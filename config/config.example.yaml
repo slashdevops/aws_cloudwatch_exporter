@@ -1,0 +1,42 @@
+server:
+  address: ":"
+  port: 9690
+  metricsPath: /metrics
+  configFile: config.yaml
+
+# https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_GetMetricData.html
+aws:
+  MetricDataQueries:
+    - Id: m1
+      MetricStat:
+        Metric:
+          Namespace: AWS/EC2
+          MetricName: NetworkOut
+          Dimensions:
+            - Name: AutoScalingGroupName
+              Value: my-asg-A
+        Period: 300
+        Stat: Average
+        Unit: Bytes
+    - Id: m2
+      MetricStat:
+        Metric:
+          Namespace: AWS/EC2
+          MetricName: NetworkOut
+          Dimensions:
+            - Name: AutoScalingGroupName
+              Value: my-asg-A
+        Period: 300
+        Stat: SampleCount
+        Unit: Count
+    - Id: m3
+      MetricStat:
+        Metric:
+          Namespace: AWS/ELB
+          MetricName: HealthyHostCount
+          Dimensions:
+            - Name: LoadBalancerName
+              Value: my-lb-B
+        Period: 300
+        Stat: Sum
+        Unit: None
