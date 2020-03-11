@@ -3,19 +3,19 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/aimroot/aws_cloudwatch_exporter/internal/server"
+	_ "github.com/aimroot/aws_cloudwatch_exporter/internal/server"
+	"github.com/aimroot/aws_cloudwatch_exporter/web"
 	"log"
 	"net/http"
-	"net/http/pprof"
 	"os"
 	"os/signal"
-	"text/template"
 	"time"
 
 	flag "github.com/spf13/pflag"
 
 	"github.com/aimroot/aws_cloudwatch_exporter/config"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/prometheus/common/version"
 	"github.com/spf13/viper"
 )
@@ -40,6 +40,8 @@ func init() {
 }
 
 func main() {
+	logger := log.New(os.Stdout,namesapce,log.LstdFlags|log.Lshortfile)
+
 	viper.SetConfigName("config")
 	viper.AddConfigPath(".")
 	viper.AddConfigPath("/etc/" + appName)
@@ -47,6 +49,9 @@ func main() {
 	viper.AutomaticEnv()
 	viper.SetConfigType("yaml")
 	viper.SetConfigType("yml")
+
+	viper.SetDefault("app.name", appName)
+	viper.SetDefault("app.description", appDescription)
 
 	var conf config.Config
 
@@ -58,8 +63,8 @@ func main() {
 	if err != nil {
 		fmt.Printf("Unable to decode into struct, %v", err)
 	}
-
 	flag.Parse()
+
 	listenAddr := *serverAddr + *serverPort
 
 	if *showVersion {
@@ -67,37 +72,21 @@ func main() {
 		os.Exit(0)
 	}
 
+	h := web.NewHandlers(logger,&conf)
 	mux := http.NewServeMux()
-	server := &http.Server{
-		ReadTimeout:       2 * time.Second,
-		WriteTimeout:      5 * time.Second,
-		IdleTimeout:       60 * time.Second,
-		ReadHeaderTimeout: 2 * time.Second,
-		Addr:              listenAddr,
-		Handler:           mux,
-	}
+	h.SetupRoutes(mux)
+	server := server.New(mux,listenAddr)
 
 	ctx := context.Background()
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 
-	mux.HandleFunc("/", homeHandler)
-	mux.HandleFunc("/healthz", healthHandler)
-	mux.Handle(*metricsPath, promhttp.Handler())
-
-	// Debug & Profiling
-	mux.HandleFunc("/debug/pprof/", pprof.Index)
-	mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
-	mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
-	mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
-	mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
-
-	log.Printf("Starting %s %s %s on %s", appDescription, version.Info(), version.BuildContext(), *serverPort)
+	logger.Printf("Starting %s %s %s on %s", appDescription, version.Info(), version.BuildContext(), *serverPort)
 
 	// Start the server
 	go func() {
 		if err := server.ListenAndServe(); err != nil {
-			log.Printf("Error starting %s", appDescription)
+			logger.Printf("Error starting %s", appDescription)
 			os.Exit(1)
 		}
 	}()
@@ -106,22 +95,9 @@ func main() {
 	srvCtx, srvCancel := context.WithTimeout(ctx, 5*time.Second)
 	defer srvCancel()
 	<-c
-	log.Printf("Shutting Down %s signal received", appDescription)
+	logger.Printf("Shutting Down %s signal received", appDescription)
 	err = server.Shutdown(srvCtx)
 	if err != nil {
-		log.Fatalf("Error shuting down %s", appDescription)
+		logger.Fatalf("Error shuting down %s", appDescription)
 	}
-}
-
-func homeHandler(w http.ResponseWriter, r *http.Request) {
-	data := struct {
-		Title         string
-		MetricHandler string
-	}{appDescription, *metricsPath}
-	t := template.Must(template.ParseFiles("../../web/template/index.html"))
-	t.Execute(w, data)
-}
-
-func healthHandler(w http.ResponseWriter, r *http.Request) {
-	http.Error(w, http.StatusText(http.StatusOK), http.StatusOK)
 }

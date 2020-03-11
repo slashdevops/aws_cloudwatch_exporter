@@ -1,8 +1,14 @@
 package config
 
 type Config struct {
+	App AppConfig
 	Server ServerConfig
 	AWS    AWSConfig
+}
+
+type AppConfig struct {
+	Name string `json:"name"`
+	Description string `json:"description"`
 }
 
 type ServerConfig struct {
