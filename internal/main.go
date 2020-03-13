@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
@@ -45,39 +44,40 @@ func main() {
 		Config:                  *conf,
 		SharedConfigState:       session.SharedConfigEnable,
 		AssumeRoleTokenProvider: stscreds.StdinTokenProvider,
-		Profile:                 "aleaplay-stg",
+		Profile:                 "aleaplay-prod",
 	}))
 
 	svc := cloudwatch.New(sess)
 
-	lmi := &cloudwatch.ListMetricsInput{
-		MetricName: aws.String("NetworkOut"),
-		Namespace:  aws.String("AWS/EC2"),
-		Dimensions: []*cloudwatch.DimensionFilter{
-			&cloudwatch.DimensionFilter{
-				Name: aws.String("AutoScalingGroupName"),
-			},
-		},
-	}
-	result, err := svc.ListMetrics(lmi)
-	if err != nil {
-		log.Println(err.Error())
-	}
-	fmt.Println("Metrics", result.Metrics)
+	// lmi := &cloudwatch.ListMetricsInput{
+	// 	MetricName: aws.String("NetworkOut"),
+	// 	Namespace:  aws.String("AWS/EC2"),
+	// 	Dimensions: []*cloudwatch.DimensionFilter{
+	// 		&cloudwatch.DimensionFilter{
+	// 			Name: aws.String("AutoScalingGroupName"),
+	// 		},
+	// 	},
+	// }
+	// result, err := svc.ListMetrics(lmi)
+	// if err != nil {
+	// 	log.Println(err.Error())
+	// }
+	// fmt.Println("Metrics", result.Metrics)
 
 	msi := &cloudwatch.GetMetricStatisticsInput{
 		Namespace:  aws.String("AWS/EC2"),
-		MetricName: aws.String("NetworkOut"),
+		MetricName: aws.String("CPUUtilization"),
 		Dimensions: []*cloudwatch.Dimension{
 			&cloudwatch.Dimension{
 				Name:  aws.String("AutoScalingGroupName"),
-				Value: aws.String("eks-stg-01-apps-01-aeg"),
+				Value: aws.String("eks-prod-01-apps-01-aeg"),
 			},
 		},
-		Period:             aws.Int64(60),
-		StartTime:          aws.Time(time.Now().Add(time.Duration(-2) * time.Hour)),
-		EndTime:            aws.Time(time.Now()),
-		ExtendedStatistics: []*string{aws.String("p25"), aws.String("p50"), aws.String("p75")},
+		Period:    aws.Int64(300),
+		StartTime: aws.Time(time.Now().Add(time.Duration(-2) * time.Hour)),
+		EndTime:   aws.Time(time.Now()),
+		//ExtendedStatistics: []*string{aws.String("p25"), aws.String("p50"), aws.String("p75")},
+		Statistics: []*string{aws.String("Average")},
 	}
 	resp, err := svc.GetMetricStatistics(msi)
 	if err != nil { // resp is now filled

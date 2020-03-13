@@ -1,17 +1,18 @@
 package web
 
 import (
-	"github.com/aimroot/aws_cloudwatch_exporter/config"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"log"
 	"net/http"
 	"net/http/pprof"
+
+	"github.com/aimroot/aws_cloudwatch_exporter/config"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"text/template"
 )
 
 type Handlers struct {
-	conf  *config.Config
+	conf   *config.Config
 	logger *log.Logger
 }
 
@@ -20,7 +21,7 @@ func (h *Handlers) Home(w http.ResponseWriter, r *http.Request) {
 		Title         string
 		MetricHandler string
 	}{h.conf.App.Description, h.conf.Server.MetricsPath}
-	t := template.Must(template.ParseFiles("web/template/index.html"))
+	t := template.Must(template.ParseFiles("web/templates/index.html"))
 	t.Execute(w, data)
 }
 
@@ -43,9 +44,9 @@ func (h *Handlers) SetupRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
 }
 
-func NewHandlers(l *log.Logger, c *config.Config) *Handlers{
+func NewHandlers(l *log.Logger, c *config.Config) *Handlers {
 	return &Handlers{
-		logger:l,
-		conf:c,
+		logger: l,
+		conf:   c,
 	}
 }

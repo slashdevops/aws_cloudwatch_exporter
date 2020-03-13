@@ -11,10 +11,10 @@ aws:
       MetricStat:
         Metric:
           Namespace: AWS/EC2
-          MetricName: NetworkOut
+          MetricName: CPUUtilization
           Dimensions:
             - Name: AutoScalingGroupName
-              Value: my-asg-A
+              Value: eks-prod-01-apps-01-aeg
         Period: 300
         Stat: Average
         Unit: Bytes
@@ -25,7 +25,7 @@ aws:
           MetricName: NetworkOut
           Dimensions:
             - Name: AutoScalingGroupName
-              Value: my-asg-A
+              Value: eks-prod-01-apps-01-aeg
         Period: 300
         Stat: SampleCount
         Unit: Count

@@ -8,6 +8,11 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
+type Collector struct {
+	CloudWatchClient string
+	Scrapes          prometheus.Counter
+	Collectors       []collector
+}
 type MetricRule struct {
 	Namespace                    string
 	MetricName                   string

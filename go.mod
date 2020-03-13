@@ -3,7 +3,7 @@ module github.com/aimroot/aws_cloudwatch_exporter
 go 1.14
 
 require (
-	github.com/aws/aws-sdk-go v1.29.19 // indirect
+	github.com/aws/aws-sdk-go v1.29.19
 	github.com/golang/protobuf v1.3.4 // indirect
 	github.com/prometheus/client_golang v1.5.0
 	github.com/prometheus/common v0.9.1
