@@ -1,11 +1,17 @@
 server:
   address: ":"
   port: 9690
-  metricsPath: /metrics
-  configFile: config.yaml
 
 # https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_GetMetricData.html
+# https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html
 aws:
+#  credentials:
+#    aws_access_key_id: ""
+#    aws_secret_access_key: ""
+#    aws_region: ""
+#    aws_profile: ""
+#    aws_role_arn: ""
+#    aws_web_identity_token_file: ""
   MetricDataQueries:
     - Id: m1
       MetricStat:
@@ -15,7 +21,7 @@ aws:
           Dimensions:
             - Name: AutoScalingGroupName
               Value: my-asg-A
-        Period: 300
+        Period: 60
         Stat: Average
         Unit: Bytes
     - Id: m2
@@ -26,7 +32,7 @@ aws:
           Dimensions:
             - Name: AutoScalingGroupName
               Value: my-asg-A
-        Period: 300
+        Period: 60
         Stat: SampleCount
         Unit: Count
     - Id: m3
@@ -37,6 +43,6 @@ aws:
           Dimensions:
             - Name: LoadBalancerName
               Value: my-lb-B
-        Period: 300
+        Period: 60
         Stat: Sum
         Unit: None

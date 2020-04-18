@@ -3,14 +3,23 @@ package aws
 import (
 	"log"
 
+	"github.com/aws/aws-sdk-go/aws"
+
+	"github.com/aimroot/aws_cloudwatch_exporter/config"
 	"github.com/aws/aws-sdk-go/aws/session"
 )
 
-func NewSession() *session.Session {
+type AWSSession struct {
+	conf   *config.Config
+	logger *log.Logger
+}
 
-	sess, err := session.NewSession()
-	if err != nil {
-		log.Println(err.Error())
+func NewAWSSession(l *log.Logger, c *config.Config) *AWSSession {
+
+	if c.AWS.Credentials != nil{
+
 	}
-	return sess
+	aws_config := &aws.Config{Region: }
+	sess := session.Must(session.NewSession())
+
 }

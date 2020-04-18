@@ -3,14 +3,15 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/aimroot/aws_cloudwatch_exporter/internal/server"
-	_ "github.com/aimroot/aws_cloudwatch_exporter/internal/server"
-	"github.com/aimroot/aws_cloudwatch_exporter/web"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
+
+	"github.com/aimroot/aws_cloudwatch_exporter/internal/server"
+	_ "github.com/aimroot/aws_cloudwatch_exporter/internal/server"
+	"github.com/aimroot/aws_cloudwatch_exporter/web"
 
 	flag "github.com/spf13/pflag"
 
@@ -21,28 +22,28 @@ import (
 )
 
 const (
-	namesapce      = "aws_cloudwatch"
-	appName        = "aws_cloudwatch_exporter"
-	appDescription = "AWS CloudWatch Exporter"
+	namespace         = "aws_cloudwatch"
+	appName           = "aws_cloudwatch_exporter"
+	appDescription    = "AWS CloudWatch Exporter for Prometheus metrics"
+	appConfigFileName = "config"
 )
 
 var (
 	showVersion = flag.Bool("version", false, "Print version information.")
 	serverAddr  = flag.String("server.address", ":", "Address to listen on for web interface and telemetry.")
-	serverPort  = flag.String("server.port", "9690", "Address to listen on for web interface and telemetry.")
+	serverPort  = flag.String("server.port", "9690", "Port to listen on for web interface and telemetry.")
 	//role_arn    = flag.String("role_arn", "", "AWS Role ARN.  ENV VAR ROLE_ARN")
-	metricsPath = flag.String("server.metricsPath", "/metrics", "Path under which to expose metrics.")
-	configFile  = flag.String("server.configFile", "config.yaml", "This exporter configuration file name.")
+	configFile = flag.String("server.configFile", "config.yaml", "This exporter configuration file name.")
 )
 
 func init() {
-	prometheus.MustRegister(version.NewCollector(namesapce))
+	prometheus.MustRegister(version.NewCollector(namespace))
 }
 
 func main() {
-	logger := log.New(os.Stdout,namesapce,log.LstdFlags|log.Lshortfile)
+	logger := log.New(os.Stdout, namespace, log.LstdFlags|log.Lshortfile)
 
-	viper.SetConfigName("config")
+	viper.SetConfigName(appConfigFileName)
 	viper.AddConfigPath(".")
 	viper.AddConfigPath("/etc/" + appName)
 	viper.AddConfigPath("$HOME/." + appName)
@@ -68,14 +69,14 @@ func main() {
 	listenAddr := *serverAddr + *serverPort
 
 	if *showVersion {
-		fmt.Println(version.Print(namesapce))
+		fmt.Println(version.Print(namespace))
 		os.Exit(0)
 	}
 
-	h := web.NewHandlers(logger,&conf)
+	h := web.NewHandlers(logger, &conf)
 	mux := http.NewServeMux()
 	h.SetupRoutes(mux)
-	server := server.New(mux,listenAddr)
+	server := server.New(mux, listenAddr)
 
 	ctx := context.Background()
 	c := make(chan os.Signal, 1)
@@ -95,6 +96,7 @@ func main() {
 	srvCtx, srvCancel := context.WithTimeout(ctx, 5*time.Second)
 	defer srvCancel()
 	<-c
+
 	logger.Printf("Shutting Down %s signal received", appDescription)
 	err = server.Shutdown(srvCtx)
 	if err != nil {

@@ -1,49 +1,30 @@
 package collector
 
 import (
-	"io"
-	"log"
-	"sync"
+	"regexp"
 
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-type Collector struct {
+// https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html
+var (
+	up = prometheus.NewDesc(
+		"up",
+		"Was talking to aws_cloudwatch_exporter successful.",
+		nil, nil,
+	)
+	invalidChars = regexp.MustCompile("[^a-zA-Z0-9:_]")
+)
+
+type CWCollector struct {
 	CloudWatchClient string
 	Scrapes          prometheus.Counter
-	Collectors       []collector
-}
-type MetricRule struct {
-	Namespace                    string
-	MetricName                   string
-	Period                       int32
-	Range                        int32
-	delay                        int32
-	Statistics                   []string
-	StatistExtendedStatisticsics []string
-	Dimensions                   []string
-	DimensionSelect              map[string]string
-	DimensionSelectRegex         map[string]string
-	Help                         string
-	TimeStamp                    bool
+	//Collectors       []collector
 }
 
-var rules []MetricRule
-
-type Exporter struct {
-	URI   string
-	mutex sync.RWMutex
-	fetch func() (io.ReadCloser, error)
-
-	up                             prometheus.Gauge
-	totalScrapes, csvParseFailures prometheus.Counter
-	serverMetrics                  map[int]*prometheus.Desc
-	logger                         log.Logger
+func (c *CWCollector) Describe(ch chan<- *prometheus.Desc) {
+	ch <- up
 }
 
-func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
-
-}
-
-func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
+func (c *CWCollector) Collect(ch chan<- prometheus.Metric) {
 }

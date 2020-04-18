@@ -1,13 +1,13 @@
 package config
 
 type Config struct {
-	App AppConfig
+	App    AppConfig
 	Server ServerConfig
 	AWS    AWSConfig
 }
 
 type AppConfig struct {
-	Name string `json:"name"`
+	Name        string `json:"name"`
 	Description string `json:"description"`
 }
 
@@ -19,6 +19,14 @@ type ServerConfig struct {
 
 //AWSConfig reference https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_GetMetricData.html
 type AWSConfig struct {
+	Credentials []struct {
+		AWSAccessKeyID          string `json:"aws_access_key_id"`
+		AWSSecretAccessKey      string `json:"aws_secret_access_key"`
+		AWSRegion               string `json:"aws_region"`
+		AWSProfile              string `json:"aws_profile"`
+		AWSRoleArn              string `json:"aws_role_arn"`
+		AWSWebIdentityTokenFile string `json:"aws_web_identity_token_file"`
+	}
 	MetricDataQueries []struct {
 		ID         string `json:"Id"`
 		MetricStat struct {

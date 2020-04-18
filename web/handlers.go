@@ -16,6 +16,13 @@ type Handlers struct {
 	logger *log.Logger
 }
 
+func NewHandlers(l *log.Logger, c *config.Config) *Handlers {
+	return &Handlers{
+		logger: l,
+		conf:   c,
+	}
+}
+
 func (h *Handlers) Home(w http.ResponseWriter, r *http.Request) {
 	data := struct {
 		Title         string
@@ -42,11 +49,4 @@ func (h *Handlers) SetupRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
 	mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
 	mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
-}
-
-func NewHandlers(l *log.Logger, c *config.Config) *Handlers {
-	return &Handlers{
-		logger: l,
-		conf:   c,
-	}
 }

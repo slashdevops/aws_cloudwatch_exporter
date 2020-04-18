@@ -1,11 +1,16 @@
 server:
   address: ":"
   port: 9690
-  metricsPath: /metrics
-  configFile: config.yaml
 
 # https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_GetMetricData.html
 aws:
+#  credentials:
+#    aws_access_key_id: ""
+#    aws_secret_access_key: ""
+#    aws_region: ""
+#    aws_profile: ""
+#    aws_role_arn: ""
+#    aws_web_identity_token_file: ""
   MetricDataQueries:
     - Id: m1
       MetricStat:
