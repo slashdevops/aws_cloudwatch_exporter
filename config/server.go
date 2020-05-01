@@ -1,29 +1,38 @@
 package config
 
+import log "github.com/sirupsen/logrus"
+
 type Server struct {
-	App    AppConfig
+	App    Application
 	Server ServerConfig
-	AWS    AWSConfig
+	AWS    AWS
+	Logger *log.Logger
 }
 
-type AppConfig struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
+type Application struct {
+	Name        string
+	Description string
+	Version     string
 }
 
 type ServerConfig struct {
-	Address     string `json:"Address"`
-	Port        uint16 `json:"Port"`
-	MetricsPath string `json:"MetricsPath"`
+	Address     string `mapstructure:"Address" json:"Address"`
+	Port        uint16 `mapstructure:"Port" json:"Port"`
+	MetricsPath string `mapstructure:"MetricsPath" json:"MetricsPath"`
 }
 
-type AWSConfig struct {
-	Credentials []struct {
-		AWSAccessKeyID          string `json:"aws_access_key_id"`
-		AWSSecretAccessKey      string `json:"aws_secret_access_key"`
-		AWSRegion               string `json:"aws_region"`
-		AWSProfile              string `json:"aws_profile"`
-		AWSRoleArn              string `json:"aws_role_arn"`
-		AWSWebIdentityTokenFile string `json:"aws_web_identity_token_file"`
-	}
+type AWS struct {
+	AccessKeyID          string   `mapstructure:"aws_access_key_id"`
+	SecretAccessKey      string   `mapstructure:"aws_secret_access_key"`
+	SessionToken         string   `mapstructure:"aws_session_token"`
+	Region               string   `mapstructure:"region"`
+	Profile              string   `mapstructure:"profile"`
+	RoleArn              string   `mapstructure:"role_arn"`
+	RoleSessionName      string   `mapstructure:"role_session_name"`
+	WebIdentityTokenFile string   `mapstructure:"web_identity_token_file"`
+	ExternalID           string   `mapstructure:"external_id"`
+	MFASerial            string   `mapstructure:"mfa_serial"`
+	SharedConfigState    bool     `mapstructure:"shared_config_state"`
+	CredentialsFile      []string `mapstructure:"aws_shared_credential_file"`
+	ConfigFile           []string `mapstructure:"aws_config_file"`
 }

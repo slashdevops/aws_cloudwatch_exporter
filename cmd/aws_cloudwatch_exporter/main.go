@@ -3,11 +3,13 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
+
+	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/aimroot/aws_cloudwatch_exporter/internal/server"
 	_ "github.com/aimroot/aws_cloudwatch_exporter/internal/server"
@@ -22,10 +24,11 @@ import (
 )
 
 const (
-	namespace         = "aws_cloudwatch"
-	appName           = "aws_cloudwatch_exporter"
-	appDescription    = "AWS CloudWatch Exporter for Prometheus metrics"
-	appConfigFileName = "config"
+	namespace                = "aws_cloudwatch"
+	appName                  = "aws_cloudwatch_exporter"
+	appDescription           = "AWS CloudWatch Exporter for Prometheus metrics"
+	appConfigServerFileName  = "server"
+	appConfigMetricsFileName = "metrics"
 )
 
 var (
@@ -33,7 +36,8 @@ var (
 	serverAddr  = flag.String("server.address", ":", "Address to listen on for web interface and telemetry.")
 	serverPort  = flag.String("server.port", "9690", "Port to listen on for web interface and telemetry.")
 	//role_arn    = flag.String("role_arn", "", "AWS Role ARN.  ENV VAR ROLE_ARN")
-	configFile = flag.String("server.configFile", "config.yaml", "This exporter configuration file name.")
+	configServer  = flag.String("server.configServer", "server.yaml", "Exporter server configuration file name.")
+	configMetrics = flag.String("server.configServer", "metrics.yaml", "Exporter metrics configuration file name.")
 )
 
 func init() {
@@ -41,29 +45,56 @@ func init() {
 }
 
 func main() {
-	logger := log.New(os.Stdout, namespace, log.LstdFlags|log.Lshortfile)
+	logger := logrus.New()
+	logger.SetFormatter(&log.JSONFormatter{})
+	logger.SetOutput(os.Stdout)
+	logger.SetLevel(log.DebugLevel)
 
-	viper.SetConfigName(appConfigFileName)
-	viper.AddConfigPath(".")
-	viper.AddConfigPath("/etc/" + appName)
-	viper.AddConfigPath("$HOME/." + appName)
-	viper.AutomaticEnv()
-	viper.SetConfigType("yaml")
-	viper.SetConfigType("yml")
+	vServer := viper.New()
+	vMetrics := viper.New()
 
-	viper.SetDefault("app.name", appName)
-	viper.SetDefault("app.description", appDescription)
+	vServer.SetDefault("app.name", appName)
+	vServer.SetDefault("app.description", appDescription)
 
-	var conf config.Server
+	var sConf config.Server
+	sConf.Logger = logger
 
-	if err := viper.ReadInConfig(); err != nil {
+	vServer.SetConfigName(appConfigServerFileName)
+	vServer.AddConfigPath(".")
+	vServer.AddConfigPath("/etc/" + appName)
+	vServer.AddConfigPath("$HOME/." + appName)
+	vServer.AutomaticEnv()
+	vServer.SetConfigType("yaml")
+	vServer.SetConfigType("yml")
+
+	if err := vServer.ReadInConfig(); err != nil {
 		fmt.Printf("Error reading config file, %s", err)
 	}
 
-	err := viper.Unmarshal(&conf)
+	err := vServer.Unmarshal(&sConf)
 	if err != nil {
 		fmt.Printf("Unable to decode into struct, %v", err)
 	}
+
+	vMetrics.SetConfigName(appConfigMetricsFileName)
+	vMetrics.AddConfigPath(".")
+	vMetrics.AddConfigPath("/etc/" + appName)
+	vMetrics.AddConfigPath("$HOME/." + appName)
+	vMetrics.AutomaticEnv()
+	vMetrics.SetConfigType("yaml")
+	vMetrics.SetConfigType("yml")
+
+	var mConf config.Metrics
+
+	if err := vMetrics.ReadInConfig(); err != nil {
+		fmt.Printf("Error reading config file, %s", err)
+	}
+
+	err = vMetrics.Unmarshal(&mConf)
+	if err != nil {
+		fmt.Printf("Unable to decode into struct, %v", err)
+	}
+
 	flag.Parse()
 
 	listenAddr := *serverAddr + *serverPort
@@ -73,7 +104,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	h := web.NewHandlers(logger, &conf)
+	h := web.NewHandlers(&sConf)
 	mux := http.NewServeMux()
 	h.SetupRoutes(mux)
 	server := server.New(mux, listenAddr)

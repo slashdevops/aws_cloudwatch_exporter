@@ -7,19 +7,19 @@ type Metrics struct {
 //AWSConfig reference https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_GetMetricData.html
 type AWSMetrics struct {
 	MetricDataQueries []struct {
-		ID         string `json:"Id"`
+		ID         string `mapstructure:"Id" json:"Id"`
 		MetricStat struct {
 			Metric struct {
-				Namespace  string `json:"Namespace"`
-				MetricName string `json:"MetricName"`
+				Namespace  string `mapstructure:"Namespace" json:"Namespace"`
+				MetricName string `mapstructure:"MetricName" json:"MetricName"`
 				Dimensions []struct {
-					Name  string `json:"Name"`
-					Value string `json:"Value"`
+					Name  string `mapstructure:"Name" json:"Name"`
+					Value string `mapstructure:"Value" json:"Value"`
 				}
 			}
-			Period int32  `json:"Period"`
-			Stat   string `json:"Stat"`
-			Unit   string `json:"Unit"`
+			Period int32  `mapstructure:"Period" json:"Period"`
+			Stat   string `mapstructure:"Stat" json:"Stat"`
+			Unit   string `mapstructure:"Unit" json:"Unit"`
 		}
 	}
 }

@@ -1,7 +1,6 @@
 package web
 
 import (
-	"log"
 	"net/http"
 	"net/http/pprof"
 
@@ -12,14 +11,12 @@ import (
 )
 
 type Handlers struct {
-	conf   *config.Server
-	logger *log.Logger
+	conf *config.Server
 }
 
-func NewHandlers(l *log.Logger, c *config.Server) *Handlers {
+func NewHandlers(c *config.Server) *Handlers {
 	return &Handlers{
-		logger: l,
-		conf:   c,
+		conf: c,
 	}
 }
 
