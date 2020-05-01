@@ -1,0 +1,6 @@
+[default]
+region = us-west-2
+output = json
+
+[profile case2]
+source_profile = default
