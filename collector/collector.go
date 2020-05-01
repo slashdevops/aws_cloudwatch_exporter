@@ -7,24 +7,32 @@ import (
 )
 
 // https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html
+// https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/using-metric-math.html#metric-math-syntax
+// https://docs.aws.amazon.com/sdk-for-go/api/service/cloudwatch/#CloudWatch.GetMetricData
+// https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_GetMetricData.html
 var (
 	up = prometheus.NewDesc(
 		"up",
-		"Was talking to aws_cloudwatch_exporter successful.",
+		"aws_cloudwatch_exporter is up and running.",
 		nil, nil,
 	)
 	invalidChars = regexp.MustCompile("[^a-zA-Z0-9:_]")
 )
 
-type CWCollector struct {
+type ACWCollector struct {
 	CloudWatchClient string
 	Scrapes          prometheus.Counter
 	//Collectors       []collector
 }
 
-func (c *CWCollector) Describe(ch chan<- *prometheus.Desc) {
+// Implements prometheus.Collector
+func (c *ACWCollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- up
 }
 
-func (c *CWCollector) Collect(ch chan<- prometheus.Metric) {
+// Implements prometheus.Collector
+func (c *ACWCollector) Collect(ch chan<- prometheus.Metric) {
+
+	// When the collector is working fine
+	ch <- prometheus.MustNewConstMetric(up, prometheus.GaugeValue, 1)
 }

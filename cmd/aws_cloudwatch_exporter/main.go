@@ -54,7 +54,7 @@ func main() {
 	viper.SetDefault("app.name", appName)
 	viper.SetDefault("app.description", appDescription)
 
-	var conf config.Config
+	var conf config.Server
 
 	if err := viper.ReadInConfig(); err != nil {
 		fmt.Printf("Error reading config file, %s", err)

@@ -10,11 +10,11 @@ import (
 )
 
 type AWSSession struct {
-	conf   *config.Config
+	conf   *config.Server
 	logger *log.Logger
 }
 
-func NewAWSSession(l *log.Logger, c *config.Config) *AWSSession {
+func NewAWSSession(l *log.Logger, c *config.Server) *AWSSession {
 
 	if c.AWS.Credentials != nil{
 

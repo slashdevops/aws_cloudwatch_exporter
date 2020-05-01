@@ -12,11 +12,11 @@ import (
 )
 
 type Handlers struct {
-	conf   *config.Config
+	conf   *config.Server
 	logger *log.Logger
 }
 
-func NewHandlers(l *log.Logger, c *config.Config) *Handlers {
+func NewHandlers(l *log.Logger, c *config.Server) *Handlers {
 	return &Handlers{
 		logger: l,
 		conf:   c,
