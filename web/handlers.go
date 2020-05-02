@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"net/http/pprof"
 
-	"github.com/slashdevops/aws_cloudwatch_exporter/config"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/slashdevops/aws_cloudwatch_exporter/config"
 
 	"text/template"
 )
@@ -20,6 +20,22 @@ func NewHandlers(c *config.All) *Handlers {
 	}
 }
 
+func (h *Handlers) SetupRoutes(mux *http.ServeMux) {
+	mux.HandleFunc("/", h.Home)
+	mux.HandleFunc("/healthz", h.health)
+
+	// Gatherer endopoint
+	//mux.Handle(h.conf.Server.MetricsPath, promhttp.Handler())
+	mux.Handle(h.conf.Server.MetricsPath, promhttp.HandlerFor(h.conf.Gatherer, promhttp.HandlerOpts{}))
+
+	// Debug & Profiling
+	mux.HandleFunc("/debug/pprof/", pprof.Index)
+	mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+	mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
+	mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+	mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
+}
+
 func (h *Handlers) Home(w http.ResponseWriter, r *http.Request) {
 	data := struct {
 		Title         string
@@ -31,19 +47,4 @@ func (h *Handlers) Home(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handlers) health(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, http.StatusText(http.StatusOK), http.StatusOK)
-}
-
-func (h *Handlers) SetupRoutes(mux *http.ServeMux) {
-	mux.HandleFunc("/", h.Home)
-	mux.HandleFunc("/healthz", h.health)
-
-	// Prometheus endopoint
-	mux.Handle(h.conf.Server.MetricsPath, promhttp.Handler())
-
-	// Debug & Profiling
-	mux.HandleFunc("/debug/pprof/", pprof.Index)
-	mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
-	mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
-	mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
-	mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
 }

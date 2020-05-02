@@ -2,6 +2,7 @@ package config
 
 import (
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 type All struct {
@@ -39,6 +40,8 @@ type Application struct {
 	Name        string `mapstructure:"name" json:"Name"`
 	Description string `mapstructure:"description" json:"Description"`
 	Version     string `mapstructure:"version" json:"Version"`
+	Namespace   string `mapstructure:"namespace" json:"Namespace"`
+	Gatherer    prometheus.Gatherer
 	AWSSession  *session.Session
 }
 

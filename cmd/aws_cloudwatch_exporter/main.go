@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
+	"github.com/slashdevops/aws_cloudwatch_exporter/collector"
 	"github.com/slashdevops/aws_cloudwatch_exporter/config"
 	"github.com/slashdevops/aws_cloudwatch_exporter/internal/server"
 	"github.com/slashdevops/aws_cloudwatch_exporter/web"
@@ -21,9 +22,9 @@ import (
 )
 
 const (
-	namespace                = "aws_cloudwatch"
+	appNamespace             = "aws_cloudwatch"
 	appName                  = "aws_cloudwatch_exporter"
-	appDescription           = "AWS CloudWatch Exporter for Prometheus metrics"
+	appDescription           = "AWS CloudWatch Exporter for Gatherer metrics"
 	appMetricsPath           = "/metrics"
 	appConfigServerFileName  = "server"
 	appConfigMetricsFileName = "metrics"
@@ -38,7 +39,13 @@ var (
 )
 
 func init() {
-	prometheus.MustRegister(version.NewCollector(namespace))
+	version.Version = "v1.0.0"
+	version.Revision = "sha"
+	version.Branch = "master"
+	version.BuildUser = "christiangda"
+	version.BuildDate = "2020-05-02"
+	prometheus.MustRegister(version.NewCollector(appNamespace))
+
 	log.SetFormatter(&logrus.JSONFormatter{})
 	log.SetOutput(os.Stdout)
 	log.SetLevel(logrus.DebugLevel)
@@ -58,6 +65,7 @@ func main() {
 
 	vApp.SetDefault("application.name", appName)
 	vApp.SetDefault("application.description", appDescription)
+	vApp.SetDefault("application.namespace", appNamespace)
 
 	// Read conf from server.yaml file
 	err := vApp.Unmarshal(&conf)
@@ -123,11 +131,15 @@ func main() {
 	flag.Parse()
 
 	if *showVersion {
-		fmt.Println(version.Print(namespace))
+		fmt.Println(version.Print(appNamespace))
 		os.Exit(0)
 	}
 
-	log.Debug("conf: %v", conf)
+	// Create the collector
+	col := collector.NewAWSCollector(&conf)
+	req := prometheus.NewRegistry()
+	req.MustRegister(col)
+	conf.Application.Gatherer = req
 
 	h := web.NewHandlers(&conf)
 	mux := http.NewServeMux()

@@ -3,8 +3,8 @@ package collector
 import (
 	"regexp"
 
-	"github.com/slashdevops/aws_cloudwatch_exporter/config"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/slashdevops/aws_cloudwatch_exporter/config"
 )
 
 // https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html
@@ -22,25 +22,38 @@ var (
 )
 
 type AWSCollector struct {
-	conf *config.All
-	//Scrapes prometheus.Counter
+	conf    *config.All
+	Up      *prometheus.Desc
+	Scrapes prometheus.Counter
 }
 
 func NewAWSCollector(c *config.All) *AWSCollector {
 	return &AWSCollector{
 		conf: c,
-		//Scrapes: prometheus.NewCounter(""),
+		Up: prometheus.NewDesc(
+			c.Application.Namespace+"_up",
+			c.Application.Name+" is up and running",
+			nil,
+			nil,
+		),
+		Scrapes: prometheus.NewCounter(prometheus.CounterOpts{
+			Namespace: c.Application.Namespace,
+			Subsystem: "collector",
+			Name:      "scrapes_total",
+			Help:      "Total number of times AWS CloudWatch API was scraped for metrics.",
+		}),
 	}
 }
 
 // Implements prometheus.Collector
 func (c *AWSCollector) Describe(ch chan<- *prometheus.Desc) {
+	c.Scrapes.Describe(ch)
 	ch <- up
 }
 
 // Implements prometheus.Collector
 func (c *AWSCollector) Collect(ch chan<- prometheus.Metric) {
-
+	c.Scrapes.Inc()
 	// When the collector is working fine
-	ch <- prometheus.MustNewConstMetric(up, prometheus.GaugeValue, 1)
+	ch <- prometheus.MustNewConstMetric(c.Up, prometheus.GaugeValue, 1)
 }

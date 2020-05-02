@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# https://github.com/prometheus/promu
 GO     := go
 GOPATH := $(firstword $(subst :, ,$(shell $(GO) env GOPATH)))
 PROMU  := $(GOPATH)/bin/promu

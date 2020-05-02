@@ -1,2 +1,13 @@
 # aws_cloudwatch_exporter
-AWS CloudWatch Prometheus exporter
+
+Prometheus exporter for AWS CloudWatch
+
+## Config files
+
+* server.yaml
+* credentials.yaml
+* metrics.yaml
+
+## Building and release
+
+* https://github.com/prometheus/promu
