@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
-	log "github.com/sirupsen/logrus"
 	"github.com/slashdevops/aws_cloudwatch_exporter/config"
 	"github.com/slashdevops/aws_cloudwatch_exporter/internal/server"
 	"github.com/slashdevops/aws_cloudwatch_exporter/web"
@@ -32,6 +31,7 @@ const (
 )
 
 var (
+	log         = logrus.New()
 	showVersion = flag.Bool("version", false, "Print version information.")
 	serverAddr  = flag.String("server.address", ":", "Address to listen on for web interface and telemetry.")
 	serverPort  = flag.String("server.port", "9690", "Port to listen on for web interface and telemetry.")
@@ -39,15 +39,17 @@ var (
 
 func init() {
 	prometheus.MustRegister(version.NewCollector(namespace))
+	log.SetFormatter(&logrus.JSONFormatter{})
+	log.SetOutput(os.Stdout)
+	log.SetLevel(logrus.DebugLevel)
 }
 
 func main() {
-	var conf config.All
+	//Set the output of the message for the current logrus instance,
+	//Output of logrus instance can be set to any io.writer
+	log.Out = os.Stdout
 
-	logger := logrus.New()
-	logger.SetFormatter(&log.JSONFormatter{})
-	logger.SetOutput(os.Stdout)
-	logger.SetLevel(log.DebugLevel)
+	var conf config.All
 
 	vServer := viper.New()
 	vApp := viper.New()
@@ -56,7 +58,6 @@ func main() {
 
 	vApp.SetDefault("application.name", appName)
 	vApp.SetDefault("application.description", appDescription)
-	vApp.SetDefault("application.logger", logger)
 
 	// Read conf from server.yaml file
 	err := vApp.Unmarshal(&conf)
@@ -126,7 +127,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	logger.Debug("conf: %v", conf)
+	log.Debug("conf: %v", conf)
 
 	h := web.NewHandlers(&conf)
 	mux := http.NewServeMux()
@@ -137,12 +138,12 @@ func main() {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 
-	logger.Printf("Starting %s %s %s on %s", appDescription, version.Info(), version.BuildContext(), *serverPort)
+	log.Printf("Starting %s %s %s on %s", appDescription, version.Info(), version.BuildContext(), *serverPort)
 
 	// Start the server
 	go func() {
 		if err := s.ListenAndServe(); err != nil {
-			logger.Printf("Error starting %s", appDescription)
+			log.Printf("Error starting %s", appDescription)
 			os.Exit(1)
 		}
 	}()
@@ -152,9 +153,9 @@ func main() {
 	defer srvCancel()
 	<-c
 
-	logger.Printf("Shutting Down %s signal received", appDescription)
+	log.Printf("Shutting Down %s signal received", appDescription)
 	err = s.Shutdown(srvCtx)
 	if err != nil {
-		logger.Fatalf("Error shuting down %s", appDescription)
+		log.Fatalf("Error shuting down %s", appDescription)
 	}
 }

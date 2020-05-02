@@ -1,8 +1,6 @@
 package config
 
 import (
-	log "github.com/sirupsen/logrus"
-
 	"github.com/aws/aws-sdk-go/aws/session"
 )
 
@@ -41,7 +39,6 @@ type Application struct {
 	Name        string `mapstructure:"name" json:"Name"`
 	Description string `mapstructure:"description" json:"Description"`
 	Version     string `mapstructure:"version" json:"Version"`
-	Logger      *log.Logger
 	AWSSession  *session.Session
 }
 
@@ -50,7 +47,6 @@ type Application struct {
 // credentials:
 //   aws_access_key_id:
 //   aws_secret_access_key:
-
 type CredentialsConf struct {
 	Credentials Credentials
 }
@@ -75,6 +71,7 @@ type Credentials struct {
 // Will be filled with que Metrics Queries
 // https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_GetMetricData.html
 // https://aws.amazon.com/premiumsupport/knowledge-center/cloudwatch-getmetricdata-api/
+// NOTE: This structure is nested becouse I don't use its internal strcuture in anywhere
 type MetricsQueriesConf struct {
 	MetricDataQueries []struct {
 		ID         string `mapstructure:"Id" json:"Id"`

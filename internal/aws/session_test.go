@@ -6,6 +6,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/prometheus/common/log"
 	"github.com/slashdevops/aws_cloudwatch_exporter/config"
 
 	"github.com/sirupsen/logrus"
@@ -48,15 +49,11 @@ func TestNewSessionWithEnvVars(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.Name, func(t *testing.T) {
 			// Using the same logger of the package aws
-			logger := logrus.New()
-
-			logger.SetLevel(LogLevel)
-			logger.SetFormatter(&logrus.JSONFormatter{})
-			logger.Debug(tc.Description)
+			log.Debug(tc.Description)
 
 			// Set the Environment Variables if exist
 			for key, value := range tc.EnvVars {
-				logger.Debugf("Setting Env Var: %s", key)
+				log.Debugf("Setting Env Var: %s", key)
 				os.Setenv(key, value)
 			}
 
@@ -139,11 +136,7 @@ func TestNewSessionWithFiles(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.Name, func(t *testing.T) {
 			// Using the same logger of the package aws
-			logger := logrus.New()
-
-			logger.SetLevel(LogLevel)
-			logger.SetFormatter(&logrus.JSONFormatter{})
-			logger.Debug(tc.Description)
+			log.Debug(tc.Description)
 
 			// Create the session with the arguments
 			s, _ := NewSession(tc.Args)
@@ -227,11 +220,7 @@ func TestNewSessionWithConfig(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.Name, func(t *testing.T) {
 			// Using the same logger of the package aws
-			logger := logrus.New()
-
-			logger.SetLevel(LogLevel)
-			logger.SetFormatter(&logrus.JSONFormatter{})
-			logger.Debug(tc.Description)
+			log.Debug(tc.Description)
 
 			// Create the session with the arguments
 			s, _ := NewSession(tc.Args)
