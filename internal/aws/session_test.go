@@ -20,17 +20,14 @@ func TestNewSessionWithEnvVars(t *testing.T) {
 	testCases := []struct {
 		Name        string
 		Description string
-		Args        *config.Server
+		Args        *config.All
 		EnvVars     map[string]string
 		Expected    map[string]string
 	}{
 		{
 			Name:        "UsingEnvVarsBasicAndToken",
 			Description: "Using AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY and AWS_SESSION_TOKEN Env Vars",
-			Args: &config.Server{
-				AWS:    config.AWS{},
-				Logger: logrus.New(),
-			},
+			Args:        &config.All{},
 			EnvVars: map[string]string{
 				"AWS_SHARED_CREDENTIALS_FILE": "/tmp/nothing", // This is very important to avoid the use of your own credentials
 				"AWS_CONFIG_FILE":             "/tmp/nothing", // This is very important to avoid the use of your own credentials
@@ -51,13 +48,15 @@ func TestNewSessionWithEnvVars(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.Name, func(t *testing.T) {
 			// Using the same logger of the package aws
-			tc.Args.Logger.SetLevel(LogLevel)
-			tc.Args.Logger.SetFormatter(&logrus.JSONFormatter{})
-			tc.Args.Logger.Debug(tc.Description)
+			logger := logrus.New()
+
+			logger.SetLevel(LogLevel)
+			logger.SetFormatter(&logrus.JSONFormatter{})
+			logger.Debug(tc.Description)
 
 			// Set the Environment Variables if exist
 			for key, value := range tc.EnvVars {
-				tc.Args.Logger.Debugf("Setting Env Var: %s", key)
+				logger.Debugf("Setting Env Var: %s", key)
 				os.Setenv(key, value)
 			}
 
@@ -94,19 +93,20 @@ func TestNewSessionWithFiles(t *testing.T) {
 	testCases := []struct {
 		Name        string
 		Description string
-		Args        *config.Server
+		Args        *config.All
 		Expected    map[string]string
 	}{
 		{
 			Name:        "UsingProfileAndConfigStateFile",
 			Description: "Using ",
-			Args: &config.Server{
-				AWS: config.AWS{
-					Profile:           "default",
-					SharedConfigState: true,
-					CredentialsFile:   []string{"testdata/default/credentials", "testdata/default/config"},
+			Args: &config.All{
+				CredentialsConf: config.CredentialsConf{
+					Credentials: config.Credentials{
+						Profile:           "default",
+						SharedConfigState: true,
+						CredentialsFile:   []string{"testdata/default/credentials", "testdata/default/config"},
+					},
 				},
-				Logger: logrus.New(),
 			},
 			Expected: map[string]string{
 				"AWS_ACCESS_KEY_ID":     "AKIAIOSFODNN7EXAMPLE",
@@ -118,13 +118,14 @@ func TestNewSessionWithFiles(t *testing.T) {
 		{
 			Name:        "UsingProfileAndConfigStateFile",
 			Description: "Using cas1 profile from testdata",
-			Args: &config.Server{
-				AWS: config.AWS{
-					Profile:           "case1",
-					SharedConfigState: true,
-					CredentialsFile:   []string{"testdata/case1/credentials", "testdata/case1/config"},
+			Args: &config.All{
+				CredentialsConf: config.CredentialsConf{
+					Credentials: config.Credentials{
+						Profile:           "case1",
+						SharedConfigState: true,
+						CredentialsFile:   []string{"testdata/case1/credentials", "testdata/case1/config"},
+					},
 				},
-				Logger: logrus.New(),
 			},
 			Expected: map[string]string{
 				"AWS_ACCESS_KEY_ID":     "AKIAIOSFODNN7EXAMPLE",
@@ -138,9 +139,11 @@ func TestNewSessionWithFiles(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.Name, func(t *testing.T) {
 			// Using the same logger of the package aws
-			tc.Args.Logger.SetLevel(LogLevel)
-			tc.Args.Logger.SetFormatter(&logrus.JSONFormatter{})
-			tc.Args.Logger.Debug(tc.Description)
+			logger := logrus.New()
+
+			logger.SetLevel(LogLevel)
+			logger.SetFormatter(&logrus.JSONFormatter{})
+			logger.Debug(tc.Description)
 
 			// Create the session with the arguments
 			s, _ := NewSession(tc.Args)
@@ -175,20 +178,21 @@ func TestNewSessionWithConfig(t *testing.T) {
 	testCases := []struct {
 		Name        string
 		Description string
-		Args        *config.Server
+		Args        *config.All
 		Expected    map[string]string
 	}{
 		{
 			Name:        "UsingConfig",
 			Description: "Using ",
-			Args: &config.Server{
-				AWS: config.AWS{
-					AccessKeyID:     "AKIAIOSFODNN7EXAMPLE",
-					SecretAccessKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
-					//Region:          "us-west-2",
-					SessionToken: "ConfigToken",
+			Args: &config.All{
+				CredentialsConf: config.CredentialsConf{
+					Credentials: config.Credentials{
+						AccessKeyID:     "AKIAIOSFODNN7EXAMPLE",
+						SecretAccessKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+						// Region:          "us-west-2",
+						SessionToken: "ConfigToken",
+					},
 				},
-				Logger: logrus.New(),
 			},
 			Expected: map[string]string{
 				"AWS_ACCESS_KEY_ID":     "AKIAIOSFODNN7EXAMPLE",
@@ -200,15 +204,16 @@ func TestNewSessionWithConfig(t *testing.T) {
 		{
 			Name:        "UsingConfig",
 			Description: "Using cas1 profile from testdata",
-			Args: &config.Server{
-				AWS: config.AWS{
-					AccessKeyID:     "AKIAIOSFODNN7EXAMPLE",
-					SecretAccessKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
-					Region:          "us-west-2",
-					//RoleArn:         "arn:aws:iam::123456789012:role/role-name",
-					SessionToken: "ConfigToken",
+			Args: &config.All{
+				CredentialsConf: config.CredentialsConf{
+					Credentials: config.Credentials{
+						AccessKeyID:     "AKIAIOSFODNN7EXAMPLE",
+						SecretAccessKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+						Region:          "us-west-2",
+						// RoleArn:         "arn:aws:iam::123456789012:role/role-name",
+						SessionToken: "ConfigToken",
+					},
 				},
-				Logger: logrus.New(),
 			},
 			Expected: map[string]string{
 				"AWS_ACCESS_KEY_ID":     "AKIAIOSFODNN7EXAMPLE",
@@ -222,9 +227,11 @@ func TestNewSessionWithConfig(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.Name, func(t *testing.T) {
 			// Using the same logger of the package aws
-			tc.Args.Logger.SetLevel(LogLevel)
-			tc.Args.Logger.SetFormatter(&logrus.JSONFormatter{})
-			tc.Args.Logger.Debug(tc.Description)
+			logger := logrus.New()
+
+			logger.SetLevel(LogLevel)
+			logger.SetFormatter(&logrus.JSONFormatter{})
+			logger.Debug(tc.Description)
 
 			// Create the session with the arguments
 			s, _ := NewSession(tc.Args)
