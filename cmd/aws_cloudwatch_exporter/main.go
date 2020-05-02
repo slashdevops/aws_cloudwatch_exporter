@@ -8,11 +8,11 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/slashdevops/aws_cloudwatch_exporter/config"
 	"github.com/slashdevops/aws_cloudwatch_exporter/internal/server"
 	"github.com/slashdevops/aws_cloudwatch_exporter/web"
-	"github.com/sirupsen/logrus"
-	log "github.com/sirupsen/logrus"
 
 	flag "github.com/spf13/pflag"
 
@@ -54,16 +54,11 @@ func main() {
 	vMetrics := viper.New()
 	vCreds := viper.New()
 
-	vApp.SetDefault(".name", appName)
-	vApp.SetDefault(".description", appDescription)
-	vApp.SetDefault(".logger", logger)
-
-	if err := vApp.ReadInConfig(); err != nil {
-		fmt.Printf("Error reading config file, %s", err)
-	}
+	vApp.SetDefault("application.name", appName)
+	vApp.SetDefault("application.description", appDescription)
+	vApp.SetDefault("application.logger", logger)
 
 	// Read conf from server.yaml file
-	//var sConf config.Server
 	err := vApp.Unmarshal(&conf)
 	if err != nil {
 		fmt.Printf("Unable to decode into struct, %v", err)
@@ -83,7 +78,6 @@ func main() {
 	}
 
 	// Read conf from server.yaml file
-	//var sConf config.Server
 	err = vServer.Unmarshal(&conf)
 	if err != nil {
 		fmt.Printf("Unable to decode into struct, %v", err)
@@ -102,7 +96,6 @@ func main() {
 	}
 
 	// Read conf from metrics.yaml file
-	//var mConf config.MetricsQueries
 	err = vMetrics.Unmarshal(&conf)
 	if err != nil {
 		fmt.Printf("Unable to decode into struct, %v", err)
@@ -121,7 +114,6 @@ func main() {
 	}
 
 	// Read conf from metrics.yaml file
-	//var cConf config.Credentials
 	err = vCreds.Unmarshal(&conf)
 	if err != nil {
 		fmt.Printf("Unable to decode into struct, %v", err)
@@ -134,25 +126,12 @@ func main() {
 		os.Exit(0)
 	}
 
-	// Fill all config structure
-	/*	conf := config.All{
-		Application:    &aConf,
-		Server:         &sConf,
-		Credentials:    &cConf,
-		MetricsQueries: &mConf,
-	}*/
-
-	/*	logger.Debug("sConf: %v", sConf)
-		logger.Debug("mConf: %v", mConf)
-		logger.Debug("cConf: %v", cConf)
-	*/
 	logger.Debug("conf: %v", conf)
 
-	listenAddr := *serverAddr + *serverPort
 	h := web.NewHandlers(&conf)
 	mux := http.NewServeMux()
 	h.SetupRoutes(mux)
-	s := server.New(mux, listenAddr)
+	s := server.New(mux, &conf)
 
 	ctx := context.Background()
 	c := make(chan os.Signal, 1)
