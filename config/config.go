@@ -8,6 +8,12 @@ type All struct {
 	CredentialsConf    `mapstructure:",squash"`
 	MetricsQueriesConf `mapstructure:",squash"`
 }
+
+// server.conf file
+// Nested:
+// server:
+//   address:
+//   port:
 type ServerConf struct {
 	Server struct {
 		Address     string `mapstructure:"address" json:"Address"`
@@ -17,6 +23,10 @@ type ServerConf struct {
 }
 
 // No File conf
+// Nested:
+// application:
+//   name:
+//   description:
 type ApplicationConf struct {
 	Application struct {
 		Name        string `mapstructure:"name" json:"Name"`
@@ -25,6 +35,12 @@ type ApplicationConf struct {
 		Logger      *log.Logger
 	}
 }
+
+// credentials.yaml file
+// Nested:
+// credentials:
+//   aws_access_key_id:
+//   aws_secret_access_key:
 
 type CredentialsConf struct {
 	Credentials struct {
