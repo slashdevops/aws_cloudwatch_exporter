@@ -3,6 +3,7 @@ package collector
 import (
 	"regexp"
 
+	"github.com/aimroot/aws_cloudwatch_exporter/config"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -20,19 +21,25 @@ var (
 	invalidChars = regexp.MustCompile("[^a-zA-Z0-9:_]")
 )
 
-type ACWCollector struct {
-	CloudWatchClient string
-	Scrapes          prometheus.Counter
-	//Collectors       []collector
+type AWSCollector struct {
+	conf *config.All
+	//Scrapes prometheus.Counter
+}
+
+func NewAWSCollector(c *config.All) *AWSCollector {
+	return &AWSCollector{
+		conf: c,
+		//Scrapes: prometheus.NewCounter(""),
+	}
 }
 
 // Implements prometheus.Collector
-func (c *ACWCollector) Describe(ch chan<- *prometheus.Desc) {
+func (c *AWSCollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- up
 }
 
 // Implements prometheus.Collector
-func (c *ACWCollector) Collect(ch chan<- prometheus.Metric) {
+func (c *AWSCollector) Collect(ch chan<- prometheus.Metric) {
 
 	// When the collector is working fine
 	ch <- prometheus.MustNewConstMetric(up, prometheus.GaugeValue, 1)

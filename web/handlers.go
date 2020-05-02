@@ -11,10 +11,10 @@ import (
 )
 
 type Handlers struct {
-	conf *config.Server
+	conf *config.All
 }
 
-func NewHandlers(c *config.Server) *Handlers {
+func NewHandlers(c *config.All) *Handlers {
 	return &Handlers{
 		conf: c,
 	}
@@ -24,7 +24,7 @@ func (h *Handlers) Home(w http.ResponseWriter, r *http.Request) {
 	data := struct {
 		Title         string
 		MetricHandler string
-	}{h.conf.App.Description, h.conf.Server.MetricsPath}
+	}{h.conf.Application.Description, h.conf.Server.MetricsPath}
 	t := template.Must(template.ParseFiles("web/templates/index.html"))
 	t.Execute(w, data)
 }

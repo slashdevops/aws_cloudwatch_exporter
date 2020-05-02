@@ -8,16 +8,14 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/aimroot/aws_cloudwatch_exporter/config"
+	"github.com/aimroot/aws_cloudwatch_exporter/internal/server"
+	"github.com/aimroot/aws_cloudwatch_exporter/web"
 	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/aimroot/aws_cloudwatch_exporter/internal/server"
-	_ "github.com/aimroot/aws_cloudwatch_exporter/internal/server"
-	"github.com/aimroot/aws_cloudwatch_exporter/web"
-
 	flag "github.com/spf13/pflag"
 
-	"github.com/aimroot/aws_cloudwatch_exporter/config"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/common/version"
 	"github.com/spf13/viper"
@@ -30,6 +28,7 @@ const (
 	appMetricsPath           = "/metrics"
 	appConfigServerFileName  = "server"
 	appConfigMetricsFileName = "metrics"
+	appConfigCredFileName    = "credentials"
 )
 
 var (
@@ -43,22 +42,34 @@ func init() {
 }
 
 func main() {
+	var conf config.All
+
 	logger := logrus.New()
 	logger.SetFormatter(&log.JSONFormatter{})
 	logger.SetOutput(os.Stdout)
 	logger.SetLevel(log.DebugLevel)
 
 	vServer := viper.New()
+	vApp := viper.New()
 	vMetrics := viper.New()
+	vCreds := viper.New()
 
-	// Default Variables
-	vServer.SetDefault("app.name", appName)
-	vServer.SetDefault("app.description", appDescription)
+	vApp.SetDefault(".name", appName)
+	vApp.SetDefault(".description", appDescription)
+	vApp.SetDefault(".logger", logger)
+
+	if err := vApp.ReadInConfig(); err != nil {
+		fmt.Printf("Error reading config file, %s", err)
+	}
+
+	// Read conf from server.yaml file
+	//var sConf config.Server
+	err := vApp.Unmarshal(&conf)
+	if err != nil {
+		fmt.Printf("Unable to decode into struct, %v", err)
+	}
+
 	vServer.SetDefault("server.metricsPath", appMetricsPath)
-
-	var sConf config.Server
-	sConf.Logger = logger
-
 	vServer.SetConfigName(appConfigServerFileName)
 	vServer.AddConfigPath(".")
 	vServer.AddConfigPath("/etc/" + appName)
@@ -71,7 +82,9 @@ func main() {
 		fmt.Printf("Error reading config file, %s", err)
 	}
 
-	err := vServer.Unmarshal(&sConf)
+	// Read conf from server.yaml file
+	//var sConf config.Server
+	err = vServer.Unmarshal(&conf)
 	if err != nil {
 		fmt.Printf("Unable to decode into struct, %v", err)
 	}
@@ -84,33 +97,62 @@ func main() {
 	vMetrics.SetConfigType("yaml")
 	vMetrics.SetConfigType("yml")
 
-	var mConf config.Metrics
-
 	if err := vMetrics.ReadInConfig(); err != nil {
 		fmt.Printf("Error reading config file, %s", err)
 	}
 
-	err = vMetrics.Unmarshal(&mConf)
+	// Read conf from metrics.yaml file
+	//var mConf config.MetricsQueries
+	err = vMetrics.Unmarshal(&conf)
+	if err != nil {
+		fmt.Printf("Unable to decode into struct, %v", err)
+	}
+
+	vCreds.SetConfigName(appConfigCredFileName)
+	vCreds.AddConfigPath(".")
+	vCreds.AddConfigPath("/etc/" + appName)
+	vCreds.AddConfigPath("$HOME/." + appName)
+	vCreds.AutomaticEnv()
+	vCreds.SetConfigType("yaml")
+	vCreds.SetConfigType("yml")
+
+	if err := vCreds.ReadInConfig(); err != nil {
+		fmt.Printf("Error reading config file, %s", err)
+	}
+
+	// Read conf from metrics.yaml file
+	//var cConf config.Credentials
+	err = vCreds.Unmarshal(&conf)
 	if err != nil {
 		fmt.Printf("Unable to decode into struct, %v", err)
 	}
 
 	flag.Parse()
 
-	listenAddr := *serverAddr + *serverPort
-
 	if *showVersion {
 		fmt.Println(version.Print(namespace))
 		os.Exit(0)
 	}
 
-	logger.Debug("sConf: %v", sConf)
-	logger.Debug("mConf: %v", mConf)
+	// Fill all config structure
+	/*	conf := config.All{
+		Application:    &aConf,
+		Server:         &sConf,
+		Credentials:    &cConf,
+		MetricsQueries: &mConf,
+	}*/
 
-	h := web.NewHandlers(&sConf)
+	/*	logger.Debug("sConf: %v", sConf)
+		logger.Debug("mConf: %v", mConf)
+		logger.Debug("cConf: %v", cConf)
+	*/
+	logger.Debug("conf: %v", conf)
+
+	listenAddr := *serverAddr + *serverPort
+	h := web.NewHandlers(&conf)
 	mux := http.NewServeMux()
 	h.SetupRoutes(mux)
-	server := server.New(mux, listenAddr)
+	s := server.New(mux, listenAddr)
 
 	ctx := context.Background()
 	c := make(chan os.Signal, 1)
@@ -120,7 +162,7 @@ func main() {
 
 	// Start the server
 	go func() {
-		if err := server.ListenAndServe(); err != nil {
+		if err := s.ListenAndServe(); err != nil {
 			logger.Printf("Error starting %s", appDescription)
 			os.Exit(1)
 		}
@@ -132,7 +174,7 @@ func main() {
 	<-c
 
 	logger.Printf("Shutting Down %s signal received", appDescription)
-	err = server.Shutdown(srvCtx)
+	err = s.Shutdown(srvCtx)
 	if err != nil {
 		logger.Fatalf("Error shuting down %s", appDescription)
 	}

@@ -2,26 +2,28 @@ package config
 
 import log "github.com/sirupsen/logrus"
 
+type All struct {
+	Server         `mapstructure:",squash"`
+	Application    `mapstructure:",squash"`
+	Credentials    `mapstructure:",squash"`
+	MetricsQueries `mapstructure:",squash"`
+}
+
 type Server struct {
-	App    Application
-	Server ServerConfig
-	AWS    AWS
-	Logger *log.Logger
+	Address     string `mapstructure:"address" json:"Address"`
+	Port        uint16 `mapstructure:"port" json:"Port"`
+	MetricsPath string `mapstructure:"metricsPath" json:"MetricsPath"`
 }
 
+// No File conf
 type Application struct {
-	Name        string
-	Description string
-	Version     string
+	Name        string `mapstructure:"name" json:"Name"`
+	Description string `mapstructure:"description" json:"Description"`
+	Version     string `mapstructure:"version" json:"Version"`
+	Logger      *log.Logger
 }
 
-type ServerConfig struct {
-	Address     string `mapstructure:"Address" json:"Address"`
-	Port        uint16 `mapstructure:"Port" json:"Port"`
-	MetricsPath string `mapstructure:"MetricsPath" json:"MetricsPath"`
-}
-
-type AWS struct {
+type Credentials struct {
 	AccessKeyID          string   `mapstructure:"aws_access_key_id"`
 	SecretAccessKey      string   `mapstructure:"aws_secret_access_key"`
 	SessionToken         string   `mapstructure:"aws_session_token"`
@@ -35,4 +37,27 @@ type AWS struct {
 	SharedConfigState    bool     `mapstructure:"shared_config_state"`
 	CredentialsFile      []string `mapstructure:"aws_shared_credential_file"`
 	ConfigFile           []string `mapstructure:"aws_config_file"`
+}
+
+// File conf metrics.yaml
+// Will be filled with que Metrics Queries
+// https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_GetMetricData.html
+// https://aws.amazon.com/premiumsupport/knowledge-center/cloudwatch-getmetricdata-api/
+type MetricsQueries struct {
+	MetricDataQueries []struct {
+		ID         string `mapstructure:"Id" json:"Id"`
+		MetricStat struct {
+			Metric struct {
+				Namespace  string `mapstructure:"Namespace" json:"Namespace"`
+				MetricName string `mapstructure:"MetricName" json:"MetricName"`
+				Dimensions []struct {
+					Name  string `mapstructure:"Name" json:"Name"`
+					Value string `mapstructure:"Value" json:"Value"`
+				}
+			}
+			Period int32  `mapstructure:"Period" json:"Period"`
+			Stat   string `mapstructure:"Stat" json:"Stat"`
+			Unit   string `mapstructure:"Unit" json:"Unit"`
+		}
+	}
 }

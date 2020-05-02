@@ -4,7 +4,6 @@ go 1.14
 
 require (
 	github.com/aws/aws-sdk-go v1.30.9
-	github.com/christiangda/test_aws_credentials v0.0.0-20200419080953-cb9306191923 // indirect
 	github.com/golang/protobuf v1.3.4 // indirect
 	github.com/prometheus/client_golang v1.5.0
 	github.com/prometheus/common v0.9.1
