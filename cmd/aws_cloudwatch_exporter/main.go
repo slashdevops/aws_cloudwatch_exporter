@@ -27,6 +27,7 @@ const (
 	namespace                = "aws_cloudwatch"
 	appName                  = "aws_cloudwatch_exporter"
 	appDescription           = "AWS CloudWatch Exporter for Prometheus metrics"
+	appMetricsPath           = "/metrics"
 	appConfigServerFileName  = "server"
 	appConfigMetricsFileName = "metrics"
 )
@@ -35,9 +36,6 @@ var (
 	showVersion = flag.Bool("version", false, "Print version information.")
 	serverAddr  = flag.String("server.address", ":", "Address to listen on for web interface and telemetry.")
 	serverPort  = flag.String("server.port", "9690", "Port to listen on for web interface and telemetry.")
-	//role_arn    = flag.String("role_arn", "", "AWS Role ARN.  ENV VAR ROLE_ARN")
-	configServer  = flag.String("server.configServer", "server.yaml", "Exporter server configuration file name.")
-	configMetrics = flag.String("server.configServer", "metrics.yaml", "Exporter metrics configuration file name.")
 )
 
 func init() {
@@ -53,8 +51,10 @@ func main() {
 	vServer := viper.New()
 	vMetrics := viper.New()
 
+	// Default Variables
 	vServer.SetDefault("app.name", appName)
 	vServer.SetDefault("app.description", appDescription)
+	vServer.SetDefault("server.metricsPath", appMetricsPath)
 
 	var sConf config.Server
 	sConf.Logger = logger
@@ -103,6 +103,9 @@ func main() {
 		fmt.Println(version.Print(namespace))
 		os.Exit(0)
 	}
+
+	logger.Debug("sConf: %v", sConf)
+	logger.Debug("mConf: %v", mConf)
 
 	h := web.NewHandlers(&sConf)
 	mux := http.NewServeMux()

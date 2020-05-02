@@ -1,11 +1,8 @@
 package config
 
+// https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_GetMetricData.html
+// https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_MetricDataQuery.html
 type Metrics struct {
-	AWS AWSMetrics
-}
-
-//AWSConfig reference https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_GetMetricData.html
-type AWSMetrics struct {
 	MetricDataQueries []struct {
 		ID         string `mapstructure:"Id" json:"Id"`
 		MetricStat struct {
