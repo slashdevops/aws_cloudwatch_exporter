@@ -8,9 +8,9 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/aimroot/aws_cloudwatch_exporter/config"
-	"github.com/aimroot/aws_cloudwatch_exporter/internal/server"
-	"github.com/aimroot/aws_cloudwatch_exporter/web"
+	"github.com/slashdevops/aws_cloudwatch_exporter/config"
+	"github.com/slashdevops/aws_cloudwatch_exporter/internal/server"
+	"github.com/slashdevops/aws_cloudwatch_exporter/web"
 	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
 

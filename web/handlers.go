@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"net/http/pprof"
 
-	"github.com/aimroot/aws_cloudwatch_exporter/config"
+	"github.com/slashdevops/aws_cloudwatch_exporter/config"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"text/template"

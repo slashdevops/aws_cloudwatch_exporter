@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/aimroot/aws_cloudwatch_exporter/config"
+	"github.com/slashdevops/aws_cloudwatch_exporter/config"
 
 	"github.com/sirupsen/logrus"
 )

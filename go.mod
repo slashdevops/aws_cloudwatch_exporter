@@ -1,4 +1,4 @@
-module github.com/aimroot/aws_cloudwatch_exporter
+module github.com/slashdevops/aws_cloudwatch_exporter
 
 go 1.14
 

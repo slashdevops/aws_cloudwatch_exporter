@@ -4,7 +4,7 @@ import (
 	"os"
 	"reflect"
 
-	"github.com/aimroot/aws_cloudwatch_exporter/config"
+	"github.com/slashdevops/aws_cloudwatch_exporter/config"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
