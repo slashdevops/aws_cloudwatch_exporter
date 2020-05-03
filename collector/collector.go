@@ -12,6 +12,7 @@ import (
 // https://docs.aws.amazon.com/sdk-for-go/api/service/cloudwatch/#CloudWatch.GetMetricData
 // https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_GetMetricData.html
 // https://aws.amazon.com/premiumsupport/knowledge-center/cloudwatch-getmetricdata-api/
+// https://aws.amazon.com/cloudwatch/pricing/
 var (
 	up = prometheus.NewDesc(
 		"up",

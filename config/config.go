@@ -87,9 +87,8 @@ type MetricsQueriesConf struct {
 					Value string `mapstructure:"Value" json:"Value"`
 				}
 			}
-			Period int32  `mapstructure:"Period" json:"Period"`
+			Period int64  `mapstructure:"Period" json:"Period"`
 			Stat   string `mapstructure:"Stat" json:"Stat"`
-			Unit   string `mapstructure:"Unit" json:"Unit"`
 		}
 	}
 }
