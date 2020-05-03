@@ -3,10 +3,26 @@ package metrics
 import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/slashdevops/aws_cloudwatch_exporter/config"
 )
 
-func NewMetrics(c *config.MetricsQueriesConf) (*cloudwatch.GetMetricDataInput, error) {
+// https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/using-metric-math.html#metric-math-syntax
+func NewMetrics(c *config.MetricsQueriesConf) *cloudwatch.GetMetricDataInput {
+
+	dataQry := getAWSDataQuery(c)
+
+	return &cloudwatch.GetMetricDataInput{
+		EndTime:           nil,
+		MaxDatapoints:     nil,
+		MetricDataQueries: dataQry,
+		NextToken:         nil,
+		ScanBy:            nil,
+		StartTime:         nil,
+	}
+}
+
+func getAWSDataQuery(c *config.MetricsQueriesConf) []*cloudwatch.MetricDataQuery {
 
 	periodQry := int64(60 * 5)
 	var dataQry []*cloudwatch.MetricDataQuery
@@ -39,15 +55,24 @@ func NewMetrics(c *config.MetricsQueriesConf) (*cloudwatch.GetMetricDataInput, e
 		}
 		dataQry = append(dataQry, metricsQry)
 	}
+	return dataQry
+}
 
-	metricsDataInputQry := &cloudwatch.GetMetricDataInput{
-		EndTime:           nil,
-		MaxDatapoints:     nil,
-		MetricDataQueries: dataQry,
-		NextToken:         nil,
-		ScanBy:            nil,
-		StartTime:         nil,
+func getPrometheusMetrics(mdo *cloudwatch.GetMetricDataOutput) []prometheus.Metric {
+
+	/*if len(mdo.Messages) < 0 {
+
+	}*/
+	var promMetrics []prometheus.Metric
+
+	for _, mr := range mdo.MetricDataResults {
+		mn := prometheus.BuildFQName()
+
+		des := prometheus.NewDesc(mn, mr.Label)
+		m := prometheus.MustNewConstMetric(des)
+		prometheus.NewMetricWithTimestamp()
+		append(promMetrics, m)
 	}
 
-	return metricsDataInputQry, nil
+	return promMetrics
 }
