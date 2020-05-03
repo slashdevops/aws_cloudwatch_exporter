@@ -1,8 +1,6 @@
 package collector
 
 import (
-	"regexp"
-
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/slashdevops/aws_cloudwatch_exporter/config"
 )
@@ -19,7 +17,6 @@ var (
 		"aws_cloudwatch_exporter is up and running.",
 		nil, nil,
 	)
-	invalidChars = regexp.MustCompile("[^a-zA-Z0-9:_]")
 )
 
 type AWSCollector struct {

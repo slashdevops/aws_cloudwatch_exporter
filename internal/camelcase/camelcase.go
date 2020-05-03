@@ -1,6 +1,7 @@
 package camelcase
 
 import (
+	"regexp"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -91,6 +92,7 @@ func Split(s string) []string {
 }
 
 // Remove White Spaces
+// Remove Special Characters not supported by prometheus metrics name
 func SplitToLower(s string) []string {
 
 	var entries []string
@@ -107,6 +109,16 @@ func SplitToLower(s string) []string {
 	return entries
 }
 
+// take care of existing "_"
 func ToSnake(s string) string {
-	return strings.Join(SplitToLower(s), "_")
+	var invalidChars = regexp.MustCompile("[^a-zA-Z0-9:_]")
+	var snake string
+	var valid []string
+	for _, e := range SplitToLower(s) {
+		if invalidChars.FindStringIndex(e) == nil {
+			valid = append(valid, e)
+		}
+	}
+	snake = strings.Join(valid, "_")
+	return snake
 }

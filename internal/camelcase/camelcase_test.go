@@ -59,11 +59,15 @@ func TestSplit(t *testing.T) {
 				"NetworkOut",
 				"CPUUtilization",
 				"AutoScalingGroupName",
+				"AWS/ApiGateway",
+				"AWS/ElasticBeanstalk",
 			},
 			wantEntries: [][]string{
 				{"Network", "Out"},
 				{"CPU", "Utilization"},
 				{"Auto", "Scaling", "Group", "Name"},
+				{"AWS", "/", "Api", "Gateway"},
+				{"AWS", "/", "Elastic", "Beanstalk"},
 			},
 		},
 	}
@@ -135,11 +139,15 @@ func TestSplitToLower(t *testing.T) {
 				"NetworkOut",
 				"CPUUtilization",
 				"AutoScalingGroupName",
+				"AWS/ApiGateway",
+				"AWS/ElasticBeanstalk",
 			},
 			wantEntries: [][]string{
 				{"network", "out"},
 				{"cpu", "utilization"},
 				{"auto", "scaling", "group", "name"},
+				{"aws", "/", "api", "gateway"},
+				{"aws", "/", "elastic", "beanstalk"},
 			},
 		},
 	}
@@ -200,9 +208,9 @@ func TestToSnake(t *testing.T) {
 				"99_bottles",
 				"may_5",
 				"bfg_9000",
-				"böse_überraschung",
+				"",
 				"two_spaces",
-				"BadUTF8\xe2\xe2\xa1",
+				"",
 			},
 		},
 		{
@@ -211,11 +219,15 @@ func TestToSnake(t *testing.T) {
 				"NetworkOut",
 				"CPUUtilization",
 				"AutoScalingGroupName",
+				"AWS/ApiGateway",
+				"AWS/ElasticBeanstalk",
 			},
 			wantEntries: []string{
 				"network_out",
 				"cpu_utilization",
 				"auto_scaling_group_name",
+				"aws_api_gateway",
+				"aws_elastic_beanstalk",
 			},
 		},
 	}
@@ -223,11 +235,8 @@ func TestToSnake(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			for i, arg := range tt.args {
-				// reflect.DeepEqual []string{} different []string(nil)
-				if len(arg) != 0 && len(tt.wantEntries[i]) != 0 {
-					if gotEntries := ToSnake(arg); !reflect.DeepEqual(gotEntries, tt.wantEntries[i]) {
-						t.Errorf("ToSnake() = '%v', want '%v'", gotEntries, tt.wantEntries[i])
-					}
+				if gotEntries := ToSnake(arg); !reflect.DeepEqual(gotEntries, tt.wantEntries[i]) {
+					t.Errorf("ToSnake() = '%v', want '%v'", gotEntries, tt.wantEntries[i])
 				}
 			}
 		})
