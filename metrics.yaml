@@ -21,13 +21,3 @@ MetricDataQueries:
             Value: eks-prod-01-apps-01-aeg
       Period: 300
       Stat: SampleCount
-  - Id: m3
-    MetricStat:
-      Metric:
-        Namespace: AWS/ELB
-        MetricName: HealthyHostCount
-        Dimensions:
-          - Name: LoadBalancerName
-            Value: my-lb-B
-      Period: 300
-      Stat: Sum

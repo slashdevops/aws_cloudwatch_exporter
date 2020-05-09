@@ -55,11 +55,11 @@ type CredentialsConf struct {
 }
 
 type Credentials struct {
-	AccessKeyID          string   `mapstructure:"aws_access_key_id"`
+	AccessKeyID          string   `mapstructure:"aws_access_key_id" json:"AccessKeyID" yaml:"AccessKeyID"`
 	SecretAccessKey      string   `mapstructure:"aws_secret_access_key"`
 	SessionToken         string   `mapstructure:"aws_session_token"`
 	Region               string   `mapstructure:"region"`
-	Profile              string   `mapstructure:"profile"`
+	Profile              string   `mapstructure:"profile" json:"Profile" yaml:"Profile"`
 	RoleArn              string   `mapstructure:"role_arn"`
 	RoleSessionName      string   `mapstructure:"role_session_name"`
 	WebIdentityTokenFile string   `mapstructure:"web_identity_token_file"`
@@ -77,18 +77,18 @@ type Credentials struct {
 // NOTE: This structure is nested becouse I don't use its internal strcuture in anywhere
 type MetricsQueriesConf struct {
 	MetricDataQueries []struct {
-		ID         string `mapstructure:"Id" json:"Id"`
+		ID         string `mapstructure:"Id" json:"Id" yaml:"Id"`
 		MetricStat struct {
 			Metric struct {
-				Namespace  string `mapstructure:"Namespace" json:"Namespace"`
-				MetricName string `mapstructure:"MetricName" json:"MetricName"`
+				Namespace  string `mapstructure:"Namespace" json:"Namespace" yaml:"Namespace"`
+				MetricName string `mapstructure:"MetricName" json:"MetricName" yaml:"MetricName"`
 				Dimensions []struct {
-					Name  string `mapstructure:"Name" json:"Name"`
-					Value string `mapstructure:"Value" json:"Value"`
-				}
-			}
-			Period int64  `mapstructure:"Period" json:"Period"`
-			Stat   string `mapstructure:"Stat" json:"Stat"`
-		}
-	}
+					Name  string `mapstructure:"Name" json:"Name" yaml:"Name"`
+					Value string `mapstructure:"Value" json:"Value" yaml:"Value"`
+				} `mapstructure:"Dimensions" json:"Dimensions" yaml:"Dimensions"`
+			} `mapstructure:"Metric" json:"Metric" yaml:"Metric"`
+			Period int64  `mapstructure:"Period" json:"Period" yaml:"Period"`
+			Stat   string `mapstructure:"Stat" json:"Stat" yaml:"Stat"`
+		} `mapstructure:"MetricStat" json:"MetricStat" yaml:"MetricStat"`
+	} `mapstructure:"MetricDataQueries" json:"MetricDataQueries" yaml:"MetricDataQueries"`
 }
