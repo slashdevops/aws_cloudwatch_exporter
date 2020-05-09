@@ -17,7 +17,7 @@ import (
 // https://docs.Credentials.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html
 // https://docs.Credentials.amazon.com/sdk-for-go/api/aws/session/
 
-func NewSession(c *config.All) (*session.Session, error) {
+func NewSession(c *config.Credentials) (*session.Session, error) {
 	awsConf := aws.Config{CredentialsChainVerboseErrors: aws.Bool(true)}
 	awsSession := &session.Session{}
 	awsSessionOptions := session.Options{}
@@ -30,7 +30,7 @@ func NewSession(c *config.All) (*session.Session, error) {
 	// 4. If your application uses an ECS task definition or RunTask API operation, IAM role for tasks.
 	// https://docs.Credentials.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html#specifying-credentials
 	// https://docs.Credentials.amazon.com/sdk-for-go/api/aws/defaults/#CredChain
-	if reflect.DeepEqual(config.Credentials{}, c.Credentials) {
+	if reflect.DeepEqual(&config.Credentials{}, c) {
 		log.Debug("Creating AWS Session from default credential provider chain")
 
 		// Case 1.1: It is Defined the AWS_PROFILE env var, so this read the credentials from .aws/credentials file
@@ -66,31 +66,31 @@ func NewSession(c *config.All) (*session.Session, error) {
 	}
 
 	// Case 2: When config.AWS structure is not empty which is mean use local config file "aws" section
-	if !reflect.DeepEqual(config.Credentials{}, c.Credentials) {
+	if !reflect.DeepEqual(&config.Credentials{}, c) {
 		log.Debug("Creating AWS Session from config.AWS")
 
 		// profile exist, necessary to use .aws/credentials and .aws/config wherever they are
-		if c.Credentials.Profile != "" && !c.Credentials.SharedConfigState {
-			c.Credentials.SharedConfigState = true
-			awsSessionOptions.Profile = c.Credentials.Profile
+		if c.Profile != "" && !c.SharedConfigState {
+			c.SharedConfigState = true
+			awsSessionOptions.Profile = c.Profile
 		}
 
 		// Case 2.1: When this is enabled all the credentials where load from files, not from config
 		// Force to use .aws/credentials and .aws/config or custom location
-		if c.Credentials.SharedConfigState {
+		if c.SharedConfigState {
 			log.Debug("Enabling Session SharedConfigState")
 			awsSessionOptions.SharedConfigState = session.SharedConfigEnable
 
 			// Case 2.1.1: Different path for credentials/config
-			if len(c.Credentials.CredentialsFile) > 0 {
-				log.Debugf("Using custom credential files: %s", c.Credentials.CredentialsFile)
-				if len(c.Credentials.ConfigFile) > 0 {
-					log.Debugf("Using custom config files: %s", c.Credentials.ConfigFile)
-					files := append(c.Credentials.CredentialsFile, c.Credentials.ConfigFile...)
+			if len(c.CredentialsFile) > 0 {
+				log.Debugf("Using custom credential files: %s", c.CredentialsFile)
+				if len(c.ConfigFile) > 0 {
+					log.Debugf("Using custom config files: %s", c.ConfigFile)
+					files := append(c.CredentialsFile, c.ConfigFile...)
 					log.Debugf("Using custom credential/config files: %s", files)
 					awsSessionOptions.SharedConfigFiles = files
 				} else {
-					awsSessionOptions.SharedConfigFiles = c.Credentials.CredentialsFile
+					awsSessionOptions.SharedConfigFiles = c.CredentialsFile
 				}
 			}
 
@@ -100,7 +100,7 @@ func NewSession(c *config.All) (*session.Session, error) {
 				if aerr, ok := err.(awserr.Error); ok {
 					switch aerr.Code() {
 					case "AssumeRoleTokenProviderNotSetError":
-						log.Infof("The profile '%s' is using MFA configuration", c.Credentials.Profile)
+						log.Infof("The profile '%s' is using MFA configuration", c.Profile)
 						awsSessionOptions.AssumeRoleTokenProvider = stscreds.StdinTokenProvider
 					default:
 						log.Error(aerr.Error())
@@ -117,22 +117,22 @@ func NewSession(c *config.All) (*session.Session, error) {
 
 		} else { // Case 2.2: When exist access_key, secret_key profile,etc in conf file
 			// region come from conf file also
-			if c.Credentials.Region != "" {
-				log.Debugf("Using AWS Region: %s", c.Credentials.Region)
-				awsConf.Region = aws.String(c.Credentials.Region)
+			if c.Region != "" {
+				log.Debugf("Using AWS Region: %s", c.Region)
+				awsConf.Region = aws.String(c.Region)
 			}
 
 			log.Debug("Using AWS AccessKey, SecretKey and SessionToken")
-			awsConf.Credentials = credentials.NewStaticCredentials(c.Credentials.AccessKeyID, c.Credentials.SecretAccessKey, c.Credentials.SessionToken)
+			awsConf.Credentials = credentials.NewStaticCredentials(c.AccessKeyID, c.SecretAccessKey, c.SessionToken)
 			awsSession = session.Must(session.NewSession(&awsConf))
 
 			// Case 2.2.1: AWS and role provided, you must assume the role and create new session
 			// using this role
-			if c.Credentials.RoleArn != "" {
-				log.Debugf("Assuming a Role: %s", c.Credentials.RoleArn)
+			if c.RoleArn != "" {
+				log.Debugf("Assuming a Role: %s", c.RoleArn)
 
 				// Override session AWS with the new credentials provided after assume the role
-				awsConf.Credentials = stscreds.NewCredentials(awsSession, c.Credentials.RoleArn)
+				awsConf.Credentials = stscreds.NewCredentials(awsSession, c.RoleArn)
 				// Override session with the new session after assume a role and get new credentials
 				awsSession = session.Must(session.NewSession(&awsConf))
 			}

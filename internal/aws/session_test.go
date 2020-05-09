@@ -21,14 +21,14 @@ func TestNewSessionWithEnvVars(t *testing.T) {
 	testCases := []struct {
 		Name        string
 		Description string
-		Args        *config.All
+		Args        *config.Credentials
 		EnvVars     map[string]string
 		Expected    map[string]string
 	}{
 		{
 			Name:        "UsingEnvVarsBasicAndToken",
 			Description: "Using AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY and AWS_SESSION_TOKEN Env Vars",
-			Args:        &config.All{},
+			Args:        &config.Credentials{},
 			EnvVars: map[string]string{
 				"AWS_SHARED_CREDENTIALS_FILE": "/tmp/nothing", // This is very important to avoid the use of your own credentials
 				"AWS_CONFIG_FILE":             "/tmp/nothing", // This is very important to avoid the use of your own credentials
@@ -90,20 +90,16 @@ func TestNewSessionWithFiles(t *testing.T) {
 	testCases := []struct {
 		Name        string
 		Description string
-		Args        *config.All
+		Args        *config.Credentials
 		Expected    map[string]string
 	}{
 		{
 			Name:        "UsingProfileAndConfigStateFile",
 			Description: "Using ",
-			Args: &config.All{
-				CredentialsConf: config.CredentialsConf{
-					Credentials: config.Credentials{
-						Profile:           "default",
-						SharedConfigState: true,
-						CredentialsFile:   []string{"testdata/default/credentials", "testdata/default/config"},
-					},
-				},
+			Args: &config.Credentials{
+				Profile:           "default",
+				SharedConfigState: true,
+				CredentialsFile:   []string{"testdata/default/credentials", "testdata/default/config"},
 			},
 			Expected: map[string]string{
 				"AWS_ACCESS_KEY_ID":     "AKIAIOSFODNN7EXAMPLE",
@@ -115,14 +111,10 @@ func TestNewSessionWithFiles(t *testing.T) {
 		{
 			Name:        "UsingProfileAndConfigStateFile",
 			Description: "Using cas1 profile from testdata",
-			Args: &config.All{
-				CredentialsConf: config.CredentialsConf{
-					Credentials: config.Credentials{
-						Profile:           "case1",
-						SharedConfigState: true,
-						CredentialsFile:   []string{"testdata/case1/credentials", "testdata/case1/config"},
-					},
-				},
+			Args: &config.Credentials{
+				Profile:           "case1",
+				SharedConfigState: true,
+				CredentialsFile:   []string{"testdata/case1/credentials", "testdata/case1/config"},
 			},
 			Expected: map[string]string{
 				"AWS_ACCESS_KEY_ID":     "AKIAIOSFODNN7EXAMPLE",
@@ -171,21 +163,17 @@ func TestNewSessionWithConfig(t *testing.T) {
 	testCases := []struct {
 		Name        string
 		Description string
-		Args        *config.All
+		Args        *config.Credentials
 		Expected    map[string]string
 	}{
 		{
 			Name:        "UsingConfig",
 			Description: "Using ",
-			Args: &config.All{
-				CredentialsConf: config.CredentialsConf{
-					Credentials: config.Credentials{
-						AccessKeyID:     "AKIAIOSFODNN7EXAMPLE",
-						SecretAccessKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
-						// Region:          "us-west-2",
-						SessionToken: "ConfigToken",
-					},
-				},
+			Args: &config.Credentials{
+				AccessKeyID:     "AKIAIOSFODNN7EXAMPLE",
+				SecretAccessKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+				// Region:          "us-west-2",
+				SessionToken: "ConfigToken",
 			},
 			Expected: map[string]string{
 				"AWS_ACCESS_KEY_ID":     "AKIAIOSFODNN7EXAMPLE",
@@ -197,16 +185,12 @@ func TestNewSessionWithConfig(t *testing.T) {
 		{
 			Name:        "UsingConfig",
 			Description: "Using cas1 profile from testdata",
-			Args: &config.All{
-				CredentialsConf: config.CredentialsConf{
-					Credentials: config.Credentials{
-						AccessKeyID:     "AKIAIOSFODNN7EXAMPLE",
-						SecretAccessKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
-						Region:          "us-west-2",
-						// RoleArn:         "arn:aws:iam::123456789012:role/role-name",
-						SessionToken: "ConfigToken",
-					},
-				},
+			Args: &config.Credentials{
+				AccessKeyID:     "AKIAIOSFODNN7EXAMPLE",
+				SecretAccessKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+				Region:          "us-west-2",
+				// RoleArn:         "arn:aws:iam::123456789012:role/role-name",
+				SessionToken: "ConfigToken",
 			},
 			Expected: map[string]string{
 				"AWS_ACCESS_KEY_ID":     "AKIAIOSFODNN7EXAMPLE",

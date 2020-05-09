@@ -18,7 +18,7 @@ type All struct {
 //   address:
 //   port:
 type ServerConf struct {
-	Server
+	Server `mapstructure:",squash"`
 }
 
 type Server struct {
@@ -33,7 +33,7 @@ type Server struct {
 //   name:
 //   description:
 type ApplicationConf struct {
-	Application
+	Application `mapstructure:",squash"`
 }
 
 type Application struct {
@@ -51,7 +51,7 @@ type Application struct {
 //   aws_access_key_id:
 //   aws_secret_access_key:
 type CredentialsConf struct {
-	Credentials Credentials
+	Credentials `mapstructure:",squash"`
 }
 
 type Credentials struct {
@@ -74,7 +74,7 @@ type Credentials struct {
 // Will be filled with que Metrics Queries
 // https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_GetMetricData.html
 // https://aws.amazon.com/premiumsupport/knowledge-center/cloudwatch-getmetricdata-api/
-// NOTE: This structure is nested becouse I don't use its internal strcuture in anywhere
+// NOTE: This structure is nested because I don't use its internal structure in anywhere
 type MetricsQueriesConf struct {
 	MetricDataQueries []struct {
 		ID         string `mapstructure:"Id" json:"Id" yaml:"Id"`
