@@ -16,7 +16,6 @@ limitations under the License.
 package cmd
 
 import (
-	"flag"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
@@ -56,14 +55,6 @@ func init() {
 func get(cmd *cobra.Command, args []string) {
 	fmt.Printf("get called with args %v\n", args)
 	initConf()
-	fmt.Println(conf)
-	/*	profile, err := cmd.Flags().GetString("profile")
-		if err != nil {
-			log.Error(err)
-		}
-
-		log.Debugf("AWS Profile: %v", profile)
-	*/
 	sess, _ := aws.NewSession(&conf.Credentials)
 	svc := cloudwatch.New(sess)
 	_ = svc
@@ -72,7 +63,6 @@ func get(cmd *cobra.Command, args []string) {
 func initConf() {
 	parseConfFiles(&conf, "metrics")
 	parseConfFiles(&conf, "credentials")
-	flag.Parse()
 	fmt.Println(conf.ToJson())
 	fmt.Println(conf.ToYaml())
 
