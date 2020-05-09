@@ -17,32 +17,38 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
+	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // serverCmd represents the server command
-var serverCmd = &cobra.Command{
-	Use:   "server",
-	Short: "A brief description of your command",
-	Long:  `A longer description that spans `,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("server called")
-	},
-}
+var (
+	confFile  string
+	serverCmd = &cobra.Command{
+		Use:   "server",
+		Short: "A brief description of your command",
+		Long:  `A longer description that spans `,
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Println("server called")
+		},
+	}
+)
 
 func init() {
 	rootCmd.AddCommand(serverCmd)
 
-	/*	serverCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/server.yaml)")
-		serverCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	*/
+	serverCmd.PersistentFlags().StringVar(&confFile, "config", "", "config file (default is $HOME/server.yaml)")
+	serverCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+
 }
 
-/*func initConfig() {
-	if cfgFile != "" {
+func initConfig() {
+	if confFile != "" {
 		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
+		viper.SetConfigFile(confFile)
 	} else {
 		// Find home directory.
 		home, err := homedir.Dir()
@@ -63,4 +69,3 @@ func init() {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
 }
-*/

@@ -24,4 +24,5 @@ require (
 	golang.org/x/sys v0.0.0-20200509044756-6aff5f38e54f // indirect
 	golang.org/x/tools v0.0.0-20200501155019-2658dc0cadb5 // indirect
 	gopkg.in/ini.v1 v1.56.0 // indirect
+	gopkg.in/yaml.v2 v2.2.8
 )

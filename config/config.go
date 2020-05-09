@@ -1,8 +1,11 @@
 package config
 
 import (
+	"encoding/json"
+
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/prometheus/client_golang/prometheus"
+	"gopkg.in/yaml.v2"
 )
 
 type All struct {
@@ -12,13 +15,29 @@ type All struct {
 	MetricsQueriesConf `mapstructure:",squash"`
 }
 
+func (c *All) ToJson() string {
+	out, err := json.Marshal(c)
+	if err != nil {
+		panic(err)
+	}
+	return string(out)
+}
+
+func (c *All) ToYaml() string {
+	out, err := yaml.Marshal(c)
+	if err != nil {
+		panic(err)
+	}
+	return string(out)
+}
+
 // server.conf file
 // Nested:
 // server:
 //   address:
 //   port:
 type ServerConf struct {
-	Server `mapstructure:",squash"`
+	Server `mapstructure:"Server" json:"Server" yaml:"Server"`
 }
 
 type Server struct {
@@ -33,7 +52,7 @@ type Server struct {
 //   name:
 //   description:
 type ApplicationConf struct {
-	Application `mapstructure:",squash"`
+	Application `mapstructure:"Application" json:"Application" yaml:"Application"`
 }
 
 type Application struct {
@@ -51,23 +70,23 @@ type Application struct {
 //   aws_access_key_id:
 //   aws_secret_access_key:
 type CredentialsConf struct {
-	Credentials `mapstructure:",squash"`
+	Credentials `mapstructure:"Credentials" json:"Credentials" yaml:"Credentials"`
 }
 
 type Credentials struct {
-	AccessKeyID          string   `mapstructure:"aws_access_key_id" json:"AccessKeyID" yaml:"AccessKeyID"`
-	SecretAccessKey      string   `mapstructure:"aws_secret_access_key"`
-	SessionToken         string   `mapstructure:"aws_session_token"`
-	Region               string   `mapstructure:"region"`
+	AccessKeyID          string   `mapstructure:"access_key_id" json:"AccessKeyID" yaml:"AccessKeyID"`
+	SecretAccessKey      string   `mapstructure:"secret_access_key" json:"SecretAccessKey" yaml:"SecretAccessKey"`
+	SessionToken         string   `mapstructure:"session_token" json:"SessionToken" yaml:"SessionToken"`
+	Region               string   `mapstructure:"region" json:"Region" yaml:"Region"`
 	Profile              string   `mapstructure:"profile" json:"Profile" yaml:"Profile"`
-	RoleArn              string   `mapstructure:"role_arn"`
-	RoleSessionName      string   `mapstructure:"role_session_name"`
-	WebIdentityTokenFile string   `mapstructure:"web_identity_token_file"`
-	ExternalID           string   `mapstructure:"external_id"`
-	MFASerial            string   `mapstructure:"mfa_serial"`
-	SharedConfigState    bool     `mapstructure:"shared_config_state"`
-	CredentialsFile      []string `mapstructure:"aws_shared_credential_file"`
-	ConfigFile           []string `mapstructure:"aws_config_file"`
+	RoleArn              string   `mapstructure:"role_arn" json:"RoleArn" yaml:"RoleArn"`
+	RoleSessionName      string   `mapstructure:"role_session_name" json:"RoleSessionName" yaml:"RoleSessionName"`
+	WebIdentityTokenFile string   `mapstructure:"web_identity_token_file" json:"WebIdentityTokenFile" yaml:"WebIdentityTokenFile"`
+	ExternalID           string   `mapstructure:"external_id" json:"ExternalID" yaml:"ExternalID"`
+	MFASerial            string   `mapstructure:"mfa_serial" json:"MFASerial" yaml:"MFASerial"`
+	SharedConfigState    bool     `mapstructure:"shared_config_state" json:"SharedConfigState" yaml:"SharedConfigState"`
+	CredentialsFile      []string `mapstructure:"aws_shared_credential_file" json:"CredentialsFile" yaml:"CredentialsFile"`
+	ConfigFile           []string `mapstructure:"aws_config_file" json:"ConfigFile" yaml:"ConfigFile"`
 }
 
 // File conf metrics.yaml
@@ -76,19 +95,21 @@ type Credentials struct {
 // https://aws.amazon.com/premiumsupport/knowledge-center/cloudwatch-getmetricdata-api/
 // NOTE: This structure is nested because I don't use its internal structure in anywhere
 type MetricsQueriesConf struct {
-	MetricDataQueries []struct {
-		ID         string `mapstructure:"Id" json:"Id" yaml:"Id"`
-		MetricStat struct {
-			Metric struct {
-				Namespace  string `mapstructure:"Namespace" json:"Namespace" yaml:"Namespace"`
-				MetricName string `mapstructure:"MetricName" json:"MetricName" yaml:"MetricName"`
-				Dimensions []struct {
-					Name  string `mapstructure:"Name" json:"Name" yaml:"Name"`
-					Value string `mapstructure:"Value" json:"Value" yaml:"Value"`
-				} `mapstructure:"Dimensions" json:"Dimensions" yaml:"Dimensions"`
-			} `mapstructure:"Metric" json:"Metric" yaml:"Metric"`
-			Period int64  `mapstructure:"Period" json:"Period" yaml:"Period"`
-			Stat   string `mapstructure:"Stat" json:"Stat" yaml:"Stat"`
-		} `mapstructure:"MetricStat" json:"MetricStat" yaml:"MetricStat"`
-	} `mapstructure:"MetricDataQueries" json:"MetricDataQueries" yaml:"MetricDataQueries"`
+	MetricDataQueries `mapstructure:"MetricDataQueries" json:"MetricDataQueries" yaml:"MetricDataQueries"`
+}
+
+type MetricDataQueries []struct {
+	ID         string `mapstructure:"Id" json:"Id" yaml:"Id"`
+	MetricStat struct {
+		Metric struct {
+			Namespace  string `mapstructure:"Namespace" json:"Namespace" yaml:"Namespace"`
+			MetricName string `mapstructure:"MetricName" json:"MetricName" yaml:"MetricName"`
+			Dimensions []struct {
+				Name  string `mapstructure:"Name" json:"Name" yaml:"Name"`
+				Value string `mapstructure:"Value" json:"Value" yaml:"Value"`
+			} `mapstructure:"Dimensions" json:"Dimensions" yaml:"Dimensions"`
+		} `mapstructure:"Metric" json:"Metric" yaml:"Metric"`
+		Period int64  `mapstructure:"Period" json:"Period" yaml:"Period"`
+		Stat   string `mapstructure:"Stat" json:"Stat" yaml:"Stat"`
+	} `mapstructure:"MetricStat" json:"MetricStat" yaml:"MetricStat"`
 }

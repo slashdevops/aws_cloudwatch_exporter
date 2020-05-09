@@ -16,6 +16,7 @@ limitations under the License.
 package cmd
 
 import (
+	"flag"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
@@ -27,8 +28,7 @@ import (
 
 // metricsCmd represents the metrics command
 var (
-	conf config.All
-
+	conf       config.All
 	metricsCmd = &cobra.Command{
 		Use:   "metrics [COMMANDS]",
 		Short: "useful to get metrics",
@@ -50,19 +50,49 @@ func init() {
 	metricsCmd.AddCommand(metricsGetCmd)
 
 	metricsGetCmd.PersistentFlags().StringVar(&conf.Credentials.Profile, "profile", "", "The AWS CLI profile nae from .aws/config or .aws/credential")
-	viper.BindPFlag("profile", rootCmd.PersistentFlags().Lookup("profile"))
+	viper.BindPFlag("credentials.profile", metricsGetCmd.PersistentFlags().Lookup("profile"))
 }
 
 func get(cmd *cobra.Command, args []string) {
 	fmt.Printf("get called with args %v\n", args)
-	profile, err := cmd.Flags().GetString("profile")
-	if err != nil {
-		log.Error(err)
-	}
+	initConf()
+	fmt.Println(conf)
+	/*	profile, err := cmd.Flags().GetString("profile")
+		if err != nil {
+			log.Error(err)
+		}
 
-	log.Debugf("AWS Profile: %v", profile)
-
-	sess, _ := aws.NewSession(&conf)
+		log.Debugf("AWS Profile: %v", profile)
+	*/
+	sess, _ := aws.NewSession(&conf.Credentials)
 	svc := cloudwatch.New(sess)
 	_ = svc
+}
+
+func initConf() {
+	parseConfFiles(&conf, "metrics")
+	parseConfFiles(&conf, "credentials")
+	flag.Parse()
+	fmt.Println(conf.ToJson())
+	fmt.Println(conf.ToYaml())
+
+}
+
+func parseConfFiles(c *config.All, file string) {
+
+	viper.SetConfigName(file)
+	viper.AddConfigPath(".")
+	viper.AutomaticEnv()
+	viper.SetConfigType("yaml")
+	viper.SetConfigType("yml")
+
+	if err := viper.ReadInConfig(); err != nil {
+		fmt.Printf("Error reading config file, %s", err)
+	}
+
+	// Read conf from metrics.yaml file
+	err := viper.Unmarshal(&c)
+	if err != nil {
+		fmt.Printf("Unable to decode into struct, %v", err)
+	}
 }
