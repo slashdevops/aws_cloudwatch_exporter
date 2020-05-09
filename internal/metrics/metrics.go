@@ -1,30 +1,43 @@
 package metrics
 
 import (
+	"time"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
-	"github.com/prometheus/client_golang/prometheus"
 	"github.com/slashdevops/aws_cloudwatch_exporter/config"
 )
 
 // https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/using-metric-math.html#metric-math-syntax
-func NewMetrics(c *config.MetricsQueriesConf) *cloudwatch.GetMetricDataInput {
+func NewGetMetricDataInput(c *config.MetricsQueriesConf, st time.Time, et time.Time, p int64, nt string) *cloudwatch.GetMetricDataInput {
 
-	dataQry := getAWSDataQuery(c)
+	dataQry := getAWSDataQuery(c, p)
+	var mdi *cloudwatch.GetMetricDataInput
 
-	return &cloudwatch.GetMetricDataInput{
-		EndTime:           nil,
-		MaxDatapoints:     nil,
-		MetricDataQueries: dataQry,
-		NextToken:         nil,
-		ScanBy:            nil,
-		StartTime:         nil,
+	if len(nt) > 0 {
+		mdi = &cloudwatch.GetMetricDataInput{
+			StartTime:         aws.Time(st),
+			EndTime:           aws.Time(et),
+			MetricDataQueries: dataQry,
+			NextToken:         aws.String(nt),
+			ScanBy:            aws.String(cloudwatch.ScanByTimestampDescending), // Get the fresh data first
+		}
+	} else {
+		mdi = &cloudwatch.GetMetricDataInput{
+			StartTime:         aws.Time(st),
+			EndTime:           aws.Time(et),
+			MetricDataQueries: dataQry,
+			ScanBy:            aws.String(cloudwatch.ScanByTimestampDescending), // Get the fresh data first
+		}
 	}
+	return mdi
 }
 
-func getAWSDataQuery(c *config.MetricsQueriesConf) []*cloudwatch.MetricDataQuery {
+// This function is used to transform the structure config.MetricsQueriesConf whcih contains
+// the values read from config file metrics.yaml to a cloudwatch.MetricDataQuery structure which is
+// the default structure used to get cloudwatch metrics data
+func getAWSDataQuery(c *config.MetricsQueriesConf, p int64) []*cloudwatch.MetricDataQuery {
 
-	periodQry := int64(60 * 5)
 	var dataQry []*cloudwatch.MetricDataQuery
 
 	for _, m := range c.MetricDataQueries {
@@ -50,19 +63,18 @@ func getAWSDataQuery(c *config.MetricsQueriesConf) []*cloudwatch.MetricDataQuery
 				Period: aws.Int64(m.MetricStat.Period),
 				Stat:   aws.String(m.MetricStat.Stat),
 			},
-			Period:     aws.Int64(periodQry),
-			ReturnData: aws.Bool(true), //to return the timestamps and raw data values of this metric.
+			Period:     aws.Int64(p),
+			ReturnData: aws.Bool(true), // Return the timestamps and raw data values of this metric.
 		}
 		dataQry = append(dataQry, metricsQry)
 	}
 	return dataQry
 }
 
-func getPrometheusMetrics(mdo *cloudwatch.GetMetricDataOutput) []prometheus.Metric {
+/*func getPrometheusMetrics(mdo *cloudwatch.GetMetricDataOutput) []prometheus.Metric {
 
-	/*if len(mdo.Messages) < 0 {
-
-	}*/
+	//if len(mdo.Messages) < 0 {
+	//}
 	var promMetrics []prometheus.Metric
 
 	for _, mr := range mdo.MetricDataResults {
@@ -71,8 +83,9 @@ func getPrometheusMetrics(mdo *cloudwatch.GetMetricDataOutput) []prometheus.Metr
 		des := prometheus.NewDesc(mn, mr.Label)
 		m := prometheus.MustNewConstMetric(des)
 		prometheus.NewMetricWithTimestamp()
-		append(promMetrics, m)
+		promMetrics = append(promMetrics, m)
 	}
 
 	return promMetrics
 }
+*/
