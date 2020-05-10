@@ -18,6 +18,7 @@ package cmd
 import (
 	"fmt"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
@@ -52,7 +53,6 @@ func init() {
 	rootCmd.AddCommand(metricsCmd)
 	metricsCmd.AddCommand(metricsGetCmd)
 
-	viper.AutomaticEnv()
 	// Files
 	metricsGetCmd.PersistentFlags().StringVar(&conf.Application.CredentialsFile, "credentialsFile", "credentials.yaml", "The metrics files with the CloudWatch Queries")
 	viper.BindPFlag("application.credentialsFile", metricsGetCmd.PersistentFlags().Lookup("credentialsFile"))
@@ -117,6 +117,10 @@ func parseConfFiles(c *config.All) {
 		viper.AddConfigPath(filepath.Dir(file))
 		viper.SetConfigType(filepath.Ext(file)[1:])
 
+		viper.AutomaticEnv()
+		viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+		viper.SetEnvPrefix("ace")
+
 		log.Debugf("Reading configuration from file: %s", file)
 		if err := viper.ReadInConfig(); err != nil {
 			log.Errorf("Error reading config file, %s", err)
@@ -128,8 +132,6 @@ func parseConfFiles(c *config.All) {
 			log.Errorf("Unable to decode into struct, %v", err)
 		}
 	}
-	// Read from Env Vars
-	//viper.AutomaticEnv()
 }
 
 // Unmarshall Yaml files into c config structure
