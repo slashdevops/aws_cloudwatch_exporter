@@ -9,15 +9,31 @@ MetricDataQueries:
         Dimensions:
           - Name: AutoScalingGroupName
             Value: eks-prod-01-apps-01-aeg
-      Period: 300
       Stat: Average
   - Id: m2
     MetricStat:
       Metric:
         Namespace: AWS/EC2
-        MetricName: NetworkOut
+        MetricName: CPUUtilization
         Dimensions:
           - Name: AutoScalingGroupName
             Value: eks-prod-01-apps-01-aeg
-      Period: 300
+      Stat: Maximum
+  - Id: m3
+    MetricStat:
+      Metric:
+        Namespace: AWS/EC2
+        MetricName: CPUUtilization
+        Dimensions:
+          - Name: AutoScalingGroupName
+            Value: eks-prod-01-apps-01-aeg
+      Stat: Minimum
+  - Id: m4
+    MetricStat:
+      Metric:
+        Namespace: AWS/EC2
+        MetricName: CPUUtilization
+        Dimensions:
+          - Name: AutoScalingGroupName
+            Value: eks-prod-01-apps-01-aeg
       Stat: SampleCount

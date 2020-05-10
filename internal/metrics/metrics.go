@@ -104,7 +104,9 @@ func GetTimeStamps(t time.Time, p string) (startTime time.Time, endTime time.Tim
 		log.Errorf("Error parsing period: %v, %v", p, err)
 	}
 
-	endTime = t.Truncate(period)
+	// endTime = t.Truncate(period)
+	// startTime = t.Truncate(period).Add(period * -1)
+	endTime = t.Truncate(period).Add(period * 1)
 	startTime = t.Truncate(period).Add(period * -1)
 	return
 }

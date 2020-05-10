@@ -37,7 +37,7 @@ func (c *All) ToYaml() string {
 //   address:
 //   port:
 type ServerConf struct {
-	Server `mapstructure:"Server" json:"Server" yaml:"Server"`
+	Server `mapstructure:"server" json:"Server" yaml:"Server"`
 }
 
 type Server struct {
@@ -52,19 +52,20 @@ type Server struct {
 //   name:
 //   description:
 type ApplicationConf struct {
-	Application `mapstructure:"Application" json:"Application" yaml:"Application"`
+	Application `mapstructure:"application" json:"Application" yaml:"Application"`
 }
 
 type Application struct {
-	Name           string   `mapstructure:"name" json:"Name" yaml:"Name"`
-	Description    string   `mapstructure:"description" json:"Description" yaml:"Description"`
-	Version        string   `mapstructure:"version" json:"Version" yaml:"Version"`
-	Namespace      string   `mapstructure:"namespace" json:"Namespace" yaml:"Namespace"`
-	ServerFile     string   `mapstructure:"serverFile" json:"ServerFile" yaml:"ServerFile"`
-	CredentialFile string   `mapstructure:"credentialFile" json:"CredentialFile" yaml:"CredentialFile"`
-	MetricsFiles   []string `mapstructure:"metricsFiles" json:"MetricsFiles" yaml:"MetricsFiles"`
-	Gatherer       prometheus.Gatherer
-	AWSSession     *session.Session
+	Name            string   `mapstructure:"name" json:"Name" yaml:"Name"`
+	Description     string   `mapstructure:"description" json:"Description" yaml:"Description"`
+	Version         string   `mapstructure:"version" json:"Version" yaml:"Version"`
+	Namespace       string   `mapstructure:"namespace" json:"Namespace" yaml:"Namespace"`
+	ServerFile      string   `mapstructure:"serverFile" json:"ServerFile" yaml:"ServerFile"`
+	CredentialsFile string   `mapstructure:"credentialsFile" json:"CredentialsFile" yaml:"CredentialsFile"`
+	MetricsFiles    []string `mapstructure:"metricsFiles" json:"MetricsFiles" yaml:"MetricsFiles"`
+	StatsPeriod     string   `mapstructure:"statsPeriod" json:"StatsPeriod" yaml:"StatsPeriod"`
+	Gatherer        prometheus.Gatherer
+	AWSSession      *session.Session
 }
 
 // credentials.yaml file
