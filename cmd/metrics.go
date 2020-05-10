@@ -17,10 +17,12 @@ package cmd
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
 	"github.com/slashdevops/aws_cloudwatch_exporter/config"
 	"github.com/slashdevops/aws_cloudwatch_exporter/internal/aws"
+	"github.com/slashdevops/aws_cloudwatch_exporter/internal/metrics"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -53,36 +55,43 @@ func init() {
 }
 
 func get(cmd *cobra.Command, args []string) {
-	fmt.Printf("get called with args %v\n", args)
 	initConf()
+	startTime, endTime, period := metrics.GetTimeStamps(time.Now(), "5m")
+	mdi := metrics.NewGetMetricDataInput(&conf.MetricsQueriesConf, startTime, endTime, period, "")
 	sess, _ := aws.NewSession(&conf.Credentials)
 	svc := cloudwatch.New(sess)
-	_ = svc
+	mdo, err := svc.GetMetricData(mdi)
+	if err != nil {
+		log.Errorf("Error getting metrics %v", err)
+	}
+	fmt.Println(mdo)
+
 }
 
 func initConf() {
-	parseConfFiles(&conf, "metrics")
-	parseConfFiles(&conf, "credentials")
-	fmt.Println(conf.ToJson())
-	fmt.Println(conf.ToYaml())
+	parseConfFile(&conf, "metrics")
+	parseConfFile(&conf, "credentials")
+	log.Debugf("Configuration %s", conf.ToJson())
+	//fmt.Println(conf.ToYaml())
 
 }
 
-func parseConfFiles(c *config.All, file string) {
-
+// Unmarshall Yaml files into c config structure
+func parseConfFile(c *config.All, file string) {
+	log.Debugf("Parsing configuration file: %s", file)
 	viper.SetConfigName(file)
 	viper.AddConfigPath(".")
-	viper.AutomaticEnv()
 	viper.SetConfigType("yaml")
 	viper.SetConfigType("yml")
+	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err != nil {
-		fmt.Printf("Error reading config file, %s", err)
+		log.Errorf("Error reading config file, %s", err)
 	}
 
 	// Read conf from metrics.yaml file
 	err := viper.Unmarshal(&c)
 	if err != nil {
-		fmt.Printf("Unable to decode into struct, %v", err)
+		log.Errorf("Unable to decode into struct, %v", err)
 	}
 }

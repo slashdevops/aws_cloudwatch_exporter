@@ -5,11 +5,13 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
+	"github.com/prometheus/common/log"
 	"github.com/slashdevops/aws_cloudwatch_exporter/config"
 )
 
 // https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/using-metric-math.html#metric-math-syntax
-func NewGetMetricDataInput(c *config.MetricsQueriesConf, st time.Time, et time.Time, p int64, nt string) *cloudwatch.GetMetricDataInput {
+// https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_GetMetricData.html
+func NewGetMetricDataInput(c *config.MetricsQueriesConf, st time.Time, et time.Time, p time.Duration, nt string) *cloudwatch.GetMetricDataInput {
 
 	dataQry := getAWSDataQuery(c, p)
 	var mdi *cloudwatch.GetMetricDataInput
@@ -33,10 +35,13 @@ func NewGetMetricDataInput(c *config.MetricsQueriesConf, st time.Time, et time.T
 	return mdi
 }
 
-// This function is used to transform the structure config.MetricsQueriesConf whcih contains
+// This function is used to transform the structure config.MetricsQueriesConf which contains
 // the values read from config file metrics.yaml to a cloudwatch.MetricDataQuery structure which is
 // the default structure used to get cloudwatch metrics data
-func getAWSDataQuery(c *config.MetricsQueriesConf, p int64) []*cloudwatch.MetricDataQuery {
+func getAWSDataQuery(c *config.MetricsQueriesConf, p time.Duration) []*cloudwatch.MetricDataQuery {
+
+	// time.Duration is in nanoseconds, and the CW API need it in seconds
+	period := int64(p / time.Second)
 
 	var dataQry []*cloudwatch.MetricDataQuery
 
@@ -63,7 +68,7 @@ func getAWSDataQuery(c *config.MetricsQueriesConf, p int64) []*cloudwatch.Metric
 				Period: aws.Int64(m.MetricStat.Period),
 				Stat:   aws.String(m.MetricStat.Stat),
 			},
-			Period:     aws.Int64(p),
+			Period:     aws.Int64(period),
 			ReturnData: aws.Bool(true), // Return the timestamps and raw data values of this metric.
 		}
 		dataQry = append(dataQry, metricsQry)
@@ -89,3 +94,25 @@ func getAWSDataQuery(c *config.MetricsQueriesConf, p int64) []*cloudwatch.Metric
 	return promMetrics
 }
 */
+
+/*func GetTimeStamps(t time.Time, p string) (startTime string, endTime string, period time.Duration) {
+	period, err := time.ParseDuration(p)
+	if err != nil {
+		log.Errorf("Error parsing period: %v, %v", p, err)
+	}
+
+	endTime = t.Truncate(period).Format(time.RFC3339)
+	startTime = t.Truncate(period).Add(period * -1).Format(time.RFC3339)
+	return
+}
+*/
+func GetTimeStamps(t time.Time, p string) (startTime time.Time, endTime time.Time, period time.Duration) {
+	period, err := time.ParseDuration(p)
+	if err != nil {
+		log.Errorf("Error parsing period: %v, %v", p, err)
+	}
+
+	endTime = t.Truncate(period)
+	startTime = t.Truncate(period).Add(period * -1)
+	return
+}
