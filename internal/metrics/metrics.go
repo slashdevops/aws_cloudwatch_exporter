@@ -107,6 +107,6 @@ func GetTimeStamps(t time.Time, p string) (startTime time.Time, endTime time.Tim
 	// endTime = t.Truncate(period)
 	// startTime = t.Truncate(period).Add(period * -1)
 	endTime = t.Truncate(period).Add(period * 1)
-	startTime = t.Truncate(period).Add(period * -1)
+	startTime = t.Truncate(period).Add(period * -2)
 	return
 }
