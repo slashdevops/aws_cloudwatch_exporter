@@ -21,14 +21,14 @@ func TestNewSessionWithEnvVars(t *testing.T) {
 	testCases := []struct {
 		Name        string
 		Description string
-		Args        *config.Credentials
+		Args        *config.AWS
 		EnvVars     map[string]string
 		Expected    map[string]string
 	}{
 		{
 			Name:        "UsingEnvVarsBasicAndToken",
 			Description: "Using AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY and AWS_SESSION_TOKEN Env Vars",
-			Args:        &config.Credentials{},
+			Args:        &config.AWS{},
 			EnvVars: map[string]string{
 				"AWS_SHARED_CREDENTIALS_FILE": "/tmp/nothing", // This is very important to avoid the use of your own credentials
 				"AWS_CONFIG_FILE":             "/tmp/nothing", // This is very important to avoid the use of your own credentials
@@ -90,16 +90,16 @@ func TestNewSessionWithFiles(t *testing.T) {
 	testCases := []struct {
 		Name        string
 		Description string
-		Args        *config.Credentials
+		Args        *config.AWS
 		Expected    map[string]string
 	}{
 		{
 			Name:        "UsingProfileAndConfigStateFile",
 			Description: "Using ",
-			Args: &config.Credentials{
-				Profile:           "default",
-				SharedConfigState: true,
-				CredentialsFile:   []string{"testdata/default/credentials", "testdata/default/config"},
+			Args: &config.AWS{
+				Profile:               "default",
+				SharedConfigState:     true,
+				SharedCredentialsFile: []string{"testdata/default/credentials", "testdata/default/config"},
 			},
 			Expected: map[string]string{
 				"AWS_ACCESS_KEY_ID":     "AKIAIOSFODNN7EXAMPLE",
@@ -111,10 +111,10 @@ func TestNewSessionWithFiles(t *testing.T) {
 		{
 			Name:        "UsingProfileAndConfigStateFile",
 			Description: "Using cas1 profile from testdata",
-			Args: &config.Credentials{
-				Profile:           "case1",
-				SharedConfigState: true,
-				CredentialsFile:   []string{"testdata/case1/credentials", "testdata/case1/config"},
+			Args: &config.AWS{
+				Profile:               "case1",
+				SharedConfigState:     true,
+				SharedCredentialsFile: []string{"testdata/case1/credentials", "testdata/case1/config"},
 			},
 			Expected: map[string]string{
 				"AWS_ACCESS_KEY_ID":     "AKIAIOSFODNN7EXAMPLE",
@@ -163,13 +163,13 @@ func TestNewSessionWithConfig(t *testing.T) {
 	testCases := []struct {
 		Name        string
 		Description string
-		Args        *config.Credentials
+		Args        *config.AWS
 		Expected    map[string]string
 	}{
 		{
 			Name:        "UsingConfig",
 			Description: "Using ",
-			Args: &config.Credentials{
+			Args: &config.AWS{
 				AccessKeyID:     "AKIAIOSFODNN7EXAMPLE",
 				SecretAccessKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
 				// Region:          "us-west-2",
@@ -185,7 +185,7 @@ func TestNewSessionWithConfig(t *testing.T) {
 		{
 			Name:        "UsingConfig",
 			Description: "Using cas1 profile from testdata",
-			Args: &config.Credentials{
+			Args: &config.AWS{
 				AccessKeyID:     "AKIAIOSFODNN7EXAMPLE",
 				SecretAccessKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
 				Region:          "us-west-2",

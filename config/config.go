@@ -11,7 +11,7 @@ import (
 type All struct {
 	ServerConf         `mapstructure:",squash"`
 	ApplicationConf    `mapstructure:",squash"`
-	CredentialsConf    `mapstructure:",squash"`
+	AWSConf            `mapstructure:",squash"`
 	MetricsQueriesConf `mapstructure:",squash"`
 }
 
@@ -61,36 +61,38 @@ type Application struct {
 	Version         string   `mapstructure:"version" json:"Version" yaml:"Version"`
 	Namespace       string   `mapstructure:"namespace" json:"Namespace" yaml:"Namespace"`
 	ServerFile      string   `mapstructure:"serverFile" json:"ServerFile" yaml:"ServerFile"`
-	CredentialsFile string   `mapstructure:"credentialsFile" json:"CredentialsFile" yaml:"CredentialsFile"`
+	CredentialsFile string   `mapstructure:"credentialsFile" json:"SharedCredentialsFile" yaml:"SharedCredentialsFile"`
 	MetricsFiles    []string `mapstructure:"metricsFiles" json:"MetricsFiles" yaml:"MetricsFiles"`
 	StatsPeriod     string   `mapstructure:"statsPeriod" json:"StatsPeriod" yaml:"StatsPeriod"`
 	Gatherer        prometheus.Gatherer
 	AWSSession      *session.Session
 }
 
+// https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html
 // credentials.yaml file
 // Nested:
-// credentials:
-//   aws_access_key_id:
-//   aws_secret_access_key:
-type CredentialsConf struct {
-	Credentials `mapstructure:"Credentials" json:"Credentials" yaml:"Credentials"`
+// aws:
+//   access_key_id: ""
+//   secret_access_key: ""
+//   profile: ""
+type AWSConf struct {
+	AWS `mapstructure:"AWS" json:"AWS" yaml:"AWS"`
 }
 
-type Credentials struct {
-	AccessKeyID          string   `mapstructure:"access_key_id" json:"AccessKeyID" yaml:"AccessKeyID"`
-	SecretAccessKey      string   `mapstructure:"secret_access_key" json:"SecretAccessKey" yaml:"SecretAccessKey"`
-	SessionToken         string   `mapstructure:"session_token" json:"SessionToken" yaml:"SessionToken"`
-	Region               string   `mapstructure:"region" json:"Region" yaml:"Region"`
-	Profile              string   `mapstructure:"profile" json:"Profile" yaml:"Profile"`
-	RoleArn              string   `mapstructure:"role_arn" json:"RoleArn" yaml:"RoleArn"`
-	RoleSessionName      string   `mapstructure:"role_session_name" json:"RoleSessionName" yaml:"RoleSessionName"`
-	WebIdentityTokenFile string   `mapstructure:"web_identity_token_file" json:"WebIdentityTokenFile" yaml:"WebIdentityTokenFile"`
-	ExternalID           string   `mapstructure:"external_id" json:"ExternalID" yaml:"ExternalID"`
-	MFASerial            string   `mapstructure:"mfa_serial" json:"MFASerial" yaml:"MFASerial"`
-	SharedConfigState    bool     `mapstructure:"shared_config_state" json:"SharedConfigState" yaml:"SharedConfigState"`
-	CredentialsFile      []string `mapstructure:"aws_shared_credential_file" json:"CredentialsFile" yaml:"CredentialsFile"`
-	ConfigFile           []string `mapstructure:"aws_config_file" json:"ConfigFile" yaml:"ConfigFile"`
+type AWS struct {
+	AccessKeyID           string   `mapstructure:"access_key_id" json:"AccessKeyID" yaml:"AccessKeyID"`
+	SecretAccessKey       string   `mapstructure:"secret_access_key" json:"SecretAccessKey" yaml:"SecretAccessKey"`
+	SessionToken          string   `mapstructure:"session_token" json:"SessionToken" yaml:"SessionToken"`
+	Region                string   `mapstructure:"region" json:"Region" yaml:"Region"`
+	Profile               string   `mapstructure:"profile" json:"Profile" yaml:"Profile"`
+	RoleArn               string   `mapstructure:"role_arn" json:"RoleArn" yaml:"RoleArn"`
+	RoleSessionName       string   `mapstructure:"role_session_name" json:"RoleSessionName" yaml:"RoleSessionName"`
+	WebIdentityTokenFile  string   `mapstructure:"web_identity_token_file" json:"WebIdentityTokenFile" yaml:"WebIdentityTokenFile"`
+	ExternalID            string   `mapstructure:"external_id" json:"ExternalID" yaml:"ExternalID"`
+	MFASerial             string   `mapstructure:"mfa_serial" json:"MFASerial" yaml:"MFASerial"`
+	SharedConfigState     bool     `mapstructure:"shared_config_state" json:"SharedConfigState" yaml:"SharedConfigState"`
+	SharedCredentialsFile []string `mapstructure:"shared_credential_file" json:"SharedCredentialsFile" yaml:"SharedCredentialsFile"`
+	ConfigFile            []string `mapstructure:"config_file" json:"ConfigFile" yaml:"ConfigFile"`
 }
 
 // File conf metrics.yaml

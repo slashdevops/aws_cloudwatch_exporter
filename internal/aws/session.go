@@ -17,7 +17,7 @@ import (
 // https://docs.Credentials.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html
 // https://docs.Credentials.amazon.com/sdk-for-go/api/aws/session/
 
-func NewSession(c *config.Credentials) (*session.Session, error) {
+func NewSession(c *config.AWS) (*session.Session, error) {
 	awsConf := aws.Config{CredentialsChainVerboseErrors: aws.Bool(true)}
 	awsSession := &session.Session{}
 	awsSessionOptions := session.Options{}
@@ -30,7 +30,7 @@ func NewSession(c *config.Credentials) (*session.Session, error) {
 	// 4. If your application uses an ECS task definition or RunTask API operation, IAM role for tasks.
 	// https://docs.Credentials.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html#specifying-credentials
 	// https://docs.Credentials.amazon.com/sdk-for-go/api/aws/defaults/#CredChain
-	if reflect.DeepEqual(&config.Credentials{}, c) {
+	if reflect.DeepEqual(&config.AWS{}, c) {
 		log.Debug("Creating AWS Session from default credential provider chain")
 
 		// Case 1.1: It is Defined the AWS_PROFILE env var, so this read the credentials from .aws/credentials file
@@ -66,7 +66,7 @@ func NewSession(c *config.Credentials) (*session.Session, error) {
 	}
 
 	// Case 2: When config.AWS structure is not empty which is mean use local config file "aws" section
-	if !reflect.DeepEqual(&config.Credentials{}, c) {
+	if !reflect.DeepEqual(&config.AWS{}, c) {
 		log.Debug("Creating AWS Session from config.AWS")
 
 		// profile exist, necessary to use .aws/credentials and .aws/config wherever they are
@@ -82,15 +82,15 @@ func NewSession(c *config.Credentials) (*session.Session, error) {
 			awsSessionOptions.SharedConfigState = session.SharedConfigEnable
 
 			// Case 2.1.1: Different path for credentials/config
-			if len(c.CredentialsFile) > 0 {
-				log.Debugf("Using custom credential files: %s", c.CredentialsFile)
+			if len(c.SharedCredentialsFile) > 0 {
+				log.Debugf("Using custom credential files: %s", c.SharedCredentialsFile)
 				if len(c.ConfigFile) > 0 {
 					log.Debugf("Using custom config files: %s", c.ConfigFile)
-					files := append(c.CredentialsFile, c.ConfigFile...)
+					files := append(c.SharedCredentialsFile, c.ConfigFile...)
 					log.Debugf("Using custom credential/config files: %s", files)
 					awsSessionOptions.SharedConfigFiles = files
 				} else {
-					awsSessionOptions.SharedConfigFiles = c.CredentialsFile
+					awsSessionOptions.SharedConfigFiles = c.SharedCredentialsFile
 				}
 			}
 

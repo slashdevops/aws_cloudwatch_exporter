@@ -1,5 +1,5 @@
 /*
-Copyright © 2020 NAME HERE <EMAIL ADDRESS>
+Copyright © 2020 NAME HERE christian@slashdevops.com
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -61,8 +61,8 @@ func init() {
 	viper.BindPFlag("application.metricsFiles", metricsGetCmd.PersistentFlags().Lookup("metricsFiles"))
 
 	// Behavior parameters
-	metricsGetCmd.PersistentFlags().StringVar(&conf.Credentials.Profile, "profile", "", "The AWS CLI profile nae from .aws/config or .aws/credential")
-	viper.BindPFlag("credentials.profile", metricsGetCmd.PersistentFlags().Lookup("profile"))
+	metricsGetCmd.PersistentFlags().StringVar(&conf.AWS.Profile, "profile", "", "The AWS CLI profile nae from .aws/config or .aws/credential")
+	viper.BindPFlag("aws.profile", metricsGetCmd.PersistentFlags().Lookup("profile"))
 
 	metricsGetCmd.PersistentFlags().StringVar(&conf.Application.StatsPeriod, "statsPeriod", "1m", "The AWS Cloudwatch metrics query stats period")
 	viper.BindPFlag("application.statsPeriod", metricsGetCmd.PersistentFlags().Lookup("statsPeriod"))
@@ -72,7 +72,6 @@ func init() {
 func get(cmd *cobra.Command, args []string) {
 	initConf()
 
-	//startTime, endTime, period := metrics.GetTimeStamps(time.Now(), "5m")
 	startTime, endTime, period := metrics.GetTimeStamps(time.Now(), conf.Application.StatsPeriod)
 
 	log.Debugf("Start Time: %s", startTime.Format(time.RFC3339))
@@ -81,7 +80,7 @@ func get(cmd *cobra.Command, args []string) {
 
 	mdi := metrics.NewGetMetricDataInput(&conf.MetricsQueriesConf, startTime, endTime, period, "")
 
-	sess, _ := aws.NewSession(&conf.Credentials)
+	sess, _ := aws.NewSession(&conf.AWS)
 	svc := cloudwatch.New(sess)
 	mdo, err := svc.GetMetricData(mdi)
 	if err != nil {
@@ -119,7 +118,7 @@ func parseConfFiles(c *config.All) {
 
 		viper.AutomaticEnv()
 		viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-		viper.SetEnvPrefix("ace")
+		//viper.SetEnvPrefix("ace")
 
 		log.Debugf("Reading configuration from file: %s", file)
 		if err := viper.ReadInConfig(); err != nil {
