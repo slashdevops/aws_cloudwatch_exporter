@@ -65,10 +65,11 @@ func getAWSDataQuery(c *config.MetricsQueriesConf, p time.Duration) []*cloudwatc
 					MetricName: aws.String(m.MetricStat.Metric.MetricName),
 					Namespace:  aws.String(m.MetricStat.Metric.Namespace),
 				},
-				Period: aws.Int64(m.MetricStat.Period),
+				//Period: aws.Int64(m.MetricStat.Period),
+				Period: aws.Int64(period),
 				Stat:   aws.String(m.MetricStat.Stat),
 			},
-			Period:     aws.Int64(period),
+			//Period:     aws.Int64(period),
 			ReturnData: aws.Bool(true), // Return the timestamps and raw data values of this metric.
 		}
 		dataQry = append(dataQry, metricsQry)
@@ -76,7 +77,8 @@ func getAWSDataQuery(c *config.MetricsQueriesConf, p time.Duration) []*cloudwatc
 	return dataQry
 }
 
-/*func getPrometheusMetrics(mdo *cloudwatch.GetMetricDataOutput) []prometheus.Metric {
+/*
+func getPrometheusMetrics(mdo *cloudwatch.GetMetricDataOutput) []prometheus.Metric {
 
 	//if len(mdo.Messages) < 0 {
 	//}
@@ -95,17 +97,7 @@ func getAWSDataQuery(c *config.MetricsQueriesConf, p time.Duration) []*cloudwatc
 }
 */
 
-/*func GetTimeStamps(t time.Time, p string) (startTime string, endTime string, period time.Duration) {
-	period, err := time.ParseDuration(p)
-	if err != nil {
-		log.Errorf("Error parsing period: %v, %v", p, err)
-	}
-
-	endTime = t.Truncate(period).Format(time.RFC3339)
-	startTime = t.Truncate(period).Add(period * -1).Format(time.RFC3339)
-	return
-}
-*/
+// Return the necessary inputs for function NewGetMetricDataInput
 func GetTimeStamps(t time.Time, p string) (startTime time.Time, endTime time.Time, period time.Duration) {
 	period, err := time.ParseDuration(p)
 	if err != nil {

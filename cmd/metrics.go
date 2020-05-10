@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"fmt"
+	"path/filepath"
 	"time"
 
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
@@ -52,12 +53,20 @@ func init() {
 
 	metricsGetCmd.PersistentFlags().StringVar(&conf.Credentials.Profile, "profile", "", "The AWS CLI profile nae from .aws/config or .aws/credential")
 	viper.BindPFlag("credentials.profile", metricsGetCmd.PersistentFlags().Lookup("profile"))
+
+	metricsGetCmd.PersistentFlags().StringVar(&conf.Application.CredentialFile, "credentialFile", "credentials.yaml", "The metrics files with the CloudWatch Queries")
+	viper.BindPFlag("application.credentialFile", metricsGetCmd.PersistentFlags().Lookup("credentialFile"))
+
+	metricsGetCmd.PersistentFlags().StringArrayVar(&conf.Application.MetricsFiles, "metricsFile", []string{"metrics.yaml"}, "Metrics files, example: --metricsFile ~/tmp/queries/m1.yaml --metricsFile ~/tmp/queries/m2.yml")
+	viper.BindPFlag("application.metricsFiles", metricsGetCmd.PersistentFlags().Lookup("metricsFile"))
 }
 
 func get(cmd *cobra.Command, args []string) {
 	initConf()
+
 	startTime, endTime, period := metrics.GetTimeStamps(time.Now(), "5m")
 	mdi := metrics.NewGetMetricDataInput(&conf.MetricsQueriesConf, startTime, endTime, period, "")
+
 	sess, _ := aws.NewSession(&conf.Credentials)
 	svc := cloudwatch.New(sess)
 	mdo, err := svc.GetMetricData(mdi)
@@ -69,27 +78,61 @@ func get(cmd *cobra.Command, args []string) {
 }
 
 func initConf() {
-	parseConfFile(&conf, "metrics")
-	parseConfFile(&conf, "credentials")
-	log.Debugf("Configuration %s", conf.ToJson())
+	parseMetricsFiles(&conf)
+	parseConfFile(&conf)
+	//log.Debugf("Configuration %s", conf.ToJson())
+	fmt.Println(conf.ToJson())
 	//fmt.Println(conf.ToYaml())
-
 }
 
 // Unmarshall Yaml files into c config structure
-func parseConfFile(c *config.All, file string) {
-	log.Debugf("Parsing configuration file: %s", file)
-	viper.SetConfigName(file)
-	viper.AddConfigPath(".")
-	viper.SetConfigType("yaml")
-	viper.SetConfigType("yml")
-	viper.AutomaticEnv()
+func parseConfFile(c *config.All) {
+	file := c.Application.CredentialFile
+	log.Debugf("Configuration file: %s", file)
+	log.Debugf("file: %s", filepath.Base(file))
+	log.Debugf("Location: %s", filepath.Dir(file))
+	log.Debugf("Kind: %s", filepath.Ext(file)[1:])
+
+	viper.SetConfigName(filepath.Base(file))
+	viper.AddConfigPath(filepath.Dir(file))
+	viper.SetConfigType(filepath.Ext(file)[1:])
+	//viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err != nil {
 		log.Errorf("Error reading config file, %s", err)
 	}
 
 	// Read conf from metrics.yaml file
+	err := viper.Unmarshal(&c)
+	if err != nil {
+		log.Errorf("Unable to decode into struct, %v", err)
+	}
+}
+
+// Unmarshall Yaml files into c config structure
+func parseMetricsFiles(c *config.All) {
+
+	for i, file := range c.Application.MetricsFiles {
+		log.Debugf("Configuration file: %s", file)
+		log.Debugf("file: %s", filepath.Base(file))
+		log.Debugf("Location: %s", filepath.Dir(file))
+		log.Debugf("Kind: %s", filepath.Ext(file)[1:])
+
+		viper.SetConfigName(filepath.Base(file))
+		viper.AddConfigPath(filepath.Dir(file))
+		viper.SetConfigType(filepath.Ext(file)[1:])
+
+		if i < 1 {
+			log.Debugf("Reading configuration from file: %s", file)
+			if err := viper.ReadInConfig(); err != nil {
+				log.Errorf("Error reading config file, %s", err)
+			}
+		} else {
+			log.Debugf("Merging configuration of file: %s", file)
+			viper.MergeInConfig()
+		}
+	}
+	log.Debug("Filling conf structure")
 	err := viper.Unmarshal(&c)
 	if err != nil {
 		log.Errorf("Unable to decode into struct, %v", err)
