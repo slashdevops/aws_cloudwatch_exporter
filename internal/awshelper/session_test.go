@@ -1,4 +1,4 @@
-package aws
+package awshelper
 
 // https://aws.amazon.com/blogs/developer/mocking-out-then-aws-sdk-for-go-for-unit-testing/
 
@@ -172,14 +172,12 @@ func TestNewSessionWithConfig(t *testing.T) {
 			Args: &config.AWS{
 				AccessKeyID:     "AKIAIOSFODNN7EXAMPLE",
 				SecretAccessKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
-				// Region:          "us-west-2",
-				SessionToken: "ConfigToken",
+				SessionToken:    "ConfigToken",
 			},
 			Expected: map[string]string{
 				"AWS_ACCESS_KEY_ID":     "AKIAIOSFODNN7EXAMPLE",
 				"AWS_SECRET_ACCESS_KEY": "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
-				//"AWS_REGION":            "us-west-2",
-				"AWS_SESSION_TOKEN": "ConfigToken",
+				"AWS_SESSION_TOKEN":     "ConfigToken",
 			},
 		},
 		{

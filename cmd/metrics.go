@@ -23,7 +23,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
 	"github.com/slashdevops/aws_cloudwatch_exporter/config"
-	"github.com/slashdevops/aws_cloudwatch_exporter/internal/aws"
+	"github.com/slashdevops/aws_cloudwatch_exporter/internal/awshelper"
 	"github.com/slashdevops/aws_cloudwatch_exporter/internal/metrics"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -79,15 +79,13 @@ func get(cmd *cobra.Command, args []string) {
 	log.Debugf("Period in seconds: %v s", int64(period/time.Second))
 
 	mdi := metrics.NewGetMetricDataInput(&conf.MetricsQueriesConf, startTime, endTime, period, "")
-
-	sess, _ := aws.NewSession(&conf.AWS)
+	sess, _ := awshelper.NewSession(&conf.AWS)
 	svc := cloudwatch.New(sess)
 	mdo, err := svc.GetMetricData(mdi)
 	if err != nil {
 		log.Errorf("Error getting metrics %v", err)
 	}
 	fmt.Println(mdo)
-
 }
 
 func initConf() {

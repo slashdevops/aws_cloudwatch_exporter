@@ -31,8 +31,8 @@ func (c *All) ToYaml() string {
 	return string(out)
 }
 
+// This is a convenient structure to allow config files nested (server.[keys])
 // server.conf file
-// Nested:
 // server:
 //   address:
 //   port:
@@ -46,8 +46,8 @@ type Server struct {
 	MetricsPath string `mapstructure:"metricsPath" json:"MetricsPath"`
 }
 
+// This is a convenient structure to allow config files nested (application.[keys])
 // No File conf
-// Nested:
 // application:
 //   name:
 //   description:
@@ -69,6 +69,7 @@ type Application struct {
 }
 
 // https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html
+// This is a convenient structure to allow config files nested (aws.[keys])
 // credentials.yaml file
 // Nested:
 // aws:
@@ -95,6 +96,7 @@ type AWS struct {
 	ConfigFile            []string `mapstructure:"config_file" json:"ConfigFile" yaml:"ConfigFile"`
 }
 
+// This is a convenient structure to allow config files nested (MetricDataQueries.[keys])
 // File conf metrics.yaml
 // Will be filled with que Metrics Queries
 // https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_GetMetricData.html
