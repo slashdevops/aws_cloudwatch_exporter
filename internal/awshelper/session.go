@@ -4,6 +4,7 @@ import (
 	"os"
 	"reflect"
 
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/prometheus/common/log"
 	"github.com/slashdevops/aws_cloudwatch_exporter/config"
 
@@ -11,7 +12,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
-	"github.com/aws/aws-sdk-go/aws/session"
 )
 
 // https://docs.Credentials.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html
