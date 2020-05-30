@@ -9,11 +9,24 @@ import (
 	"github.com/slashdevops/aws_cloudwatch_exporter/config"
 )
 
+type Metrics interface {
+	GetMetricDataInput(time.Time, time.Time, time.Duration, string) *cloudwatch.GetMetricDataInput
+}
+
+type metrics struct {
+	MetricsQueries *config.MetricsQueriesConf
+}
+
+func New(mq *config.MetricsQueriesConf) Metrics {
+	return &metrics{
+		MetricsQueries: mq,
+	}
+}
+
 // https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/using-metric-math.html#metric-math-syntax
 // https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_GetMetricData.html
-func NewGetMetricDataInput(c *config.MetricsQueriesConf, st time.Time, et time.Time, p time.Duration, nt string) *cloudwatch.GetMetricDataInput {
-
-	dataQry := getAWSDataQuery(c, p)
+func (m *metrics) GetMetricDataInput(st time.Time, et time.Time, p time.Duration, nt string) *cloudwatch.GetMetricDataInput {
+	dataQry := m.getAWSDataQuery(p)
 	var mdi *cloudwatch.GetMetricDataInput
 
 	if len(nt) > 0 {
@@ -38,14 +51,14 @@ func NewGetMetricDataInput(c *config.MetricsQueriesConf, st time.Time, et time.T
 // This function is used to transform the structure config.MetricsQueriesConf which contains
 // the values read from config file metrics.yaml to a cloudwatch.MetricDataQuery structure which is
 // the default structure used to get cloudwatch metrics data
-func getAWSDataQuery(c *config.MetricsQueriesConf, p time.Duration) []*cloudwatch.MetricDataQuery {
+func (m *metrics) getAWSDataQuery(p time.Duration) []*cloudwatch.MetricDataQuery {
 
 	// time.Duration is in nanoseconds, and the CW API need it in seconds
 	period := int64(p / time.Second)
 
 	var dataQry []*cloudwatch.MetricDataQuery
 
-	for _, m := range c.MetricDataQueries {
+	for _, m := range m.MetricsQueries.MetricDataQueries {
 
 		// Fill the internal struct with dimension
 		var dimQry []*cloudwatch.Dimension
@@ -65,11 +78,11 @@ func getAWSDataQuery(c *config.MetricsQueriesConf, p time.Duration) []*cloudwatc
 					MetricName: aws.String(m.MetricStat.Metric.MetricName),
 					Namespace:  aws.String(m.MetricStat.Metric.Namespace),
 				},
-				//Period: aws.Int64(m.MetricStat.Period),
+				// Period: aws.Int64(m.MetricStat.Period),
 				Period: aws.Int64(period),
 				Stat:   aws.String(m.MetricStat.Stat),
 			},
-			//Period:     aws.Int64(period),
+			// Period:     aws.Int64(period),
 			ReturnData: aws.Bool(true), // Return the timestamps and raw data values of this metric.
 		}
 		dataQry = append(dataQry, metricsQry)

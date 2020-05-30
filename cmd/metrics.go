@@ -69,7 +69,7 @@ func init() {
 
 }
 
-func getCmd(cmd cobra.Command, args []string) {
+func getCmd(cmd *cobra.Command, args []string) {
 	initConf()
 
 	startTime, endTime, period := metrics.GetTimeStamps(time.Now(), conf.Application.StatsPeriod)
@@ -78,7 +78,9 @@ func getCmd(cmd cobra.Command, args []string) {
 	log.Debugf("End Time: %s", endTime.Format(time.RFC3339))
 	log.Debugf("Period in seconds: %v s", int64(period/time.Second))
 
-	mdi := metrics.NewGetMetricDataInput(&conf.MetricsQueriesConf, startTime, endTime, period, "")
+	m := metrics.New(&conf.MetricsQueriesConf)
+	mdi := m.GetMetricDataInput(startTime, endTime, period, "")
+
 	sess, _ := awshelper.NewSession(&conf.AWS)
 	svc := cloudwatch.New(sess)
 	mdo, err := svc.GetMetricData(mdi)
