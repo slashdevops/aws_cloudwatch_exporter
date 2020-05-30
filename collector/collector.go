@@ -114,11 +114,13 @@ func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 	c.mutex.Lock() // To protect metrics from concurrent collects.
 	defer c.mutex.Unlock()
 
+	c.ownMetrics.Info.Set(1)
+	ch <- c.ownMetrics.Info
+
 	c.scrape(ch)
 }
 
 func (c *Collector) scrape(ch chan<- prometheus.Metric) {
-	c.ownMetrics.Info.Set(1)
 	c.ownMetrics.Up.Set(1)
 
 	startTime, endTime, period := metrics.GetTimeStamps(time.Now(), c.conf.Application.StatsPeriod)
@@ -140,6 +142,10 @@ func (c *Collector) scrape(ch chan<- prometheus.Metric) {
 	fmt.Println(mdo)
 	c.ownMetrics.MetricsScrapesSuccess.Inc()
 
-	ch <- c.ownMetrics.Info
+	//
+	ch <- c.ownMetrics.ScrapesSuccess
+	ch <- c.ownMetrics.ScrapesErrors
+	ch <- c.ownMetrics.MetricsScrapesSuccess
+	ch <- c.ownMetrics.MetricsScrapesErrors
 	ch <- c.ownMetrics.Up
 }
