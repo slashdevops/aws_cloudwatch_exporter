@@ -44,7 +44,7 @@ var (
 		Short: "get metrics",
 		Long:  `Get metrics from CloudWatch using the metrics queries defined in the yaml files `,
 		Run: func(cmd *cobra.Command, args []string) {
-			get(cmd, args)
+			getCmd(cmd, args)
 		},
 	}
 )
@@ -69,7 +69,7 @@ func init() {
 
 }
 
-func get(cmd *cobra.Command, args []string) {
+func getCmd(cmd cobra.Command, args []string) {
 	initConf()
 
 	startTime, endTime, period := metrics.GetTimeStamps(time.Now(), conf.Application.StatsPeriod)
@@ -116,7 +116,6 @@ func parseConfFiles(c *config.All) {
 
 		viper.AutomaticEnv()
 		viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-		//viper.SetEnvPrefix("ace")
 
 		log.Debugf("Reading configuration from file: %s", file)
 		if err := viper.ReadInConfig(); err != nil {

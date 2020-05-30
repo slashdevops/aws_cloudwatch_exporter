@@ -7,6 +7,7 @@ require (
 	github.com/aws/aws-sdk-go v1.30.9
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/golang/protobuf v1.3.4 // indirect
+	github.com/imdario/mergo v0.3.9 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/mapstructure v1.3.0 // indirect
 	github.com/pelletier/go-toml v1.7.0 // indirect
