@@ -5,6 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/common/log"
 	"github.com/slashdevops/aws_cloudwatch_exporter/config"
 )
@@ -14,12 +15,12 @@ type Metrics interface {
 }
 
 type metrics struct {
-	MetricsQueries *config.MetricDataQueriesConf
+	*config.MetricDataQueriesConf
 }
 
 func New(mq *config.MetricDataQueriesConf) Metrics {
 	return &metrics{
-		MetricsQueries: mq,
+		mq,
 	}
 }
 
@@ -27,6 +28,7 @@ func New(mq *config.MetricDataQueriesConf) Metrics {
 // https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_GetMetricData.html
 func (m *metrics) GetMetricDataInput(st time.Time, et time.Time, p time.Duration, nt string) *cloudwatch.GetMetricDataInput {
 	dataQry := m.getMetricDataQuery(p)
+
 	var mdi *cloudwatch.GetMetricDataInput
 
 	if len(nt) > 0 {
@@ -58,7 +60,7 @@ func (m *metrics) getMetricDataQuery(p time.Duration) []*cloudwatch.MetricDataQu
 
 	var dataQry []*cloudwatch.MetricDataQuery
 
-	for _, m := range m.MetricsQueries.MetricDataQueries {
+	for _, m := range m.MetricDataQueries {
 
 		// Fill the internal struct with dimension
 		var dimQry []*cloudwatch.Dimension
@@ -71,7 +73,8 @@ func (m *metrics) getMetricDataQuery(p time.Duration) []*cloudwatch.MetricDataQu
 		}
 
 		metricsQry := &cloudwatch.MetricDataQuery{
-			Id: aws.String(m.ID),
+			Id:    aws.String(m.ID),
+			Label: aws.String(m.MetricStat.Metric.Namespace + " " + m.MetricStat.Metric.MetricName + " " + m.MetricStat.Stat), // will be used to set prometheus metric name
 			MetricStat: &cloudwatch.MetricStat{
 				Metric: &cloudwatch.Metric{
 					Dimensions: dimQry,
@@ -90,25 +93,35 @@ func (m *metrics) getMetricDataQuery(p time.Duration) []*cloudwatch.MetricDataQu
 	return dataQry
 }
 
-/*
-func getPrometheusMetrics(mdo *cloudwatch.GetMetricDataOutput) []prometheus.Metric {
+func (m *metrics) GetPrometheusMetrics(mdo *cloudwatch.GetMetricDataOutput) []prometheus.Metric {
 
-	//if len(mdo.Messages) < 0 {
-	//}
+	/*
+		if len(mdo.MetricDataResults) < 0 {
+
+		}
+	*/
+
 	var promMetrics []prometheus.Metric
 
-	for _, mr := range mdo.MetricDataResults {
-		mn := prometheus.BuildFQName()
+	for _, mdr := range mdo.MetricDataResults {
 
-		des := prometheus.NewDesc(mn, mr.Label)
-		m := prometheus.MustNewConstMetric(des)
-		prometheus.NewMetricWithTimestamp()
-		promMetrics = append(promMetrics, m)
+		pmn := prometheus.BuildFQName()
+
+		des := prometheus.NewDesc(
+			pmn,
+			"",
+			[]string{""},
+			nil)
+
+		for i, val := range mdr.Values {
+			pm := prometheus.MustNewConstMetric(des, prometheus.GaugeValue, *val, "")
+			pm = prometheus.NewMetricWithTimestamp(*mdr.Timestamps[i], pm)
+			promMetrics = append(promMetrics, pm)
+		}
 	}
 
 	return promMetrics
 }
-*/
 
 // Return the necessary inputs for function NewGetMetricDataInput
 func GetTimeStamps(t time.Time, p string) (startTime time.Time, endTime time.Time, period time.Duration) {
