@@ -12,7 +12,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-func prepareMetrics() *config.MetricsQueriesConf {
+func prepareMetrics() *config.MetricDataQueriesConf {
 	MetricDataQueriesYaml := `
 MetricDataQueries:
   - Id: m1
@@ -25,7 +25,7 @@ MetricDataQueries:
             Value: my-asg
       Stat: Average
 `
-	c := config.MetricsQueriesConf{}
+	c := config.MetricDataQueriesConf{}
 	err := yaml.Unmarshal([]byte(MetricDataQueriesYaml), &c)
 	if err != nil {
 		log.Fatalf("error: %v", err)
@@ -62,7 +62,7 @@ func prepareAWSMetrics() *cloudwatch.GetMetricDataInput {
 
 func Test_metrics_GetMetricDataInput(t *testing.T) {
 	type fields struct {
-		MetricsQueries *config.MetricsQueriesConf
+		MetricsQueries *config.MetricDataQueriesConf
 	}
 	type args struct {
 		st time.Time

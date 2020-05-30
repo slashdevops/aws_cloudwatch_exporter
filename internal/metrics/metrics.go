@@ -14,10 +14,10 @@ type Metrics interface {
 }
 
 type metrics struct {
-	MetricsQueries *config.MetricsQueriesConf
+	MetricsQueries *config.MetricDataQueriesConf
 }
 
-func New(mq *config.MetricsQueriesConf) Metrics {
+func New(mq *config.MetricDataQueriesConf) Metrics {
 	return &metrics{
 		MetricsQueries: mq,
 	}
@@ -26,7 +26,7 @@ func New(mq *config.MetricsQueriesConf) Metrics {
 // https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/using-metric-math.html#metric-math-syntax
 // https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_GetMetricData.html
 func (m *metrics) GetMetricDataInput(st time.Time, et time.Time, p time.Duration, nt string) *cloudwatch.GetMetricDataInput {
-	dataQry := m.getAWSDataQuery(p)
+	dataQry := m.getMetricDataQuery(p)
 	var mdi *cloudwatch.GetMetricDataInput
 
 	if len(nt) > 0 {
@@ -48,10 +48,10 @@ func (m *metrics) GetMetricDataInput(st time.Time, et time.Time, p time.Duration
 	return mdi
 }
 
-// This function is used to transform the structure config.MetricsQueriesConf which contains
+// This function is used to transform the structure config.MetricDataQueriesConf which contains
 // the values read from config file metrics.yaml to a cloudwatch.MetricDataQuery structure which is
 // the default structure used to get cloudwatch metrics data
-func (m *metrics) getAWSDataQuery(p time.Duration) []*cloudwatch.MetricDataQuery {
+func (m *metrics) getMetricDataQuery(p time.Duration) []*cloudwatch.MetricDataQuery {
 
 	// time.Duration is in nanoseconds, and the CW API need it in seconds
 	period := int64(p / time.Second)

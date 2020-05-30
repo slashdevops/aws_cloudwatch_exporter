@@ -9,10 +9,10 @@ import (
 )
 
 type All struct {
-	ServerConf         `mapstructure:",squash"`
-	ApplicationConf    `mapstructure:",squash"`
-	AWSConf            `mapstructure:",squash"`
-	MetricsQueriesConf `mapstructure:",squash"`
+	ServerConf            `mapstructure:",squash"`
+	ApplicationConf       `mapstructure:",squash"`
+	AWSConf               `mapstructure:",squash"`
+	MetricDataQueriesConf `mapstructure:",squash"`
 }
 
 func (c *All) ToJson() string {
@@ -59,6 +59,7 @@ type Application struct {
 	Name            string   `mapstructure:"name" json:"Name" yaml:"Name"`
 	Description     string   `mapstructure:"description" json:"Description" yaml:"Description"`
 	Version         string   `mapstructure:"version" json:"Version" yaml:"Version"`
+	BuildInfo       string   `mapstructure:"buildInfo" json:"BuildInfo" yaml:"BuildInfo"`
 	Namespace       string   `mapstructure:"namespace" json:"Namespace" yaml:"Namespace"`
 	ServerFile      string   `mapstructure:"serverFile" json:"ServerFile" yaml:"ServerFile"`
 	CredentialsFile string   `mapstructure:"credentialsFile" json:"SharedCredentialsFile" yaml:"SharedCredentialsFile"`
@@ -102,7 +103,7 @@ type AWS struct {
 // https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_GetMetricData.html
 // https://aws.amazon.com/premiumsupport/knowledge-center/cloudwatch-getmetricdata-api/
 // NOTE: This structure is nested because I don't use its internal structure in anywhere
-type MetricsQueriesConf struct {
+type MetricDataQueriesConf struct {
 	MetricDataQueries `mapstructure:"MetricDataQueries" json:"MetricDataQueries" yaml:"MetricDataQueries"`
 }
 

@@ -11,47 +11,56 @@ import (
 // https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_GetMetricData.html
 // https://aws.amazon.com/premiumsupport/knowledge-center/cloudwatch-getmetricdata-api/
 // https://aws.amazon.com/cloudwatch/pricing/
-var (
-	up = prometheus.NewDesc(
-		"up",
-		"aws_cloudwatch_exporter is up and running.",
-		nil, nil,
-	)
-)
-
-type AWSCollector struct {
+type Collector struct {
 	conf    *config.All
-	Up      *prometheus.Desc
+	Up      prometheus.Gauge
+	Info    prometheus.Gauge
 	Scrapes prometheus.Counter
 }
 
-func NewAWSCollector(c *config.All) *AWSCollector {
-	return &AWSCollector{
+func New(c *config.All) *Collector {
+	return &Collector{
 		conf: c,
-		Up: prometheus.NewDesc(
-			c.Application.Namespace+"_up",
-			c.Application.Name+" is up and running",
-			nil,
-			nil,
+		Up: prometheus.NewGauge(prometheus.GaugeOpts{
+			Namespace: c.Application.Namespace + "_up",
+			Subsystem: "collector",
+			Name:      c.Application.Name + "_up",
+			Help:      "Was the last scrape of " + c.Application.Name + " successful.",
+		}),
+		Info: prometheus.NewGauge(
+			prometheus.GaugeOpts{
+				Namespace:   c.Application.Namespace,
+				Subsystem:   "collector",
+				Name:        c.Application.Name + "_version_info",
+				Help:        c.Application.Name + " version info.",
+				ConstLabels: prometheus.Labels{"release_date": c.BuildInfo, "version": c.Version},
+			},
 		),
 		Scrapes: prometheus.NewCounter(prometheus.CounterOpts{
 			Namespace: c.Application.Namespace,
 			Subsystem: "collector",
-			Name:      "scrapes_total",
+			Name:      c.Application.Name + "_scrapes_total",
 			Help:      "Total number of times AWS CloudWatch API was scraped for metrics.",
 		}),
 	}
 }
 
-// Implements prometheus.Collector
-func (c *AWSCollector) Describe(ch chan<- *prometheus.Desc) {
+// Implements prometheus.Collector Interface
+func (c *Collector) Describe(ch chan<- *prometheus.Desc) {
 	c.Scrapes.Describe(ch)
-	ch <- up
+	c.Info.Describe(ch)
+	c.Up.Describe(ch)
 }
 
-// Implements prometheus.Collector
-func (c *AWSCollector) Collect(ch chan<- prometheus.Metric) {
+// Implements prometheus.Collector Interface
+func (c *Collector) Collect(ch chan<- prometheus.Metric) {
+	c.Info.Set(1)
+	ch <- c.Info
+
 	c.Scrapes.Inc()
+	ch <- c.Scrapes
+
 	// When the collector is working fine
-	ch <- prometheus.MustNewConstMetric(c.Up, prometheus.GaugeValue, 1)
+	c.Up.Set(1)
+	ch <- c.Up
 }
