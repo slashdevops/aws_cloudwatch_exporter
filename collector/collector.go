@@ -45,7 +45,7 @@ func New(c *config.All) *Collector {
 		conf: c,
 		ownMetrics: &OwnMetrics{
 			Up: prometheus.NewGauge(prometheus.GaugeOpts{
-				Namespace: c.Application.Namespace + "_up",
+				Namespace: c.Application.Namespace,
 				Subsystem: "collector",
 				Name:      c.Application.Name + "_up",
 				Help:      "Was the last scrape of " + c.Application.Name + " successful.",
