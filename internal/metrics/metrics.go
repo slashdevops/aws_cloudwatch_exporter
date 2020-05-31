@@ -10,7 +10,6 @@ import (
 	"github.com/prometheus/common/log"
 	"github.com/slashdevops/aws_cloudwatch_exporter/config"
 	"github.com/slashdevops/aws_cloudwatch_exporter/internal/camelcase"
-	"golang.org/x/tools/go/ssa/interp/testdata/src/fmt"
 )
 
 type Metrics interface {
@@ -166,15 +165,41 @@ func createPrometheusMetricsDesc(conf *config.All) map[string]*prometheus.Desc {
 }
 
 // Return the necessary inputs for function NewGetMetricDataInput
+//              points     period        now()
+//                ↓        ↓→  ←↓         ↓
+// [(startTime)............................(endTime)] → time
+//
+// https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_MetricStat.html
+// this function calculate the right startTime, endTime and period from a time.Time and string period as a parameter
+// using the p (period as string) and the t (time.Time) this function calculate the startTime and endTime
+// as a multiple of the period.
+// The startTime is the oldest time and multiple of the period
+// The endTime is the newest time (future) and multiple of the period
+// The period is a time.Duration representation of the p string passed as function arg
 func GetTimeStamps(t time.Time, p string) (startTime time.Time, endTime time.Time, period time.Duration) {
+	var startTimeMul time.Duration = 1
+	var EndTimeMul time.Duration = 1
+
 	period, err := time.ParseDuration(p)
 	if err != nil {
 		log.Errorf("Error parsing period: %v, %v", p, err)
 	}
-
+	check1m, _ := time.ParseDuration("1m")
+	check5m, _ := time.ParseDuration("5m")
+	check10m, _ := time.ParseDuration("10m")
+	check20m, _ := time.ParseDuration("20m")
+	if (period >= check1m) && (period < check5m) {
+		startTimeMul = 10
+	} else if (period >= check5m) && (period < check10m) {
+		startTimeMul = 3
+	} else if (period >= check10m) && (period < check20m) {
+		startTimeMul = 2
+	} else {
+		startTimeMul = 1
+	}
 	// endTime = t.Truncate(period)
 	// startTime = t.Truncate(period).Add(period * -1)
-	endTime = t.Truncate(period).Add(period * 1)
-	startTime = t.Truncate(period).Add(period * -2)
+	endTime = t.Truncate(period).Add(period * EndTimeMul)
+	startTime = t.Truncate(period).Add(period * -startTimeMul)
 	return
 }

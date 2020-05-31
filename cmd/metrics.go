@@ -78,7 +78,7 @@ func getCmd(cmd *cobra.Command, args []string) {
 	log.Debugf("End Time: %s", endTime.Format(time.RFC3339))
 	log.Debugf("Period in seconds: %v s", int64(period/time.Second))
 
-	m := metrics.New(&conf.MetricDataQueriesConf)
+	m := metrics.New(&conf)
 	mdi := m.GetMetricDataInput(startTime, endTime, period, "")
 
 	sess, _ := awshelper.NewSession(&conf.AWS)

@@ -129,6 +129,10 @@ func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 func (c *Collector) scrape(ch chan<- prometheus.Metric) {
 	c.ownMetrics.Up.Set(1)
 
+	// get the timestamps necessary to query metrics from AWS CloudWatch
+	//              points     period        now()
+	//                ↓        ↓→  ←↓         ↓
+	// [(startTime)............................(endTime)] → time
 	startTime, endTime, period := metrics.GetTimeStamps(time.Now(), c.conf.Application.StatsPeriod)
 	mdi := c.metrics.GetMetricDataInput(startTime, endTime, period, "")
 
