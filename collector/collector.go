@@ -1,7 +1,6 @@
 package collector
 
 import (
-	"fmt"
 	"sync"
 	"time"
 
@@ -124,7 +123,7 @@ func (c *Collector) scrape(ch chan<- prometheus.Metric) {
 	c.ownMetrics.Up.Set(1)
 
 	startTime, endTime, period := metrics.GetTimeStamps(time.Now(), c.conf.Application.StatsPeriod)
-	m := metrics.New(&c.conf.MetricDataQueriesConf)
+	m := metrics.New(c.conf)
 	mdi := m.GetMetricDataInput(startTime, endTime, period, "")
 
 	sess, _ := awshelper.NewSession(&c.conf.AWS)
@@ -139,10 +138,24 @@ func (c *Collector) scrape(ch chan<- prometheus.Metric) {
 	}
 	c.ownMetrics.ScrapesSuccess.Inc()
 
-	fmt.Println(mdo)
-	c.ownMetrics.MetricsScrapesSuccess.Inc()
+	for _, mdr := range mdo.MetricDataResults {
+		ch <- c.ownMetrics.MetricsScrapesSuccess
 
-	//
+		for i, t := range mdr.Timestamps {
+			nm := prometheus.NewMetricWithTimestamp(
+				*t,
+				prometheus.MustNewConstMetric(
+					m.GetMetricDesc(*mdr.Id),
+					prometheus.GaugeValue,
+					*mdr.Values[i],
+				),
+			)
+
+			m.SetMetric(*mdr.Id, nm)
+		}
+	}
+
+	// report own metrics
 	ch <- c.ownMetrics.ScrapesSuccess
 	ch <- c.ownMetrics.ScrapesErrors
 	ch <- c.ownMetrics.MetricsScrapesSuccess

@@ -17,8 +17,9 @@ type Metrics interface {
 	// Used to assemble the AWS GetMetricDataInput data structure
 	GetMetricDataInput(time.Time, time.Time, time.Duration, string) *cloudwatch.GetMetricDataInput
 
-	// Used to assemble the Prometheus metrics with values obtained from AWS GetMetricDataOutput
-	GetPrometheusMetrics(mdo *cloudwatch.GetMetricDataOutput) *[]prometheus.Metric
+	//
+	SetMetric(id string, metric prometheus.Metric)
+	GetMetricDesc(id string) *prometheus.Desc
 }
 
 type metrics struct {
@@ -26,13 +27,16 @@ type metrics struct {
 	MetricDataQueriesConf *config.MetricDataQueriesConf
 
 	// The prometheus metrics created from MetricDataQueriesConf but without values
-	PrometheusMetrics map[string]*prometheus.Metric
+	// The prometheus metrics created from MetricDataQueriesConf but without values
+	PrometheusMetricsDesc map[string]*prometheus.Desc
+	PrometheusMetrics     map[string]prometheus.Metric
 }
 
 func New(conf *config.All) Metrics {
 	return &metrics{
 		MetricDataQueriesConf: &conf.MetricDataQueriesConf,
-		PrometheusMetrics:     createPrometheusMetricsNoValues(conf),
+		PrometheusMetricsDesc: createPrometheusMetricsDesc(conf),
+		PrometheusMetrics:     make(map[string]prometheus.Metric),
 	}
 }
 
@@ -105,34 +109,16 @@ func (m *metrics) getMetricDataQuery(p time.Duration) []*cloudwatch.MetricDataQu
 	return dataQry
 }
 
-func (m *metrics) GetPrometheusMetrics(mdo *cloudwatch.GetMetricDataOutput) *[]prometheus.Metric {
+func (m *metrics) SetMetric(id string, metric prometheus.Metric) {
+	m.PrometheusMetrics[id] = metric
+}
 
-	/*
-		if len(mdo.MetricDataResults) < 0 {
-
-		}
-	*/
-
-	var promMetrics *[]prometheus.Metric
-
-	for _, mdr := range mdo.MetricDataResults {
-
-		pmn := prometheus.BuildFQName()
-
-		des := prometheus.NewDesc(
-			pmn,
-			"",
-			[]string{""},
-			nil)
-
-		for i, val := range mdr.Values {
-			pm := prometheus.MustNewConstMetric(des, prometheus.GaugeValue, *val, "")
-			pm = prometheus.NewMetricWithTimestamp(*mdr.Timestamps[i], pm)
-			promMetrics = append(promMetrics, pm)
-		}
+func (m *metrics) GetMetricDesc(id string) *prometheus.Desc {
+	i, ok := m.PrometheusMetricsDesc[id]
+	if !ok {
+		log.Errorf("Metric id: %s does not exist", id)
 	}
-
-	return promMetrics
+	return i
 }
 
 // https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_concepts.html
@@ -146,9 +132,9 @@ func (m *metrics) GetPrometheusMetrics(mdo *cloudwatch.GetMetricDataOutput) *[]p
 //          - Name: AutoScalingGroupName            aws_cloudwatch_exporter_aws_ec2_cpu_utilization_average{job="aws_cloudwatch_exporter", instance="", auto_scaling_group_name="eks-prod-01-apps-01-asg"} value_from_scrap
 //            Value: eks-prod-01-apps-01-asg
 //      Stat: Average
-func createPrometheusMetricsNoValues(conf *config.All) map[string]*prometheus.Metric {
+func createPrometheusMetricsDesc(conf *config.All) map[string]*prometheus.Desc {
 	mdqc := conf.MetricDataQueriesConf
-	promMetrics := make(map[string]*prometheus.Metric)
+	promMetricsDesc := make(map[string]*prometheus.Desc)
 
 	var helpTmpl string = "%s represent the AWS CloudWatch Metric: %s --> %s, Dimensions: [%s], Statistic: %s"
 
@@ -168,12 +154,10 @@ func createPrometheusMetricsNoValues(conf *config.All) map[string]*prometheus.Me
 		mn := camelcase.ToSnake(mdq.MetricStat.Metric.Namespace) + "_" + camelcase.ToSnake(mdq.MetricStat.Metric.MetricName) + "_" + camelcase.ToSnake(mdq.MetricStat.Stat)
 		hs := fmt.Sprint(helpTmpl, mn, mdq.MetricStat.Metric.Namespace, mdq.MetricStat.Metric.MetricName, strings.Join(dimKeys, ","), mdq.MetricStat.Stat)
 
-		pmd := prometheus.NewDesc(mn, hs, nil, mcl)
-		pm := prometheus.MustNewConstMetric(pmd, prometheus.GaugeValue, 0)
-		promMetrics[mdq.ID] = &pm
+		promMetricsDesc[mdq.ID] = prometheus.NewDesc(mn, hs, nil, mcl)
 	}
 
-	return promMetrics
+	return promMetricsDesc
 }
 
 // Return the necessary inputs for function NewGetMetricDataInput
