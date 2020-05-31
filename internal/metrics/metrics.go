@@ -1,6 +1,7 @@
 package metrics
 
 import (
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -8,23 +9,34 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/common/log"
 	"github.com/slashdevops/aws_cloudwatch_exporter/config"
+	"github.com/slashdevops/aws_cloudwatch_exporter/internal/camelcase"
+	"golang.org/x/tools/go/ssa/interp/testdata/src/fmt"
 )
 
 type Metrics interface {
+	// Used to assemble the AWS GetMetricDataInput data structure
 	GetMetricDataInput(time.Time, time.Time, time.Duration, string) *cloudwatch.GetMetricDataInput
+
+	// Used to assemble the Prometheus metrics with values obtained from AWS GetMetricDataOutput
+	GetPrometheusMetrics(mdo *cloudwatch.GetMetricDataOutput) *[]prometheus.Metric
 }
 
 type metrics struct {
-	*config.MetricDataQueriesConf
+	// Metrics queries structure assemble from metrics queries yaml files
+	MetricDataQueriesConf *config.MetricDataQueriesConf
+
+	// The prometheus metrics created from MetricDataQueriesConf but without values
+	PrometheusMetrics map[string]*prometheus.Metric
 }
 
-func New(mq *config.MetricDataQueriesConf) Metrics {
+func New(conf *config.All) Metrics {
 	return &metrics{
-		mq,
+		MetricDataQueriesConf: &conf.MetricDataQueriesConf,
+		PrometheusMetrics:     createPrometheusMetricsNoValues(conf),
 	}
 }
 
-// https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/using-metric-math.html#metric-math-syntax
+// https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_concepts.html
 // https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_GetMetricData.html
 func (m *metrics) GetMetricDataInput(st time.Time, et time.Time, p time.Duration, nt string) *cloudwatch.GetMetricDataInput {
 	dataQry := m.getMetricDataQuery(p)
@@ -60,7 +72,7 @@ func (m *metrics) getMetricDataQuery(p time.Duration) []*cloudwatch.MetricDataQu
 
 	var dataQry []*cloudwatch.MetricDataQuery
 
-	for _, m := range m.MetricDataQueries {
+	for _, m := range m.MetricDataQueriesConf.MetricDataQueries {
 
 		// Fill the internal struct with dimension
 		var dimQry []*cloudwatch.Dimension
@@ -93,7 +105,7 @@ func (m *metrics) getMetricDataQuery(p time.Duration) []*cloudwatch.MetricDataQu
 	return dataQry
 }
 
-func (m *metrics) GetPrometheusMetrics(mdo *cloudwatch.GetMetricDataOutput) []prometheus.Metric {
+func (m *metrics) GetPrometheusMetrics(mdo *cloudwatch.GetMetricDataOutput) *[]prometheus.Metric {
 
 	/*
 		if len(mdo.MetricDataResults) < 0 {
@@ -101,7 +113,7 @@ func (m *metrics) GetPrometheusMetrics(mdo *cloudwatch.GetMetricDataOutput) []pr
 		}
 	*/
 
-	var promMetrics []prometheus.Metric
+	var promMetrics *[]prometheus.Metric
 
 	for _, mdr := range mdo.MetricDataResults {
 
@@ -118,6 +130,47 @@ func (m *metrics) GetPrometheusMetrics(mdo *cloudwatch.GetMetricDataOutput) []pr
 			pm = prometheus.NewMetricWithTimestamp(*mdr.Timestamps[i], pm)
 			promMetrics = append(promMetrics, pm)
 		}
+	}
+
+	return promMetrics
+}
+
+// https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_concepts.html
+// Create the prometheus metrics scaffolding without any value
+//   - Id: m1
+//    MetricStat:
+//      Metric:
+//        Namespace: AWS/EC2
+//        MetricName: CPUUtilization            --> AWS/EC2_CPUUtilization_Average{job="aws_cloudwatch_exporter", instance="", AutoScalingGroupName="eks-prod-01-apps-01-asg"} value_from_scrap
+//        Dimensions:                               aws_ec2_cpu_utilization_average{job="aws_cloudwatch_exporter", instance="", auto_scaling_group_name="eks-prod-01-apps-01-asg"} value_from_scrap
+//          - Name: AutoScalingGroupName            aws_cloudwatch_exporter_aws_ec2_cpu_utilization_average{job="aws_cloudwatch_exporter", instance="", auto_scaling_group_name="eks-prod-01-apps-01-asg"} value_from_scrap
+//            Value: eks-prod-01-apps-01-asg
+//      Stat: Average
+func createPrometheusMetricsNoValues(conf *config.All) map[string]*prometheus.Metric {
+	mdqc := conf.MetricDataQueriesConf
+	promMetrics := make(map[string]*prometheus.Metric)
+
+	var helpTmpl string = "%s represent the AWS CloudWatch Metric: %s --> %s, Dimensions: [%s], Statistic: %s"
+
+	// for every metric query defined into the yaml files
+	for _, mdq := range mdqc.MetricDataQueries {
+
+		// Add dimensions as prometheus metric labels
+		mcl := make(prometheus.Labels)
+		for _, v := range mdq.MetricStat.Metric.Dimensions {
+			mcl[v.Name] = v.Value
+		}
+		var dimKeys []string
+		for k := range mcl {
+			dimKeys = append(dimKeys, k)
+		}
+
+		mn := camelcase.ToSnake(mdq.MetricStat.Metric.Namespace) + "_" + camelcase.ToSnake(mdq.MetricStat.Metric.MetricName) + "_" + camelcase.ToSnake(mdq.MetricStat.Stat)
+		hs := fmt.Sprint(helpTmpl, mn, mdq.MetricStat.Metric.Namespace, mdq.MetricStat.Metric.MetricName, strings.Join(dimKeys, ","), mdq.MetricStat.Stat)
+
+		pmd := prometheus.NewDesc(mn, hs, nil, mcl)
+		pm := prometheus.MustNewConstMetric(pmd, prometheus.GaugeValue, 0)
+		promMetrics[mdq.ID] = &pm
 	}
 
 	return promMetrics

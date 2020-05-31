@@ -104,10 +104,10 @@ type AWS struct {
 // https://aws.amazon.com/premiumsupport/knowledge-center/cloudwatch-getmetricdata-api/
 // NOTE: This structure is nested because I don't use its internal structure in anywhere
 type MetricDataQueriesConf struct {
-	MetricDataQueries `mapstructure:"MetricDataQueries" json:"MetricDataQueries" yaml:"MetricDataQueries"`
+	MetricDataQueries []MetricDataQuery `mapstructure:"MetricDataQueries" json:"MetricDataQueries" yaml:"MetricDataQueries"`
 }
 
-type MetricDataQueries []struct {
+type MetricDataQuery struct {
 	ID         string `mapstructure:"Id" json:"Id" yaml:"Id"`
 	MetricStat struct {
 		Metric struct {
