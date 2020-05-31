@@ -118,7 +118,6 @@ type MetricDataQuery struct {
 				Value string `mapstructure:"Value" json:"Value" yaml:"Value"`
 			} `mapstructure:"Dimensions" json:"Dimensions" yaml:"Dimensions"`
 		} `mapstructure:"Metric" json:"Metric" yaml:"Metric"`
-		Period int64  `mapstructure:"Period" json:"Period" yaml:"Period"`
-		Stat   string `mapstructure:"Stat" json:"Stat" yaml:"Stat"`
+		Stat string `mapstructure:"Stat" json:"Stat" yaml:"Stat"`
 	} `mapstructure:"MetricStat" json:"MetricStat" yaml:"MetricStat"`
 }

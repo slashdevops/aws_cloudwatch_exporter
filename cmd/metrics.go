@@ -48,9 +48,18 @@ var (
 	metricsGetCmd = &cobra.Command{
 		Use:   "get [OPTIONS] [ARGS]",
 		Short: "get metrics",
-		Long:  `Get metrics from CloudWatch using the metrics queries defined in the yaml files `,
+		Long:  `Get metrics from CloudWatch using the metrics queries defined in the yaml files`,
 		Run: func(cmd *cobra.Command, args []string) {
 			getCmd(cmd, args)
+		},
+	}
+
+	metricsDisplayPromDescCmd = &cobra.Command{
+		Use:   "display [OPTIONS] [ARGS]",
+		Short: "display promDesc",
+		Long:  `Display prometheus metrics definitions`,
+		Run: func(cmd *cobra.Command, args []string) {
+			getPromDescCmd(cmd, args)
 		},
 	}
 )
@@ -58,6 +67,7 @@ var (
 func init() {
 	rootCmd.AddCommand(metricsCmd)
 	metricsCmd.AddCommand(metricsGetCmd)
+	metricsCmd.AddCommand(metricsDisplayPromDescCmd)
 
 	// Files
 	metricsGetCmd.PersistentFlags().StringVar(&conf.Application.CredentialsFile, "credentialsFile", "credentials.yaml", "The metrics files with the CloudWatch Queries")
@@ -89,7 +99,6 @@ func getCmd(cmd *cobra.Command, args []string) {
 	initConf()
 
 	startTime, endTime, period := metrics.GetTimeStamps(time.Now(), conf.Application.StatsPeriod)
-
 	log.Debugf("Start Time: %s", startTime.Format(time.RFC3339))
 	log.Debugf("End Time: %s", endTime.Format(time.RFC3339))
 	log.Debugf("Period in seconds: %v s", int64(period/time.Second))
@@ -127,6 +136,16 @@ func getCmd(cmd *cobra.Command, args []string) {
 		}
 	} else {
 		fmt.Println(string(outMetrics))
+	}
+}
+
+func getPromDescCmd(cmd *cobra.Command, args []string) {
+	initConf()
+
+	m := metrics.New(&conf)
+
+	for _, md := range m.GetMetricsDesc() {
+		fmt.Println(md.String())
 	}
 }
 
