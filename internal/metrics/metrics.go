@@ -20,6 +20,7 @@ type Metrics interface {
 	//
 	SetMetric(id string, metric prometheus.Metric)
 	GetMetricDesc(id string) *prometheus.Desc
+	GetMetricsDesc() map[string]*prometheus.Desc
 }
 
 type metrics struct {
@@ -90,7 +91,7 @@ func (m *metrics) getMetricDataQuery(p time.Duration) []*cloudwatch.MetricDataQu
 
 		metricsQry := &cloudwatch.MetricDataQuery{
 			Id:    aws.String(m.ID),
-			Label: aws.String(m.MetricStat.Metric.Namespace + " " + m.MetricStat.Metric.MetricName + " " + m.MetricStat.Stat), // will be used to set prometheus metric name
+			Label: aws.String(camelcase.ToSnake(m.MetricStat.Metric.Namespace) + "_" + camelcase.ToSnake(m.MetricStat.Metric.MetricName) + "_" + camelcase.ToSnake(m.MetricStat.Stat)),
 			MetricStat: &cloudwatch.MetricStat{
 				Metric: &cloudwatch.Metric{
 					Dimensions: dimQry,
@@ -119,6 +120,10 @@ func (m *metrics) GetMetricDesc(id string) *prometheus.Desc {
 		log.Errorf("Metric id: %s does not exist", id)
 	}
 	return i
+}
+
+func (m *metrics) GetMetricsDesc() map[string]*prometheus.Desc {
+	return m.PrometheusMetricsDesc
 }
 
 // https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_concepts.html

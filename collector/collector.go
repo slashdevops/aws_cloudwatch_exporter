@@ -35,13 +35,15 @@ type OwnMetrics struct {
 
 type Collector struct {
 	conf       *config.All
+	metrics    metrics.Metrics
 	mutex      sync.RWMutex
 	ownMetrics *OwnMetrics
 }
 
-func New(c *config.All) *Collector {
+func New(c *config.All, m metrics.Metrics) *Collector {
 	return &Collector{
-		conf: c,
+		conf:    c,
+		metrics: m,
 		ownMetrics: &OwnMetrics{
 			Up: prometheus.NewGauge(prometheus.GaugeOpts{
 				Namespace: c.Application.Namespace,
@@ -106,6 +108,11 @@ func (c *Collector) Describe(ch chan<- *prometheus.Desc) {
 	c.ownMetrics.ScrapesErrors.Describe(ch)
 	c.ownMetrics.MetricsScrapesSuccess.Describe(ch)
 	c.ownMetrics.MetricsScrapesErrors.Describe(ch)
+
+	// Describe all metrics created from yaml files
+	for _, md := range c.metrics.GetMetricsDesc() {
+		ch <- md
+	}
 }
 
 // Implements prometheus.Collector Interface
@@ -123,8 +130,7 @@ func (c *Collector) scrape(ch chan<- prometheus.Metric) {
 	c.ownMetrics.Up.Set(1)
 
 	startTime, endTime, period := metrics.GetTimeStamps(time.Now(), c.conf.Application.StatsPeriod)
-	m := metrics.New(c.conf)
-	mdi := m.GetMetricDataInput(startTime, endTime, period, "")
+	mdi := c.metrics.GetMetricDataInput(startTime, endTime, period, "")
 
 	sess, _ := awshelper.NewSession(&c.conf.AWS)
 	svc := cloudwatch.New(sess)
@@ -145,13 +151,13 @@ func (c *Collector) scrape(ch chan<- prometheus.Metric) {
 			nm := prometheus.NewMetricWithTimestamp(
 				*t,
 				prometheus.MustNewConstMetric(
-					m.GetMetricDesc(*mdr.Id),
+					c.metrics.GetMetricDesc(*mdr.Id),
 					prometheus.GaugeValue,
 					*mdr.Values[i],
 				),
 			)
 
-			m.SetMetric(*mdr.Id, nm)
+			c.metrics.SetMetric(*mdr.Id, nm)
 		}
 	}
 
