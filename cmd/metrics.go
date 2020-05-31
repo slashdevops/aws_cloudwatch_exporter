@@ -16,7 +16,9 @@ limitations under the License.
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"path/filepath"
 	"strings"
 	"time"
@@ -27,13 +29,17 @@ import (
 	"github.com/slashdevops/aws_cloudwatch_exporter/internal/metrics"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"gopkg.in/yaml.v3"
 )
 
 // metricsCmd represents the metrics command
 var (
 	conf           config.All
 	serverConfFile string = "server.yaml"
-	metricsCmd            = &cobra.Command{
+	outFormat      string = "yaml"
+	outFile        string = "yaml"
+
+	metricsCmd = &cobra.Command{
 		Use:   "metrics [COMMANDS]",
 		Short: "useful to get metrics",
 		Long:  `metrics commands`,
@@ -55,17 +61,27 @@ func init() {
 
 	// Files
 	metricsGetCmd.PersistentFlags().StringVar(&conf.Application.CredentialsFile, "credentialsFile", "credentials.yaml", "The metrics files with the CloudWatch Queries")
-	viper.BindPFlag("application.credentialsFile", metricsGetCmd.PersistentFlags().Lookup("credentialsFile"))
+	if err := viper.BindPFlag("application.credentialsFile", metricsGetCmd.PersistentFlags().Lookup("credentialsFile")); err != nil {
+		log.Error(err)
+	}
 
 	metricsGetCmd.PersistentFlags().StringSliceVar(&conf.Application.MetricsFiles, "metricsFiles", nil, "Metrics files, example: --metricsFile ~/tmp/queries/m1.yaml --metricsFile ~/tmp/queries/m2.yml")
-	viper.BindPFlag("application.metricsFiles", metricsGetCmd.PersistentFlags().Lookup("metricsFiles"))
+	if err := viper.BindPFlag("application.metricsFiles", metricsGetCmd.PersistentFlags().Lookup("metricsFiles")); err != nil {
+		log.Error(err)
+	}
 
 	// Behavior parameters
 	metricsGetCmd.PersistentFlags().StringVar(&conf.AWS.Profile, "profile", "", "The AWS CLI profile nae from .aws/config or .aws/credential")
-	viper.BindPFlag("aws.profile", metricsGetCmd.PersistentFlags().Lookup("profile"))
-
+	if err := viper.BindPFlag("aws.profile", metricsGetCmd.PersistentFlags().Lookup("profile")); err != nil {
+		log.Error(err)
+	}
 	metricsGetCmd.PersistentFlags().StringVar(&conf.Application.StatsPeriod, "statsPeriod", "1m", "The AWS Cloudwatch metrics query stats period")
-	viper.BindPFlag("application.statsPeriod", metricsGetCmd.PersistentFlags().Lookup("statsPeriod"))
+	if err := viper.BindPFlag("application.statsPeriod", metricsGetCmd.PersistentFlags().Lookup("statsPeriod")); err != nil {
+		log.Error(err)
+	}
+	// Output parameters
+	metricsGetCmd.PersistentFlags().StringVar(&outFormat, "outFormat", "yaml", "Output format for results. (supported [yaml|json] only)")
+	metricsGetCmd.PersistentFlags().StringVar(&outFile, "outFile", "", "Filename Save the result")
 
 }
 
@@ -87,7 +103,31 @@ func getCmd(cmd *cobra.Command, args []string) {
 	if err != nil {
 		log.Errorf("Error getting metrics %v", err)
 	}
-	fmt.Println(mdo)
+
+	var outMetrics []byte
+
+	if outFormat == "yaml" {
+		out, err := yaml.Marshal(mdo)
+		if err != nil {
+			log.Panicln(err)
+		}
+		outMetrics = out
+	} else if outFormat == "json" {
+		out, err := json.MarshalIndent(mdo, "", " ")
+		if err != nil {
+			log.Panicln(err)
+		}
+		outMetrics = out
+	} else {
+		log.Errorf("Invalid flag value outFormat: %s", outFormat)
+	}
+	if outFile != "" {
+		if err := ioutil.WriteFile(outFile, []byte(outMetrics), 0644); err != nil {
+			log.Panic(err)
+		}
+	} else {
+		fmt.Println(string(outMetrics))
+	}
 }
 
 func initConf() {
@@ -152,7 +192,9 @@ func parseMetricsFiles(c *config.All) {
 			}
 		} else {
 			log.Debugf("Merging configuration of file: %s", file)
-			viper.MergeInConfig()
+			if err := viper.MergeInConfig(); err != nil {
+				log.Errorf("Error merging config file, %s", err)
+			}
 		}
 	}
 

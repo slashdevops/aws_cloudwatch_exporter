@@ -1,0 +1,39 @@
+{
+  MetricDataResults: [
+    {
+      Id: "m1",
+      Label: "aws_ec_2_cpu_utilization_average",
+      StatusCode: "Complete",
+      Timestamps: [2020-05-31 18:35:00 +0000 UTC,2020-05-31 18:30:00 +0000 UTC,2020-05-31 18:25:00 +0000 UTC],
+      Values: [8.642857142857142,8.846101926457369,8.833265027326295]
+    },
+    {
+      Id: "m2",
+      Label: "aws_dynamo_db_provisioned_write_capacity_units_maximum",
+      StatusCode: "Complete",
+      Timestamps: [2020-05-31 18:35:00 +0000 UTC,2020-05-31 18:30:00 +0000 UTC,2020-05-31 18:25:00 +0000 UTC],
+      Values: [5,5,5]
+    },
+    {
+      Id: "m3",
+      Label: "aws_nat_gateway_packets_out_to_source_sample_count",
+      StatusCode: "Complete",
+      Timestamps: [2020-05-31 18:35:00 +0000 UTC,2020-05-31 18:30:00 +0000 UTC,2020-05-31 18:25:00 +0000 UTC],
+      Values: [7,10,10]
+    },
+    {
+      Id: "m4",
+      Label: "aws_wafv_2_allowed_requests_sum",
+      StatusCode: "Complete",
+      Timestamps: [2020-05-31 18:40:00 +0000 UTC,2020-05-31 18:35:00 +0000 UTC],
+      Values: [1,23]
+    },
+    {
+      Id: "m5",
+      Label: "kinesis_producer_library_user_records_put_minimum",
+      StatusCode: "Complete",
+      Timestamps: [2020-05-31 18:40:00 +0000 UTC,2020-05-31 18:35:00 +0000 UTC],
+      Values: [1,1]
+    }
+  ]
+}

@@ -13,27 +13,40 @@ MetricDataQueries:
   - Id: m2
     MetricStat:
       Metric:
-        Namespace: AWS/EC2
-        MetricName: CPUUtilization
+        Namespace: AWS/DynamoDB
+        MetricName: ProvisionedWriteCapacityUnits
         Dimensions:
-          - Name: AutoScalingGroupName
-            Value: eks-prod-01-apps-01-aeg
+          - Name: TableName
+            Value: Player
       Stat: Maximum
   - Id: m3
     MetricStat:
       Metric:
-        Namespace: AWS/EC2
-        MetricName: CPUUtilization
+        Namespace: AWS/NATGateway
+        MetricName: PacketsOutToSource
         Dimensions:
-          - Name: AutoScalingGroupName
-            Value: eks-prod-01-apps-01-aeg
-      Stat: Minimum
+          - Name: NatGatewayId
+            Value: nat-024c041c6e5cf5d20
+      Stat: SampleCount
   - Id: m4
     MetricStat:
       Metric:
-        Namespace: AWS/EC2
-        MetricName: CPUUtilization
+        Namespace: AWS/WAFV2
+        MetricName: AllowedRequests
         Dimensions:
-          - Name: AutoScalingGroupName
-            Value: eks-prod-01-apps-01-aeg
-      Stat: SampleCount
+          - Name: Region
+            Value: eu-west-1
+          - Name: Rule
+            Value: CloudFrontCustomHeader
+          - Name: RuleGroup
+            Value: CheckCloudFrontCustomHeader
+      Stat: Sum
+  - Id: m5
+    MetricStat:
+      Metric:
+        Namespace: KinesisProducerLibrary
+        MetricName: UserRecordsPut
+        Dimensions:
+          - Name: StreamName
+            Value: com.aleaplay.logs.session-transaction-trace.v1
+      Stat: Minimum
