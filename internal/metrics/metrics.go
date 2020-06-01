@@ -119,7 +119,7 @@ func (m *metrics) SetMetric(id string, metric prometheus.Metric) {
 func (m *metrics) GetMetricDesc(id string) *prometheus.Desc {
 	i, ok := m.PrometheusMetricsDesc[id]
 	if !ok {
-		log.Errorf("Metric id: %s does not exist", id)
+		log.Errorf("Metric Description id: %s does not exist", id)
 	}
 	return i
 }
@@ -159,7 +159,7 @@ func createPrometheusMetricsDesc(conf *config.All) map[string]*prometheus.Desc {
 		}
 
 		mn := camelcase.ToSnake(mdq.MetricStat.Metric.Namespace) + "_" + camelcase.ToSnake(mdq.MetricStat.Metric.MetricName) + "_" + camelcase.ToSnake(mdq.MetricStat.Stat)
-		hs := fmt.Sprint(helpTmpl, mn, mdq.MetricStat.Metric.Namespace, mdq.MetricStat.Metric.MetricName, strings.Join(dimKeys, ","), mdq.MetricStat.Stat)
+		hs := fmt.Sprintf(helpTmpl, mn, mdq.MetricStat.Metric.Namespace, mdq.MetricStat.Metric.MetricName, strings.Join(dimKeys, ","), mdq.MetricStat.Stat)
 
 		promMetricsDesc[mdq.ID] = prometheus.NewDesc(mn, hs, nil, mcl)
 	}
