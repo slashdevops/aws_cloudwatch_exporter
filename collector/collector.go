@@ -49,14 +49,14 @@ func New(c *config.All, m metrics.Metrics, s *session.Session) *Collector {
 			Up: prometheus.NewGauge(prometheus.GaugeOpts{
 				Namespace: c.Application.Namespace,
 				Subsystem: "collector",
-				Name:      c.Application.Name + "_up",
+				Name:      "up",
 				Help:      "Was the last scrape of " + c.Application.Name + " successful.",
 			}),
 			Info: prometheus.NewGauge(
 				prometheus.GaugeOpts{
 					Namespace:   c.Application.Namespace,
 					Subsystem:   "collector",
-					Name:        c.Application.Name + "_version_info",
+					Name:        "version_info",
 					Help:        c.Application.Name + " version info.",
 					ConstLabels: prometheus.Labels{"release_date": c.BuildInfo, "version": c.Version},
 				},
@@ -65,7 +65,7 @@ func New(c *config.All, m metrics.Metrics, s *session.Session) *Collector {
 				prometheus.CounterOpts{
 					Namespace:   c.Application.Namespace,
 					Subsystem:   "collector",
-					Name:        c.Application.Name + "_scrapes_success_total",
+					Name:        "scrapes_success_total",
 					Help:        "Total number of times of AWS CloudWatch API was scraped for metrics with success result.",
 					ConstLabels: nil,
 				},
@@ -74,7 +74,7 @@ func New(c *config.All, m metrics.Metrics, s *session.Session) *Collector {
 				prometheus.CounterOpts{
 					Namespace:   c.Application.Namespace,
 					Subsystem:   "collector",
-					Name:        c.Application.Name + "_scrapes_errors_total",
+					Name:        "scrapes_errors_total",
 					Help:        "Total number of times of AWS CloudWatch API was scraped for metrics with error result.",
 					ConstLabels: nil,
 				},
@@ -141,8 +141,8 @@ func (c *Collector) Describe(ch chan<- *prometheus.Desc) {
 	c.ownMetrics.MetricsScrapesMessages.Describe(ch)
 
 	// Describe all metrics created from yaml files
-	for _, md := range c.metrics.GetMetricsDesc() {
-		ch <- md
+	for _, md := range c.metrics.GetMetrics() {
+		ch <- md.Desc()
 	}
 }
 

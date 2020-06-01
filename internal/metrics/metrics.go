@@ -22,6 +22,7 @@ type Metrics interface {
 	SetMetric(id string, metric prometheus.Metric)
 	GetMetricDesc(id string) *prometheus.Desc
 	GetMetricsDesc() map[string]*prometheus.Desc
+	GetMetrics() map[string]prometheus.Metric
 }
 
 type metrics struct {
@@ -127,6 +128,10 @@ func (m *metrics) GetMetricDesc(id string) *prometheus.Desc {
 
 func (m *metrics) GetMetricsDesc() map[string]*prometheus.Desc {
 	return m.PrometheusMetricsDesc
+}
+
+func (m *metrics) GetMetrics() map[string]prometheus.Metric {
+	return m.PrometheusMetrics
 }
 
 // https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_concepts.html
