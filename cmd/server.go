@@ -17,11 +17,8 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
-	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 // serverCmd represents the server command
@@ -42,30 +39,4 @@ func init() {
 
 	serverCmd.PersistentFlags().StringVar(&confFile, "config", "", "config file (default is $HOME/server.yaml)")
 	serverCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-
-}
-
-func initConfig() {
-	if confFile != "" {
-		// Use config file from the flag.
-		viper.SetConfigFile(confFile)
-	} else {
-		// Find home directory.
-		home, err := homedir.Dir()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-
-		// Search config in home directory with name "server" (without extension).
-		viper.AddConfigPath(home)
-		viper.SetConfigName("server")
-	}
-
-	viper.AutomaticEnv() // read in environment variables that match
-
-	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
-	}
 }

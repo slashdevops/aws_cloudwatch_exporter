@@ -5,11 +5,11 @@ import (
 	"sync"
 	"time"
 
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/common/log"
 	"github.com/slashdevops/aws_cloudwatch_exporter/config"
-	"github.com/slashdevops/aws_cloudwatch_exporter/internal/awshelper"
 	"github.com/slashdevops/aws_cloudwatch_exporter/internal/metrics"
 )
 
@@ -34,14 +34,16 @@ type OwnMetrics struct {
 
 type Collector struct {
 	conf       *config.All
+	sess       *session.Session
 	metrics    metrics.Metrics
 	mutex      sync.RWMutex
 	ownMetrics *OwnMetrics
 }
 
-func New(c *config.All, m metrics.Metrics) *Collector {
+func New(c *config.All, m metrics.Metrics, s *session.Session) *Collector {
 	return &Collector{
 		conf:    c,
+		sess:    s,
 		metrics: m,
 		ownMetrics: &OwnMetrics{
 			Up: prometheus.NewGauge(prometheus.GaugeOpts{
@@ -81,7 +83,7 @@ func New(c *config.All, m metrics.Metrics) *Collector {
 				prometheus.CounterOpts{
 					Namespace:   c.Application.Namespace,
 					Subsystem:   "collector",
-					Name:        c.Application.Name + "_scrapes_messages_total",
+					Name:        "scrapes_messages_total",
 					Help:        "Total number of times of AWS CloudWatch API was scraped for metrics with some message result. (see the logs)",
 					ConstLabels: nil,
 				},
@@ -90,7 +92,7 @@ func New(c *config.All, m metrics.Metrics) *Collector {
 				prometheus.GaugeOpts{
 					Namespace:   c.Application.Namespace,
 					Subsystem:   "collector",
-					Name:        c.Application.Name + "_metrics_scrapes_success_total",
+					Name:        "metrics_scrapes_success_total",
 					Help:        "Total number of metrics of AWS CloudWatch API was scraped with success result.",
 					ConstLabels: nil,
 				},
@@ -99,7 +101,7 @@ func New(c *config.All, m metrics.Metrics) *Collector {
 				prometheus.GaugeOpts{
 					Namespace:   c.Application.Namespace,
 					Subsystem:   "collector",
-					Name:        c.Application.Name + "_metrics_scrapes_errors_total",
+					Name:        "metrics_scrapes_errors_total",
 					Help:        "Total number of metrics of AWS CloudWatch API was scraped with errors result.",
 					ConstLabels: nil,
 				},
@@ -108,7 +110,7 @@ func New(c *config.All, m metrics.Metrics) *Collector {
 				prometheus.GaugeOpts{
 					Namespace:   c.Application.Namespace,
 					Subsystem:   "collector",
-					Name:        c.Application.Name + "_metrics_scrapes_empty_total",
+					Name:        "metrics_scrapes_empty_total",
 					Help:        "Total number of metrics of AWS CloudWatch API was scraped with empty result.",
 					ConstLabels: nil,
 				},
@@ -117,7 +119,7 @@ func New(c *config.All, m metrics.Metrics) *Collector {
 				prometheus.GaugeOpts{
 					Namespace:   c.Application.Namespace,
 					Subsystem:   "collector",
-					Name:        c.Application.Name + "_metrics_scrapes_messages_total",
+					Name:        "metrics_scrapes_messages_total",
 					Help:        "Total number of metrics of AWS CloudWatch API was scraped with some messages result. (see the logs)",
 					ConstLabels: nil,
 				},
@@ -156,6 +158,8 @@ func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 	c.scrape(ch)
 }
 
+// this do the job of scrape the metrics, parse the response from AWS CloudWatch and
+// create the prometheus metrics
 func (c *Collector) scrape(ch chan<- prometheus.Metric) {
 	c.ownMetrics.Up.Set(1)
 
@@ -170,9 +174,7 @@ func (c *Collector) scrape(ch chan<- prometheus.Metric) {
 
 	mdi := c.metrics.GetMetricDataInput(startTime, endTime, period, "")
 
-	// TODO: move it out of here
-	sess, _ := awshelper.NewSession(&c.conf.AWS)
-	svc := cloudwatch.New(sess)
+	svc := cloudwatch.New(c.sess)
 
 	// Scrape CloudWatch Metrics
 	mdo, err := svc.GetMetricData(mdi)

@@ -19,12 +19,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"path/filepath"
-	"strings"
+	"net/http"
 	"time"
 
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
-	"github.com/slashdevops/aws_cloudwatch_exporter/config"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/slashdevops/aws_cloudwatch_exporter/collector"
 	"github.com/slashdevops/aws_cloudwatch_exporter/internal/awshelper"
 	"github.com/slashdevops/aws_cloudwatch_exporter/internal/metrics"
 	"github.com/spf13/cobra"
@@ -34,10 +35,8 @@ import (
 
 // metricsCmd represents the metrics command
 var (
-	conf           config.All
-	serverConfFile string = "server.yaml"
-	outFormat      string = "yaml"
-	outFile        string = "yaml"
+	outFormat string = "yaml"
+	outFile   string = "yaml"
 
 	metricsCmd = &cobra.Command{
 		Use:   "metrics [COMMANDS]",
@@ -59,7 +58,16 @@ var (
 		Short: "display promDesc",
 		Long:  `Display prometheus metrics definitions`,
 		Run: func(cmd *cobra.Command, args []string) {
-			getPromDescCmd(cmd, args)
+			displayPromDescCmd(cmd, args)
+		},
+	}
+
+	metricsCollectCmd = &cobra.Command{
+		Use:   "collect [OPTIONS] [ARGS]",
+		Short: "collect metrics",
+		Long:  `Collect metrics from AWS CloudWatch using prometheus collector`,
+		Run: func(cmd *cobra.Command, args []string) {
+			collectCmd(cmd, args)
 		},
 	}
 )
@@ -68,23 +76,9 @@ func init() {
 	rootCmd.AddCommand(metricsCmd)
 	metricsCmd.AddCommand(metricsGetCmd)
 	metricsCmd.AddCommand(metricsDisplayPromDescCmd)
-
-	// Files
-	metricsGetCmd.PersistentFlags().StringVar(&conf.Application.CredentialsFile, "credentialsFile", "credentials.yaml", "The metrics files with the CloudWatch Queries")
-	if err := viper.BindPFlag("application.credentialsFile", metricsGetCmd.PersistentFlags().Lookup("credentialsFile")); err != nil {
-		log.Error(err)
-	}
-
-	metricsGetCmd.PersistentFlags().StringSliceVar(&conf.Application.MetricsFiles, "metricsFiles", nil, "Metrics files, example: --metricsFile ~/tmp/queries/m1.yaml --metricsFile ~/tmp/queries/m2.yml")
-	if err := viper.BindPFlag("application.metricsFiles", metricsGetCmd.PersistentFlags().Lookup("metricsFiles")); err != nil {
-		log.Error(err)
-	}
+	metricsCmd.AddCommand(metricsCollectCmd)
 
 	// Behavior parameters
-	metricsGetCmd.PersistentFlags().StringVar(&conf.AWS.Profile, "profile", "", "The AWS CLI profile nae from .aws/config or .aws/credential")
-	if err := viper.BindPFlag("aws.profile", metricsGetCmd.PersistentFlags().Lookup("profile")); err != nil {
-		log.Error(err)
-	}
 	metricsGetCmd.PersistentFlags().StringVar(&conf.Application.MetricStatPeriod, "metricStatPeriod", "5m", "The AWS Cloudwatch metrics query stats period")
 	if err := viper.BindPFlag("application.metricStatPeriod", metricsGetCmd.PersistentFlags().Lookup("metricStatPeriod")); err != nil {
 		log.Error(err)
@@ -100,8 +94,6 @@ func init() {
 }
 
 func getCmd(cmd *cobra.Command, args []string) {
-	initConf()
-
 	startTime, endTime, period := metrics.GetTimeStamps(time.Now(), conf.Application.MetricStatPeriod, conf.Application.MetricTimeWindow)
 	log.Debugf("Start Time: %s", startTime.Format(time.RFC3339))
 	log.Debugf("End Time: %s", endTime.Format(time.RFC3339))
@@ -143,9 +135,7 @@ func getCmd(cmd *cobra.Command, args []string) {
 	}
 }
 
-func getPromDescCmd(cmd *cobra.Command, args []string) {
-	initConf()
-
+func displayPromDescCmd(cmd *cobra.Command, args []string) {
 	m := metrics.New(&conf)
 
 	for _, md := range m.GetMetricsDesc() {
@@ -153,81 +143,14 @@ func getPromDescCmd(cmd *cobra.Command, args []string) {
 	}
 }
 
-func initConf() {
-	parseConfFiles(&conf)
-	parseMetricsFiles(&conf)
-	//log.Debugf("Configuration %s", conf.ToJson())
-	fmt.Println(conf.ToJson())
-	//fmt.Println(conf.ToYaml())
-}
+func collectCmd(cmd *cobra.Command, args []string) {
+	m := metrics.New(&conf)
+	sess, _ := awshelper.NewSession(&conf.AWS)
 
-// Unmarshall Yaml files into c config structure
-func parseConfFiles(c *config.All) {
-	viper.SetDefault("application.ServerFile", serverConfFile)
+	c := collector.New(&conf, m, sess)
+	prometheus.MustRegister(c)
+	http.Handle("/metrics", promhttp.Handler())
 
-	files := []string{
-		serverConfFile,
-		c.Application.CredentialsFile,
-	}
-	for _, file := range files {
-		log.Debugf("Configuration file: %s", file)
-		log.Debugf("file: %s", filepath.Base(file))
-		log.Debugf("Location: %s", filepath.Dir(file))
-		log.Debugf("Kind: %s", filepath.Ext(file)[1:])
-
-		viper.SetConfigName(filepath.Base(file))
-		viper.AddConfigPath(filepath.Dir(file))
-		viper.SetConfigType(filepath.Ext(file)[1:])
-
-		viper.AutomaticEnv()
-		viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-
-		log.Debugf("Reading configuration from file: %s", file)
-		if err := viper.ReadInConfig(); err != nil {
-			log.Errorf("Error reading config file, %s", err)
-		}
-
-		log.Debug("Filling conf structure")
-		err := viper.Unmarshal(&c)
-		if err != nil {
-			log.Errorf("Unable to decode into struct, %v", err)
-		}
-	}
-}
-
-// Unmarshall Yaml files into c config structure
-func parseMetricsFiles(c *config.All) {
-
-	for i, file := range c.Application.MetricsFiles {
-		log.Debugf("Configuration file: %s", file)
-		log.Debugf("file: %s", filepath.Base(file))
-		log.Debugf("Location: %s", filepath.Dir(file))
-		log.Debugf("Kind: %s", filepath.Ext(file)[1:])
-
-		viper.SetConfigName(filepath.Base(file))
-		viper.AddConfigPath(filepath.Dir(file))
-		viper.SetConfigType(filepath.Ext(file)[1:])
-
-		if i < 1 {
-			log.Debugf("Reading configuration from file: %s", file)
-			if err := viper.ReadInConfig(); err != nil {
-				log.Errorf("Error reading config file, %s", err)
-			}
-		} else {
-			log.Debugf("Merging configuration of file: %s", file)
-			if err := viper.MergeInConfig(); err != nil {
-				log.Errorf("Error merging config file, %s", err)
-			}
-		}
-	}
-
-	if len(c.Application.MetricsFiles) > 0 {
-		log.Debug("Filling conf structure")
-		err := viper.Unmarshal(&c)
-		if err != nil {
-			log.Errorf("Unable to decode into struct, %v", err)
-		}
-	} else {
-		log.Errorf("Metrics configuration file: \"%v\" doesn't exist", c.Application.MetricsFiles)
-	}
+	log.Info("Starting Server")
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }

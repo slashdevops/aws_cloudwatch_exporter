@@ -41,9 +41,8 @@ type ServerConf struct {
 }
 
 type Server struct {
-	Address     string `mapstructure:"address" json:"Address"`
-	Port        uint16 `mapstructure:"port" json:"Port"`
-	MetricsPath string `mapstructure:"metricsPath" json:"MetricsPath"`
+	Address string `mapstructure:"address" json:"Address"`
+	Port    uint16 `mapstructure:"port" json:"Port"`
 }
 
 // This is a convenient structure to allow config files nested (application.[keys])
@@ -63,6 +62,7 @@ type Application struct {
 	Namespace        string   `mapstructure:"namespace" json:"Namespace" yaml:"Namespace"`
 	ServerFile       string   `mapstructure:"serverFile" json:"ServerFile" yaml:"ServerFile"`
 	CredentialsFile  string   `mapstructure:"credentialsFile" json:"SharedCredentialsFile" yaml:"SharedCredentialsFile"`
+	MetricsPath      string   `mapstructure:"metricsPath" json:"MetricsPath" yaml:"MetricsPath"`
 	MetricsFiles     []string `mapstructure:"metricsFiles" json:"MetricsFiles" yaml:"MetricsFiles"`
 	MetricStatPeriod string   `mapstructure:"metricStatPeriod" json:"MetricStatPeriod" yaml:"MetricStatPeriod"`
 	MetricTimeWindow string   `mapstructure:"metricTimeWindow" json:"MetricTimeWindow" yaml:"MetricTimeWindow"`
