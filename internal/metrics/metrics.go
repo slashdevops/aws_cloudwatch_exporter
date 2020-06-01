@@ -143,7 +143,7 @@ func createPrometheusMetricsDesc(conf *config.All) map[string]*prometheus.Desc {
 	mdqc := conf.MetricDataQueriesConf
 	promMetricsDesc := make(map[string]*prometheus.Desc)
 
-	var helpTmpl string = "%s represent the AWS CloudWatch Metric: %s --> %s, Dimensions: [%s], Statistic: %s"
+	var helpTmpl = "%s represent the AWS CloudWatch Metric: %s --> %s, Dimensions: [%s], Statistic: %s"
 
 	// for every metric query defined into the yaml files
 	for _, mdq := range mdqc.MetricDataQueries {
@@ -153,13 +153,22 @@ func createPrometheusMetricsDesc(conf *config.All) map[string]*prometheus.Desc {
 		for _, v := range mdq.MetricStat.Metric.Dimensions {
 			mcl[v.Name] = v.Value
 		}
+
+		// necessary to put dimensions keys in the help query string
 		var dimKeys []string
 		for k := range mcl {
 			dimKeys = append(dimKeys, k)
 		}
+		dimArray := strings.Join(dimKeys, ",")
 
 		mn := camelcase.ToSnake(mdq.MetricStat.Metric.Namespace) + "_" + camelcase.ToSnake(mdq.MetricStat.Metric.MetricName) + "_" + camelcase.ToSnake(mdq.MetricStat.Stat)
-		hs := fmt.Sprintf(helpTmpl, mn, mdq.MetricStat.Metric.Namespace, mdq.MetricStat.Metric.MetricName, strings.Join(dimKeys, ","), mdq.MetricStat.Stat)
+		hs := fmt.Sprintf(
+			helpTmpl,
+			mn,
+			mdq.MetricStat.Metric.Namespace,
+			mdq.MetricStat.Metric.MetricName,
+			dimArray,
+			mdq.MetricStat.Stat)
 
 		promMetricsDesc[mdq.ID] = prometheus.NewDesc(mn, hs, nil, mcl)
 	}
