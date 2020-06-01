@@ -45,24 +45,18 @@ func New(conf *config.All) Metrics {
 func (m *metrics) GetMetricDataInput(st time.Time, et time.Time, p time.Duration, nt string) *cloudwatch.GetMetricDataInput {
 	dataQry := m.getMetricDataQuery(p)
 
-	var mdi *cloudwatch.GetMetricDataInput
-
-	if len(nt) > 0 {
-		mdi = &cloudwatch.GetMetricDataInput{
-			StartTime:         aws.Time(st),
-			EndTime:           aws.Time(et),
-			MetricDataQueries: dataQry,
-			NextToken:         aws.String(nt),
-			ScanBy:            aws.String(cloudwatch.ScanByTimestampDescending), // Get the fresh data first
-		}
-	} else {
-		mdi = &cloudwatch.GetMetricDataInput{
-			StartTime:         aws.Time(st),
-			EndTime:           aws.Time(et),
-			MetricDataQueries: dataQry,
-			ScanBy:            aws.String(cloudwatch.ScanByTimestampDescending), // Get the fresh data first
-		}
+	mdi := &cloudwatch.GetMetricDataInput{
+		StartTime:         aws.Time(st),
+		EndTime:           aws.Time(et),
+		MetricDataQueries: dataQry,
+		ScanBy:            aws.String(cloudwatch.ScanByTimestampDescending), // Get the fresh data first
 	}
+
+	// conditional parameters are added after creation
+	if len(nt) > 0 {
+		mdi.NextToken = aws.String(nt)
+	}
+
 	return mdi
 }
 
@@ -109,7 +103,7 @@ func (m *metrics) getMetricDataQuery(p time.Duration) []*cloudwatch.MetricDataQu
 		}
 
 		// Conditional field will be filled after
-		if m.MetricStat.Unit != "" {
+		if len(m.MetricStat.Unit) > 0 {
 			metricsQry.MetricStat.Unit = aws.String(m.MetricStat.Unit)
 		}
 
