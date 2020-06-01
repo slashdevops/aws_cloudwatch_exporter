@@ -62,7 +62,7 @@ func prepareAWSMetrics() *cloudwatch.GetMetricDataInput {
 
 func Test_metrics_GetMetricDataInput(t *testing.T) {
 	type fields struct {
-		MetricsQueries *config.MetricDataQueriesConf
+		MetricDataQueriesConf *config.MetricDataQueriesConf
 	}
 	type args struct {
 		st time.Time
@@ -79,7 +79,7 @@ func Test_metrics_GetMetricDataInput(t *testing.T) {
 		{
 			name: "FirstCase",
 			fields: fields{
-				MetricsQueries: prepareMetrics(),
+				MetricDataQueriesConf: prepareMetrics(),
 			},
 			args: args{
 				st: parseDate("2020-05-10T11:00:00Z", time.RFC3339),
@@ -93,7 +93,7 @@ func Test_metrics_GetMetricDataInput(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			m := &metrics{
-				MetricsQueries: tt.fields.MetricsQueries,
+				MetricDataQueriesConf: tt.fields.MetricDataQueriesConf,
 			}
 			if got := m.GetMetricDataInput(tt.args.st, tt.args.et, tt.args.p, tt.args.nt); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("GetMetricDataInput() = %v, want %v", got, tt.want)

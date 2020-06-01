@@ -56,17 +56,18 @@ type ApplicationConf struct {
 }
 
 type Application struct {
-	Name            string   `mapstructure:"name" json:"Name" yaml:"Name"`
-	Description     string   `mapstructure:"description" json:"Description" yaml:"Description"`
-	Version         string   `mapstructure:"version" json:"Version" yaml:"Version"`
-	BuildInfo       string   `mapstructure:"buildInfo" json:"BuildInfo" yaml:"BuildInfo"`
-	Namespace       string   `mapstructure:"namespace" json:"Namespace" yaml:"Namespace"`
-	ServerFile      string   `mapstructure:"serverFile" json:"ServerFile" yaml:"ServerFile"`
-	CredentialsFile string   `mapstructure:"credentialsFile" json:"SharedCredentialsFile" yaml:"SharedCredentialsFile"`
-	MetricsFiles    []string `mapstructure:"metricsFiles" json:"MetricsFiles" yaml:"MetricsFiles"`
-	StatsPeriod     string   `mapstructure:"statsPeriod" json:"StatsPeriod" yaml:"StatsPeriod"`
-	Gatherer        prometheus.Gatherer
-	AWSSession      *session.Session
+	Name              string   `mapstructure:"name" json:"Name" yaml:"Name"`
+	Description       string   `mapstructure:"description" json:"Description" yaml:"Description"`
+	Version           string   `mapstructure:"version" json:"Version" yaml:"Version"`
+	BuildInfo         string   `mapstructure:"buildInfo" json:"BuildInfo" yaml:"BuildInfo"`
+	Namespace         string   `mapstructure:"namespace" json:"Namespace" yaml:"Namespace"`
+	ServerFile        string   `mapstructure:"serverFile" json:"ServerFile" yaml:"ServerFile"`
+	CredentialsFile   string   `mapstructure:"credentialsFile" json:"SharedCredentialsFile" yaml:"SharedCredentialsFile"`
+	MetricsFiles      []string `mapstructure:"metricsFiles" json:"MetricsFiles" yaml:"MetricsFiles"`
+	StatsPeriod       string   `mapstructure:"statsPeriod" json:"StatsPeriod" yaml:"StatsPeriod"`
+	StatsPeriodFactor int      `mapstructure:"StatsPeriodFactor" json:"StatsPeriodFactor" yaml:"StatsPeriodFactor"`
+	Gatherer          prometheus.Gatherer
+	AWSSession        *session.Session
 }
 
 // https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html
@@ -118,6 +119,8 @@ type MetricDataQuery struct {
 				Value string `mapstructure:"Value" json:"Value" yaml:"Value"`
 			} `mapstructure:"Dimensions" json:"Dimensions" yaml:"Dimensions"`
 		} `mapstructure:"Metric" json:"Metric" yaml:"Metric"`
-		Stat string `mapstructure:"Stat" json:"Stat" yaml:"Stat"`
+		Period int64  `mapstructure:"Period" json:"Period" yaml:"Period"`
+		Stat   string `mapstructure:"Stat" json:"Stat" yaml:"Stat"`
+		Unit   string `mapstructure:"Unit" json:"Unit" yaml:"Unit"`
 	} `mapstructure:"MetricStat" json:"MetricStat" yaml:"MetricStat"`
 }

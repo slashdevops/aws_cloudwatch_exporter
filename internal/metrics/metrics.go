@@ -28,7 +28,6 @@ type metrics struct {
 	MetricDataQueriesConf *config.MetricDataQueriesConf
 
 	// The prometheus metrics created from MetricDataQueriesConf but without values
-	// The prometheus metrics created from MetricDataQueriesConf but without values
 	PrometheusMetricsDesc map[string]*prometheus.Desc
 	PrometheusMetrics     map[string]prometheus.Metric
 }
@@ -79,6 +78,11 @@ func (m *metrics) getMetricDataQuery(p time.Duration) []*cloudwatch.MetricDataQu
 
 	for _, m := range m.MetricDataQueriesConf.MetricDataQueries {
 
+		// If the metric has set the Period, override global StatsPeriod
+		if m.MetricStat.Period != 0 {
+			period = m.MetricStat.Period
+		}
+
 		// Fill the internal struct with dimension
 		var dimQry []*cloudwatch.Dimension
 		for _, dim := range m.MetricStat.Metric.Dimensions {
@@ -98,13 +102,17 @@ func (m *metrics) getMetricDataQuery(p time.Duration) []*cloudwatch.MetricDataQu
 					MetricName: aws.String(m.MetricStat.Metric.MetricName),
 					Namespace:  aws.String(m.MetricStat.Metric.Namespace),
 				},
-				// Period: aws.Int64(m.MetricStat.Period),
 				Period: aws.Int64(period),
 				Stat:   aws.String(m.MetricStat.Stat),
 			},
-			// Period:     aws.Int64(period),
 			ReturnData: aws.Bool(true), // Return the timestamps and raw data values of this metric.
 		}
+
+		// Conditional field will be filled after
+		if m.MetricStat.Unit != "" {
+			metricsQry.MetricStat.Unit = aws.String(m.MetricStat.Unit)
+		}
+
 		dataQry = append(dataQry, metricsQry)
 	}
 	return dataQry
@@ -178,7 +186,7 @@ func createPrometheusMetricsDesc(conf *config.All) map[string]*prometheus.Desc {
 // The endTime is the newest time (future) and multiple of the period
 // The period is a time.Duration representation of the p string passed as function arg
 func GetTimeStamps(t time.Time, p string) (startTime time.Time, endTime time.Time, period time.Duration) {
-	var startTimeMul time.Duration = 1
+	var startTimeMul time.Duration
 	var EndTimeMul time.Duration = 1
 
 	period, err := time.ParseDuration(p)
