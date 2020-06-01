@@ -1,6 +1,7 @@
 package collector
 
 import (
+	"strings"
 	"sync"
 	"time"
 
@@ -19,18 +20,16 @@ import (
 // https://aws.amazon.com/premiumsupport/knowledge-center/cloudwatch-getmetricdata-api/
 // https://aws.amazon.com/cloudwatch/pricing/
 
-const (
-	SUCCESS = "success"
-	ERROR   = "error"
-)
-
 type OwnMetrics struct {
-	Up                    prometheus.Gauge
-	Info                  prometheus.Gauge
-	ScrapesSuccess        prometheus.Counter
-	ScrapesErrors         prometheus.Counter
-	MetricsScrapesSuccess prometheus.Counter
-	MetricsScrapesErrors  prometheus.Counter
+	Up                     prometheus.Gauge
+	Info                   prometheus.Gauge
+	ScrapesSuccess         prometheus.Counter
+	ScrapesErrors          prometheus.Counter
+	ScrapesMessages        prometheus.Counter
+	MetricsScrapesSuccess  prometheus.Counter
+	MetricsScrapesErrors   prometheus.Counter
+	MetricsScrapesEmpty    prometheus.Counter
+	MetricsScrapesMessages prometheus.Counter
 }
 
 type Collector struct {
@@ -78,6 +77,15 @@ func New(c *config.All, m metrics.Metrics) *Collector {
 					ConstLabels: nil,
 				},
 			),
+			ScrapesMessages: prometheus.NewCounter(
+				prometheus.CounterOpts{
+					Namespace:   c.Application.Namespace,
+					Subsystem:   "collector",
+					Name:        c.Application.Name + "_scrapes_messages_total",
+					Help:        "Total number of times of AWS CloudWatch API was scraped for metrics with some message result. (see the logs)",
+					ConstLabels: nil,
+				},
+			),
 			MetricsScrapesSuccess: prometheus.NewGauge(
 				prometheus.GaugeOpts{
 					Namespace:   c.Application.Namespace,
@@ -96,6 +104,24 @@ func New(c *config.All, m metrics.Metrics) *Collector {
 					ConstLabels: nil,
 				},
 			),
+			MetricsScrapesEmpty: prometheus.NewGauge(
+				prometheus.GaugeOpts{
+					Namespace:   c.Application.Namespace,
+					Subsystem:   "collector",
+					Name:        c.Application.Name + "_metrics_scrapes_empty_total",
+					Help:        "Total number of metrics of AWS CloudWatch API was scraped with empty result.",
+					ConstLabels: nil,
+				},
+			),
+			MetricsScrapesMessages: prometheus.NewGauge(
+				prometheus.GaugeOpts{
+					Namespace:   c.Application.Namespace,
+					Subsystem:   "collector",
+					Name:        c.Application.Name + "_metrics_scrapes_messages_total",
+					Help:        "Total number of metrics of AWS CloudWatch API was scraped with some messages result. (see the logs)",
+					ConstLabels: nil,
+				},
+			),
 		},
 	}
 }
@@ -106,8 +132,11 @@ func (c *Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- c.ownMetrics.Up.Desc()
 	c.ownMetrics.ScrapesSuccess.Describe(ch)
 	c.ownMetrics.ScrapesErrors.Describe(ch)
+	c.ownMetrics.ScrapesMessages.Describe(ch)
 	c.ownMetrics.MetricsScrapesSuccess.Describe(ch)
 	c.ownMetrics.MetricsScrapesErrors.Describe(ch)
+	c.ownMetrics.MetricsScrapesEmpty.Describe(ch)
+	c.ownMetrics.MetricsScrapesMessages.Describe(ch)
 
 	// Describe all metrics created from yaml files
 	for _, md := range c.metrics.GetMetricsDesc() {
@@ -120,6 +149,7 @@ func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 	c.mutex.Lock() // To protect metrics from concurrent collects.
 	defer c.mutex.Unlock()
 
+	// this information is constant
 	c.ownMetrics.Info.Set(1)
 	ch <- c.ownMetrics.Info
 
@@ -140,6 +170,7 @@ func (c *Collector) scrape(ch chan<- prometheus.Metric) {
 
 	mdi := c.metrics.GetMetricDataInput(startTime, endTime, period, "")
 
+	// TODO: move it out of here
 	sess, _ := awshelper.NewSession(&c.conf.AWS)
 	svc := cloudwatch.New(sess)
 
@@ -147,32 +178,69 @@ func (c *Collector) scrape(ch chan<- prometheus.Metric) {
 	mdo, err := svc.GetMetricData(mdi)
 	if err != nil {
 		c.ownMetrics.Up.Set(0)
-		c.ownMetrics.ScrapesSuccess.Inc()
+		c.ownMetrics.ScrapesErrors.Inc()
 		log.Errorf("Error getting metrics %v", err)
 	}
 	c.ownMetrics.ScrapesSuccess.Inc()
 
-	for _, mdr := range mdo.MetricDataResults {
-		ch <- c.ownMetrics.MetricsScrapesSuccess
-
-		for i, t := range mdr.Timestamps {
-			nm := prometheus.NewMetricWithTimestamp(
-				*t,
-				prometheus.MustNewConstMetric(
-					c.metrics.GetMetricDesc(*mdr.Id),
-					prometheus.GaugeValue,
-					*mdr.Values[i],
-				),
-			)
-
-			c.metrics.SetMetric(*mdr.Id, nm)
+	// Some information came from the metrics scrape
+	if len(mdo.Messages) > 0 {
+		c.ownMetrics.ScrapesMessages.Inc()
+		var msgs []string
+		for _, m := range mdo.Messages {
+			msgs = append(msgs, *m.Value)
 		}
+		mgssString := strings.Join(msgs, ",")
+		log.Warnf("GetMetricDataOutput Message field contain: %s", mgssString)
+	}
+
+	for _, mdr := range mdo.MetricDataResults {
+
+		if *mdr.StatusCode == "InternalError" {
+			c.ownMetrics.MetricsScrapesErrors.Inc()
+			log.Errorf("Error gotten when scrap metric id: %s, label: %s", *mdr.Id, *mdr.Label)
+			continue
+		}
+
+		// Some information came from the metric scrape
+		if len(mdr.Messages) > 0 {
+			c.ownMetrics.MetricsScrapesMessages.Inc()
+			var msgs []string
+			for _, m := range mdr.Messages {
+				msgs = append(msgs, *m.Value)
+			}
+			mgssString := strings.Join(msgs, ",")
+			log.Warnf("Message field for metric id: %s, contain: %s", *mdr.Id, mgssString)
+		}
+
+		// no metric value came, continue with the next
+		if len(mdr.Values) == 0 {
+			c.ownMetrics.MetricsScrapesEmpty.Inc()
+			continue
+		}
+
+		// mdr.Timestamps[0] and mdr.Values[0] because the first value into de arrays is the newest value
+		// since we set ScanBy: TimestampDescending into GetMetricDataInput()
+		nm := prometheus.NewMetricWithTimestamp(
+			*mdr.Timestamps[0],
+			prometheus.MustNewConstMetric(
+				c.metrics.GetMetricDesc(*mdr.Id),
+				prometheus.GaugeValue,
+				*mdr.Values[0],
+			),
+		)
+
+		c.metrics.SetMetric(*mdr.Id, nm)
+		c.ownMetrics.MetricsScrapesSuccess.Inc()
 	}
 
 	// report own metrics
+	ch <- c.ownMetrics.Up
 	ch <- c.ownMetrics.ScrapesSuccess
 	ch <- c.ownMetrics.ScrapesErrors
+	ch <- c.ownMetrics.ScrapesMessages
 	ch <- c.ownMetrics.MetricsScrapesSuccess
 	ch <- c.ownMetrics.MetricsScrapesErrors
-	ch <- c.ownMetrics.Up
+	ch <- c.ownMetrics.MetricsScrapesEmpty
+	ch <- c.ownMetrics.MetricsScrapesMessages
 }
