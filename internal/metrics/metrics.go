@@ -214,7 +214,7 @@ func GetTimeStamps(t time.Time, p string, tg string) (startTime time.Time, endTi
 	//        now()                      truncate
 	// 2020-05-10T11:06:25Z    ->   2020-05-10T11:05:00Z    -> +period (endTime)    2020-05-10T11:10:00Z
 	//                                                      -> -timeGap (startTime) 2020-05-10T10:55:00Z
-	endTime = t.Truncate(period).Add(period)
+	endTime = t.Truncate(period).Add(period * 2)
 	startTime = t.Truncate(period).Add(-timeGap)
 	return
 }

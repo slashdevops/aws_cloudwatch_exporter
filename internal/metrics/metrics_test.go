@@ -124,7 +124,7 @@ func Test_GetTimeStamps(t *testing.T) {
 				tg:  "10m",
 			},
 			wantStartTime: parseDate("2020-05-10T10:55:00Z", time.RFC3339),
-			wantEndTime:   parseDate("2020-05-10T11:10:00Z", time.RFC3339),
+			wantEndTime:   parseDate("2020-05-10T11:15:00Z", time.RFC3339),
 			wantPeriod:    parseDuration("5m"),
 		},
 		{
@@ -135,7 +135,7 @@ func Test_GetTimeStamps(t *testing.T) {
 				tg:  "10m",
 			},
 			wantStartTime: parseDate("2020-05-10T10:55:00Z", time.RFC3339),
-			wantEndTime:   parseDate("2020-05-10T11:10:00Z", time.RFC3339),
+			wantEndTime:   parseDate("2020-05-10T11:15:00Z", time.RFC3339),
 			wantPeriod:    parseDuration("5m"),
 		},
 		{
@@ -146,7 +146,7 @@ func Test_GetTimeStamps(t *testing.T) {
 				tg:  "10m",
 			},
 			wantStartTime: parseDate("2020-05-10T10:50:00Z", time.RFC3339),
-			wantEndTime:   parseDate("2020-05-10T11:05:00Z", time.RFC3339),
+			wantEndTime:   parseDate("2020-05-10T11:10:00Z", time.RFC3339),
 			wantPeriod:    parseDuration("5m"),
 		},
 		{
@@ -157,7 +157,7 @@ func Test_GetTimeStamps(t *testing.T) {
 				tg:  "10m",
 			},
 			wantStartTime: parseDate("2020-05-10T23:50:00Z", time.RFC3339),
-			wantEndTime:   parseDate("2020-05-11T00:05:00Z", time.RFC3339),
+			wantEndTime:   parseDate("2020-05-11T00:10:00Z", time.RFC3339),
 			wantPeriod:    parseDuration("5m"),
 		},
 	}
