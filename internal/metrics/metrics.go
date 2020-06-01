@@ -200,30 +200,21 @@ func createPrometheusMetricsDesc(conf *config.All) map[string]*prometheus.Desc {
 // The startTime is the oldest time and multiple of the period
 // The endTime is the newest time (future) and multiple of the period
 // The period is a time.Duration representation of the p string passed as function arg
-func GetTimeStamps(t time.Time, p string) (startTime time.Time, endTime time.Time, period time.Duration) {
-	var startTimeMul time.Duration
-	var EndTimeMul time.Duration = 1
+func GetTimeStamps(t time.Time, p string, tg string) (startTime time.Time, endTime time.Time, period time.Duration) {
 
 	period, err := time.ParseDuration(p)
 	if err != nil {
-		log.Errorf("Error parsing period: %v, %v", p, err)
+		log.Errorf("Error converting period: %v, %v", p, err)
 	}
-	check1m, _ := time.ParseDuration("1m")
-	check5m, _ := time.ParseDuration("5m")
-	check10m, _ := time.ParseDuration("10m")
-	check20m, _ := time.ParseDuration("20m")
-	if (period >= check1m) && (period < check5m) {
-		startTimeMul = 10
-	} else if (period >= check5m) && (period < check10m) {
-		startTimeMul = 3
-	} else if (period >= check10m) && (period < check20m) {
-		startTimeMul = 2
-	} else {
-		startTimeMul = 1
+	timeGap, err := time.ParseDuration(tg)
+	if err != nil {
+		log.Errorf("Error converting time gap: %v, %v", tg, err)
 	}
-	// endTime = t.Truncate(period)
-	// startTime = t.Truncate(period).Add(period * -1)
-	endTime = t.Truncate(period).Add(period * EndTimeMul)
-	startTime = t.Truncate(period).Add(period * -startTimeMul)
+
+	//        now()                      truncate
+	// 2020-05-10T11:06:25Z    ->   2020-05-10T11:05:00Z    -> +period (endTime)    2020-05-10T11:10:00Z
+	//                                                      -> -timeGap (startTime) 2020-05-10T10:55:00Z
+	endTime = t.Truncate(period).Add(period)
+	startTime = t.Truncate(period).Add(-timeGap)
 	return
 }

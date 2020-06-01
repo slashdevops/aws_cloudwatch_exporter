@@ -38,7 +38,8 @@ func prepareAWSMetrics() *cloudwatch.GetMetricDataInput {
 	return &cloudwatch.GetMetricDataInput{
 		EndTime: aws.Time(parseDate("2020-05-10T11:10:00Z", time.RFC3339)),
 		MetricDataQueries: []*cloudwatch.MetricDataQuery{&cloudwatch.MetricDataQuery{
-			Id: aws.String("m1"),
+			Id:    aws.String("m1"),
+			Label: aws.String("aws_ec_2_cpu_utilization_average"),
 			MetricStat: &cloudwatch.MetricStat{
 				Metric: &cloudwatch.Metric{
 					Dimensions: []*cloudwatch.Dimension{
@@ -96,7 +97,81 @@ func Test_metrics_GetMetricDataInput(t *testing.T) {
 				MetricDataQueriesConf: tt.fields.MetricDataQueriesConf,
 			}
 			if got := m.GetMetricDataInput(tt.args.st, tt.args.et, tt.args.p, tt.args.nt); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GetMetricDataInput() = %v, want %v", got, tt.want)
+				t.Errorf("GetMetricDataInput(): got: %v --> want: %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_GetTimeStamps(t *testing.T) {
+	type args struct {
+		now time.Time
+		p   string
+		tg  string
+	}
+	tests := []struct {
+		name          string
+		args          args
+		wantStartTime time.Time
+		wantEndTime   time.Time
+		wantPeriod    time.Duration
+	}{
+		{
+			name: "Test5mPeriodAnd10mTimeGapMinutesExact",
+			args: args{
+				now: parseDate("2020-05-10T11:05:00Z", time.RFC3339),
+				p:   "5m",
+				tg:  "10m",
+			},
+			wantStartTime: parseDate("2020-05-10T10:55:00Z", time.RFC3339),
+			wantEndTime:   parseDate("2020-05-10T11:10:00Z", time.RFC3339),
+			wantPeriod:    parseDuration("5m"),
+		},
+		{
+			name: "Test5mPeriodAnd10mTimeGapMinutesUpper",
+			args: args{
+				now: parseDate("2020-05-10T11:06:25Z", time.RFC3339),
+				p:   "5m",
+				tg:  "10m",
+			},
+			wantStartTime: parseDate("2020-05-10T10:55:00Z", time.RFC3339),
+			wantEndTime:   parseDate("2020-05-10T11:10:00Z", time.RFC3339),
+			wantPeriod:    parseDuration("5m"),
+		},
+		{
+			name: "Test5mPeriodAnd10mTimeGapMinutesLower",
+			args: args{
+				now: parseDate("2020-05-10T11:04:59Z", time.RFC3339),
+				p:   "5m",
+				tg:  "10m",
+			},
+			wantStartTime: parseDate("2020-05-10T10:50:00Z", time.RFC3339),
+			wantEndTime:   parseDate("2020-05-10T11:05:00Z", time.RFC3339),
+			wantPeriod:    parseDuration("5m"),
+		},
+		{
+			name: "Test5mPeriodAnd10mTimeGapEndDay",
+			args: args{
+				now: parseDate("2020-05-11T00:04:59Z", time.RFC3339),
+				p:   "5m",
+				tg:  "10m",
+			},
+			wantStartTime: parseDate("2020-05-10T23:50:00Z", time.RFC3339),
+			wantEndTime:   parseDate("2020-05-11T00:05:00Z", time.RFC3339),
+			wantPeriod:    parseDuration("5m"),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotStartTime, gotEndTime, gotPeriod := GetTimeStamps(tt.args.now, tt.args.p, tt.args.tg)
+			if gotStartTime != tt.wantStartTime {
+				t.Errorf("got: StartTime = %v --> want: %v", gotStartTime, tt.wantStartTime)
+			}
+			if gotEndTime != tt.wantEndTime {
+				t.Errorf("got: EndTime = %v --> want: %v", gotEndTime, tt.wantEndTime)
+			}
+			if gotPeriod != tt.wantPeriod {
+				t.Errorf("got: Period = %v --> want: %v", gotPeriod, tt.wantPeriod)
 			}
 		})
 	}
@@ -116,73 +191,4 @@ func parseDate(d string, l string) time.Time {
 		log.Errorf("Error parsing date: %v, %v", d, err)
 	}
 	return td
-}
-
-func Test_GetTimeStamps(t *testing.T) {
-	type args struct {
-		now time.Time
-		p   string
-	}
-	tests := []struct {
-		name          string
-		args          args
-		wantStartTime time.Time
-		wantEndTime   time.Time
-		wantPeriod    time.Duration
-	}{
-		{
-			name: "Test5mPeriodExact",
-			args: args{
-				now: parseDate("2020-05-10T11:05:00Z", time.RFC3339),
-				p:   "5m",
-			},
-			wantStartTime: parseDate("2020-05-10T11:00:00Z", time.RFC3339),
-			wantEndTime:   parseDate("2020-05-10T11:10:00Z", time.RFC3339),
-			wantPeriod:    parseDuration("5m"),
-		},
-		{
-			name: "Test5mPeriodBefore",
-			args: args{
-				now: parseDate("2020-05-10T11:04:59Z", time.RFC3339),
-				p:   "5m",
-			},
-			wantStartTime: parseDate("2020-05-10T10:55:00Z", time.RFC3339),
-			wantEndTime:   parseDate("2020-05-10T11:05:00Z", time.RFC3339),
-			wantPeriod:    parseDuration("5m"),
-		},
-		{
-			name: "Test5mPeriodAfter",
-			args: args{
-				now: parseDate("2020-05-10T11:05:59Z", time.RFC3339),
-				p:   "5m",
-			},
-			wantStartTime: parseDate("2020-05-10T11:00:00Z", time.RFC3339),
-			wantEndTime:   parseDate("2020-05-10T11:10:00Z", time.RFC3339),
-			wantPeriod:    parseDuration("5m"),
-		},
-		{
-			name: "Test5mPeriodEndDay",
-			args: args{
-				now: parseDate("2020-05-11T00:04:59Z", time.RFC3339),
-				p:   "5m",
-			},
-			wantStartTime: parseDate("2020-05-10T23:55:00Z", time.RFC3339),
-			wantEndTime:   parseDate("2020-05-11T00:05:00Z", time.RFC3339),
-			wantPeriod:    parseDuration("5m"),
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			gotStartTime, gotEndTime, gotPeriod := GetTimeStamps(tt.args.now, tt.args.p)
-			if gotStartTime != tt.wantStartTime {
-				t.Errorf("GetTimeStamps() gotStartTime = %v, want %v", gotStartTime, tt.wantStartTime)
-			}
-			if gotEndTime != tt.wantEndTime {
-				t.Errorf("GetTimeStamps() gotEndTime = %v, want %v", gotEndTime, tt.wantEndTime)
-			}
-			if gotPeriod != tt.wantPeriod {
-				t.Errorf("GetTimeStamps() gotPeriod = %v, want %v", gotPeriod, tt.wantPeriod)
-			}
-		})
-	}
 }
