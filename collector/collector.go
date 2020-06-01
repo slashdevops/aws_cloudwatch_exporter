@@ -133,7 +133,7 @@ func (c *Collector) scrape(ch chan<- prometheus.Metric) {
 	//              points     period        now()
 	//                ↓        ↓→  ←↓         ↓
 	// [(startTime)............................(endTime)] → time
-	startTime, endTime, period := metrics.GetTimeStamps(time.Now(), c.conf.Application.StatsPeriod)
+	startTime, endTime, period := metrics.GetTimeStamps(time.Now(), c.conf.Application.MetricStatPeriod)
 	mdi := c.metrics.GetMetricDataInput(startTime, endTime, period, "")
 
 	sess, _ := awshelper.NewSession(&c.conf.AWS)

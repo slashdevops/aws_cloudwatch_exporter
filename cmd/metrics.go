@@ -85,7 +85,7 @@ func init() {
 	if err := viper.BindPFlag("aws.profile", metricsGetCmd.PersistentFlags().Lookup("profile")); err != nil {
 		log.Error(err)
 	}
-	metricsGetCmd.PersistentFlags().StringVar(&conf.Application.StatsPeriod, "statsPeriod", "1m", "The AWS Cloudwatch metrics query stats period")
+	metricsGetCmd.PersistentFlags().StringVar(&conf.Application.MetricStatPeriod, "statsPeriod", "1m", "The AWS Cloudwatch metrics query stats period")
 	if err := viper.BindPFlag("application.statsPeriod", metricsGetCmd.PersistentFlags().Lookup("statsPeriod")); err != nil {
 		log.Error(err)
 	}
@@ -98,7 +98,7 @@ func init() {
 func getCmd(cmd *cobra.Command, args []string) {
 	initConf()
 
-	startTime, endTime, period := metrics.GetTimeStamps(time.Now(), conf.Application.StatsPeriod)
+	startTime, endTime, period := metrics.GetTimeStamps(time.Now(), conf.Application.MetricStatPeriod)
 	log.Debugf("Start Time: %s", startTime.Format(time.RFC3339))
 	log.Debugf("End Time: %s", endTime.Format(time.RFC3339))
 	log.Debugf("Period in seconds: %v s", int64(period/time.Second))

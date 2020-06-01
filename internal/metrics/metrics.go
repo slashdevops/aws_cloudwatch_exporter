@@ -2,6 +2,7 @@ package metrics
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -72,7 +73,7 @@ func (m *metrics) getMetricDataQuery(p time.Duration) []*cloudwatch.MetricDataQu
 
 	for _, m := range m.MetricDataQueriesConf.MetricDataQueries {
 
-		// If the metric has set the Period, override global StatsPeriod
+		// If the metric has set the Period, override global MetricStatPeriod
 		if m.MetricStat.Period != 0 {
 			period = m.MetricStat.Period
 		}
@@ -143,7 +144,7 @@ func createPrometheusMetricsDesc(conf *config.All) map[string]*prometheus.Desc {
 	mdqc := conf.MetricDataQueriesConf
 	promMetricsDesc := make(map[string]*prometheus.Desc)
 
-	var helpTmpl = "%s represent the AWS CloudWatch Metric: %s --> %s, Dimensions: [%s], Statistic: %s"
+	var helpTmpl = "%s represent the AWS CloudWatch Metric: %s --> %s, Dimensions: [%s], Statistic: %s%s%s"
 
 	// for every metric query defined into the yaml files
 	for _, mdq := range mdqc.MetricDataQueries {
@@ -161,6 +162,15 @@ func createPrometheusMetricsDesc(conf *config.All) map[string]*prometheus.Desc {
 		}
 		dimArray := strings.Join(dimKeys, ",")
 
+		var mu, mp string
+		// Unit and Period are conditional and we want to added it to the help query string
+		if len(mdq.MetricStat.Unit) > 0 {
+			mu = ", Unit: " + mdq.MetricStat.Unit
+		}
+		if mdq.MetricStat.Period > 0 {
+			mp = ", Period: " + strconv.FormatInt(mdq.MetricStat.Period, 10) + "s"
+		}
+
 		mn := camelcase.ToSnake(mdq.MetricStat.Metric.Namespace) + "_" + camelcase.ToSnake(mdq.MetricStat.Metric.MetricName) + "_" + camelcase.ToSnake(mdq.MetricStat.Stat)
 		hs := fmt.Sprintf(
 			helpTmpl,
@@ -168,7 +178,9 @@ func createPrometheusMetricsDesc(conf *config.All) map[string]*prometheus.Desc {
 			mdq.MetricStat.Metric.Namespace,
 			mdq.MetricStat.Metric.MetricName,
 			dimArray,
-			mdq.MetricStat.Stat)
+			mdq.MetricStat.Stat,
+			mu,
+			mp)
 
 		promMetricsDesc[mdq.ID] = prometheus.NewDesc(mn, hs, nil, mcl)
 	}

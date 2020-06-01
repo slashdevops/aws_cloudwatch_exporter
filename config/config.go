@@ -56,18 +56,18 @@ type ApplicationConf struct {
 }
 
 type Application struct {
-	Name              string   `mapstructure:"name" json:"Name" yaml:"Name"`
-	Description       string   `mapstructure:"description" json:"Description" yaml:"Description"`
-	Version           string   `mapstructure:"version" json:"Version" yaml:"Version"`
-	BuildInfo         string   `mapstructure:"buildInfo" json:"BuildInfo" yaml:"BuildInfo"`
-	Namespace         string   `mapstructure:"namespace" json:"Namespace" yaml:"Namespace"`
-	ServerFile        string   `mapstructure:"serverFile" json:"ServerFile" yaml:"ServerFile"`
-	CredentialsFile   string   `mapstructure:"credentialsFile" json:"SharedCredentialsFile" yaml:"SharedCredentialsFile"`
-	MetricsFiles      []string `mapstructure:"metricsFiles" json:"MetricsFiles" yaml:"MetricsFiles"`
-	StatsPeriod       string   `mapstructure:"statsPeriod" json:"StatsPeriod" yaml:"StatsPeriod"`
-	StatsPeriodFactor int      `mapstructure:"StatsPeriodFactor" json:"StatsPeriodFactor" yaml:"StatsPeriodFactor"`
-	Gatherer          prometheus.Gatherer
-	AWSSession        *session.Session
+	Name             string   `mapstructure:"name" json:"Name" yaml:"Name"`
+	Description      string   `mapstructure:"description" json:"Description" yaml:"Description"`
+	Version          string   `mapstructure:"version" json:"Version" yaml:"Version"`
+	BuildInfo        string   `mapstructure:"buildInfo" json:"BuildInfo" yaml:"BuildInfo"`
+	Namespace        string   `mapstructure:"namespace" json:"Namespace" yaml:"Namespace"`
+	ServerFile       string   `mapstructure:"serverFile" json:"ServerFile" yaml:"ServerFile"`
+	CredentialsFile  string   `mapstructure:"credentialsFile" json:"SharedCredentialsFile" yaml:"SharedCredentialsFile"`
+	MetricsFiles     []string `mapstructure:"metricsFiles" json:"MetricsFiles" yaml:"MetricsFiles"`
+	MetricStatPeriod string   `mapstructure:"metricStatPeriod" json:"MetricStatPeriod" yaml:"MetricStatPeriod"`
+	MetricTimeWindow string   `mapstructure:"metricTimeWindow" json:"MetricTimeWindow" yaml:"MetricTimeWindow"`
+	Gatherer         prometheus.Gatherer
+	AWSSession       *session.Session
 }
 
 // https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html
@@ -103,11 +103,13 @@ type AWS struct {
 // Will be filled with que Metrics Queries
 // https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_GetMetricData.html
 // https://aws.amazon.com/premiumsupport/knowledge-center/cloudwatch-getmetricdata-api/
+// https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_MetricStat.html
 // NOTE: This structure is nested because I don't use its internal structure in anywhere
 type MetricDataQueriesConf struct {
 	MetricDataQueries []MetricDataQuery `mapstructure:"MetricDataQueries" json:"MetricDataQueries" yaml:"MetricDataQueries"`
 }
 
+//
 type MetricDataQuery struct {
 	ID         string `mapstructure:"Id" json:"Id" yaml:"Id"`
 	MetricStat struct {

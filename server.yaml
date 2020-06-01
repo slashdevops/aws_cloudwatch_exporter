@@ -3,7 +3,8 @@ server:
   port: 9690
 
 application:
-  statsPeriod: 1m
+  metricStatPeriod: 5m
+  metricTimeWindow: 10m
   credentialsFile: credentials.yaml
   metricsFiles:
     - metrics.yaml

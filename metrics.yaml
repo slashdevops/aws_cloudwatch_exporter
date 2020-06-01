@@ -45,8 +45,10 @@ MetricDataQueries:
     MetricStat:
       Metric:
         Namespace: KinesisProducerLibrary
-        MetricName: UserRecordsPut
+        MetricName: KinesisRecordsDataPut
         Dimensions:
           - Name: StreamName
             Value: com.aleaplay.logs.session-transaction-trace.v1
+      Period: 300
       Stat: Minimum
+      Unit: Bytes
