@@ -236,9 +236,12 @@ func (c *Collector) scrape(ch chan<- prometheus.Metric) {
 			),
 		)
 
-		c.metrics.SetMetric(*mdr.Id, nm)
-		ch <- nm
+		//c.metrics.SetMetric(*mdr.Id, nm)
+
 		c.ownMetrics.MetricsScrapesSuccess.Inc()
+
+		// Send metric to channel
+		ch <- nm
 	}
 
 	// report own metrics

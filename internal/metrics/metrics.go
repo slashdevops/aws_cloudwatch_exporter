@@ -19,10 +19,8 @@ type Metrics interface {
 	GetMetricDataInput(time.Time, time.Time, time.Duration, string) *cloudwatch.GetMetricDataInput
 
 	//
-	SetMetric(id string, metric prometheus.Metric)
 	GetMetricDesc(id string) *prometheus.Desc
 	GetMetricsDesc() map[string]*prometheus.Desc
-	GetMetrics() map[string]prometheus.Metric
 }
 
 type metrics struct {
@@ -31,14 +29,12 @@ type metrics struct {
 
 	// The prometheus metrics created from MetricDataQueriesConf but without values
 	PrometheusMetricsDesc map[string]*prometheus.Desc
-	PrometheusMetrics     map[string]prometheus.Metric
 }
 
 func New(conf *config.All) Metrics {
 	return &metrics{
 		MetricDataQueriesConf: &conf.MetricDataQueriesConf,
 		PrometheusMetricsDesc: createPrometheusMetricsDesc(conf),
-		PrometheusMetrics:     make(map[string]prometheus.Metric),
 	}
 }
 
@@ -114,10 +110,6 @@ func (m *metrics) getMetricDataQuery(p time.Duration) []*cloudwatch.MetricDataQu
 	return dataQry
 }
 
-func (m *metrics) SetMetric(id string, metric prometheus.Metric) {
-	m.PrometheusMetrics[id] = metric
-}
-
 func (m *metrics) GetMetricDesc(id string) *prometheus.Desc {
 	i, ok := m.PrometheusMetricsDesc[id]
 	if !ok {
@@ -128,10 +120,6 @@ func (m *metrics) GetMetricDesc(id string) *prometheus.Desc {
 
 func (m *metrics) GetMetricsDesc() map[string]*prometheus.Desc {
 	return m.PrometheusMetricsDesc
-}
-
-func (m *metrics) GetMetrics() map[string]prometheus.Metric {
-	return m.PrometheusMetrics
 }
 
 // https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_concepts.html
@@ -188,7 +176,6 @@ func createPrometheusMetricsDesc(conf *config.All) map[string]*prometheus.Desc {
 			mp)
 
 		promMetricsDesc[mdq.ID] = prometheus.NewDesc(mn, hs, nil, mcl)
-
 	}
 
 	return promMetricsDesc
