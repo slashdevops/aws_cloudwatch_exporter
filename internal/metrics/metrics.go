@@ -188,6 +188,7 @@ func createPrometheusMetricsDesc(conf *config.All) map[string]*prometheus.Desc {
 			mp)
 
 		promMetricsDesc[mdq.ID] = prometheus.NewDesc(mn, hs, nil, mcl)
+
 	}
 
 	return promMetricsDesc

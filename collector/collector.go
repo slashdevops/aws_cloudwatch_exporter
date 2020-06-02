@@ -141,9 +141,13 @@ func (c *Collector) Describe(ch chan<- *prometheus.Desc) {
 	c.ownMetrics.MetricsScrapesMessages.Describe(ch)
 
 	// Describe all metrics created from yaml files
-	for _, md := range c.metrics.GetMetrics() {
-		ch <- md.Desc()
+	for _, md := range c.metrics.GetMetricsDesc() {
+		ch <- md
 	}
+
+	/*	for _, md := range c.metrics.GetMetrics() {
+		ch <- md.Desc()
+	}*/
 }
 
 // Implements prometheus.Collector Interface
@@ -233,6 +237,7 @@ func (c *Collector) scrape(ch chan<- prometheus.Metric) {
 		)
 
 		c.metrics.SetMetric(*mdr.Id, nm)
+		ch <- nm
 		c.ownMetrics.MetricsScrapesSuccess.Inc()
 	}
 
