@@ -6,8 +6,15 @@
 
 ## MetricDataQueries
 
+* https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_concepts.html
 * https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_MetricStat.html
 * https://docs.aws.amazon.com/cli/latest/reference/cloudwatch/get-metric-statistics.html
+* https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/aws-services-cloudwatch-metrics.html
+* https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/using-metric-math.html#metric-math-syntax
+* https://docs.aws.amazon.com/sdk-for-go/api/service/cloudwatch/#CloudWatch.GetMetricData
+* https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_GetMetricData.html
+* https://aws.amazon.com/premiumsupport/knowledge-center/cloudwatch-getmetricdata-api/
+* https://aws.amazon.com/cloudwatch/pricing/
 
 ```go
 type MetricsQueriesConf struct {
@@ -75,6 +82,13 @@ MetricDataQueries:
       Stat: Sum
 ```
 ### Prometheus metrics name
+
+```
+aws_cloudwatch_request_total{action="GetMetricData", namespace="AWS/EC2"}
+aws_cloudwatch_request_total{}
+aws_cloudwatch_request_total{}
+
+```
 
 ```
 appNamespace + MetricStat[Metric[MetricName]] + MetricStat[Metric[Stat]] (job="MetricStat(Metric(Namespace))",   )
