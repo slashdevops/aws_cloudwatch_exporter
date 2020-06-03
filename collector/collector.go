@@ -23,6 +23,7 @@ import (
 type OwnMetrics struct {
 	Up                     prometheus.Gauge
 	Info                   prometheus.Gauge
+	MetricsTotal           prometheus.Gauge
 	ScrapesSuccess         prometheus.Counter
 	ScrapesErrors          prometheus.Counter
 	ScrapesMessages        prometheus.Counter
@@ -48,23 +49,27 @@ func New(c *config.All, m metrics.Metrics, s *session.Session) *Collector {
 		ownMetrics: &OwnMetrics{
 			Up: prometheus.NewGauge(prometheus.GaugeOpts{
 				Namespace: c.Application.Namespace,
-				Subsystem: "collector",
 				Name:      "up",
 				Help:      "Was the last scrape of " + c.Application.Name + " successful.",
 			}),
 			Info: prometheus.NewGauge(
 				prometheus.GaugeOpts{
 					Namespace:   c.Application.Namespace,
-					Subsystem:   "collector",
 					Name:        "version_info",
 					Help:        c.Application.Name + " version info.",
 					ConstLabels: prometheus.Labels{"release_date": c.BuildInfo, "version": c.Version},
 				},
 			),
+			MetricsTotal: prometheus.NewGauge(
+				prometheus.GaugeOpts{
+					Namespace: c.Application.Namespace,
+					Name:      "metrics_total",
+					Help:      "Total number of metrics to be scrapped " + c.Application.Namespace + " exporter and defined into yaml files.",
+				},
+			),
 			ScrapesSuccess: prometheus.NewCounter(
 				prometheus.CounterOpts{
 					Namespace:   c.Application.Namespace,
-					Subsystem:   "collector",
 					Name:        "scrapes_success_total",
 					Help:        "Total number of times of AWS CloudWatch API was scraped for metrics with success result.",
 					ConstLabels: nil,
@@ -132,6 +137,7 @@ func New(c *config.All, m metrics.Metrics, s *session.Session) *Collector {
 func (c *Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- c.ownMetrics.Info.Desc()
 	ch <- c.ownMetrics.Up.Desc()
+	ch <- c.ownMetrics.MetricsTotal.Desc()
 	c.ownMetrics.ScrapesSuccess.Describe(ch)
 	c.ownMetrics.ScrapesErrors.Describe(ch)
 	c.ownMetrics.ScrapesMessages.Describe(ch)
@@ -140,14 +146,10 @@ func (c *Collector) Describe(ch chan<- *prometheus.Desc) {
 	c.ownMetrics.MetricsScrapesEmpty.Describe(ch)
 	c.ownMetrics.MetricsScrapesMessages.Describe(ch)
 
-	// Describe all metrics created from yaml files
+	// Describe all metrics constructed from yaml files
 	for _, md := range c.metrics.GetMetricsDesc() {
 		ch <- md
 	}
-
-	/*	for _, md := range c.metrics.GetMetrics() {
-		ch <- md.Desc()
-	}*/
 }
 
 // Implements prometheus.Collector Interface
@@ -159,6 +161,7 @@ func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 	c.ownMetrics.Info.Set(1)
 	ch <- c.ownMetrics.Info
 
+	// Going to scrape metrics from yaml files
 	c.scrape(ch)
 }
 
@@ -170,13 +173,16 @@ func (c *Collector) scrape(ch chan<- prometheus.Metric) {
 	// get the timestamps necessary to query metrics from AWS CloudWatch
 	//              points     period        now()
 	//                ↓        ↓→  ←↓         ↓
-	// [(startTime)............................(endTime)] → time
+	// [(startTime).............................(endTime)] → time
 	startTime, endTime, period := metrics.GetTimeStamps(
 		time.Now(),
 		c.conf.Application.MetricStatPeriod,
 		c.conf.Application.MetricTimeWindow)
 
 	mdi := c.metrics.GetMetricDataInput(startTime, endTime, period, "")
+
+	// number of metrics to be scrapped and defined in yaml files
+	c.ownMetrics.MetricsTotal.Add(float64(len(mdi.MetricDataQueries)))
 
 	svc := cloudwatch.New(c.sess)
 
@@ -211,12 +217,12 @@ func (c *Collector) scrape(ch chan<- prometheus.Metric) {
 		// Some information came from the metric scrape
 		if len(mdr.Messages) > 0 {
 			c.ownMetrics.MetricsScrapesMessages.Inc()
-			var msgs []string
+			var messages []string
 			for _, m := range mdr.Messages {
-				msgs = append(msgs, *m.Value)
+				messages = append(messages, *m.Value)
 			}
-			mgssString := strings.Join(msgs, ",")
-			log.Warnf("Message field for metric id: %s, contain: %s", *mdr.Id, mgssString)
+			mgsString := strings.Join(messages, ",")
+			log.Warnf("Message field for metric id: %s, contain: %s", *mdr.Id, mgsString)
 		}
 
 		// no metric value came, continue with the next
@@ -236,16 +242,15 @@ func (c *Collector) scrape(ch chan<- prometheus.Metric) {
 			),
 		)
 
-		//c.metrics.SetMetric(*mdr.Id, nm)
-
 		c.ownMetrics.MetricsScrapesSuccess.Inc()
 
-		// Send metric to channel
+		// Notify metrics to prometheus
 		ch <- nm
 	}
 
 	// report own metrics
 	ch <- c.ownMetrics.Up
+	ch <- c.ownMetrics.MetricsTotal
 	ch <- c.ownMetrics.ScrapesSuccess
 	ch <- c.ownMetrics.ScrapesErrors
 	ch <- c.ownMetrics.ScrapesMessages
