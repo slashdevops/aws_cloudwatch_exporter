@@ -12,6 +12,10 @@ Prometheus exporter for AWS CloudWatch
 
 * https://github.com/prometheus/promu
 
+## References
+
+* https://aws.amazon.com/premiumsupport/knowledge-center/cloudwatch-getmetricdata-api/
+
 ## Development Notes
 
 ### Metrics suffix

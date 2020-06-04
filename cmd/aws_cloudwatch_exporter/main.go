@@ -139,7 +139,6 @@ func main() {
 	col := collector.NewAWSCloudWatchCollector(&conf)
 	req := prometheus.NewRegistry()
 	req.MustRegister(col)
-	conf.Application.Gatherer = req
 
 	h := web.NewHandlers(&conf)
 	mux := http.NewServeMux()

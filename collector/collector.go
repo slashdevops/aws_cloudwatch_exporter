@@ -1,6 +1,7 @@
 package collector
 
 import (
+	"fmt"
 	"strings"
 	"sync"
 	"time"
@@ -54,10 +55,18 @@ func New(c *config.All, m metrics.Metrics, s *session.Session) *Collector {
 			}),
 			Info: prometheus.NewGauge(
 				prometheus.GaugeOpts{
-					Namespace:   c.Application.Namespace,
-					Name:        "version_info",
-					Help:        c.Application.Name + " version info.",
-					ConstLabels: prometheus.Labels{"release_date": c.BuildInfo, "version": c.Version},
+					Namespace: c.Application.Namespace,
+					Name:      "build_info",
+					Help: fmt.Sprintf(
+						"A metric with a constant '1' value labeled by version, revision, branch, and goversion from which %s was built.",
+						c.Application.Name,
+					),
+					ConstLabels: prometheus.Labels{
+						"version":   c.Version,
+						"revision":  c.Revision,
+						"branch":    c.Branch,
+						"goversion": c.GoVersion,
+					},
 				},
 			),
 			MetricsTotal: prometheus.NewGauge(

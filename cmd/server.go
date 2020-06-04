@@ -16,27 +16,48 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
+	"net/http"
 
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/slashdevops/aws_cloudwatch_exporter/collector"
+	"github.com/slashdevops/aws_cloudwatch_exporter/internal/awshelper"
+	"github.com/slashdevops/aws_cloudwatch_exporter/internal/metrics"
 	"github.com/spf13/cobra"
 )
 
 // serverCmd represents the server command
 var (
-	confFile  string
 	serverCmd = &cobra.Command{
 		Use:   "server",
-		Short: "A brief description of your command",
+		Short: "Server commands",
 		Long:  `A longer description that spans `,
+	}
+
+	serverStartCmd = &cobra.Command{
+		Use:   "start",
+		Short: "Start the http server",
+		Long:  `This start the http server to handle connections for metrics endpoint`,
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("server called")
+			startCmd(cmd, args)
 		},
 	}
 )
 
 func init() {
 	rootCmd.AddCommand(serverCmd)
+	serverCmd.AddCommand(serverStartCmd)
+}
 
-	serverCmd.PersistentFlags().StringVar(&confFile, "config", "", "config file (default is $HOME/server.yaml)")
-	serverCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+func startCmd(cmd *cobra.Command, args []string) {
+
+	m := metrics.New(&conf)
+	sess, _ := awshelper.NewSession(&conf.AWS)
+	c := collector.New(&conf, m, sess)
+	prometheus.MustRegister(c)
+
+	http.Handle("/metrics", promhttp.Handler())
+
+	log.Info("Starting Server")
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }

@@ -58,6 +58,12 @@ type Application struct {
 	Name             string   `mapstructure:"name" json:"Name" yaml:"Name"`
 	Description      string   `mapstructure:"description" json:"Description" yaml:"Description"`
 	Version          string   `mapstructure:"version" json:"Version" yaml:"Version"`
+	Revision         string   `mapstructure:"revision" json:"Revision" yaml:"Revision"`
+	Branch           string   `mapstructure:"branch" json:"Branch" yaml:"Branch"`
+	BuildUser        string   `mapstructure:"buildUser" json:"BuildUser" yaml:"BuildUser"`
+	BuildDate        string   `mapstructure:"buildDate" json:"BuildDate" yaml:"BuildDate"`
+	GoVersion        string   `mapstructure:"goVersion" json:"GoVersion" yaml:"GoVersion"`
+	Info             string   `mapstructure:"info" json:"Info" yaml:"Info"`
 	BuildInfo        string   `mapstructure:"buildInfo" json:"BuildInfo" yaml:"BuildInfo"`
 	Namespace        string   `mapstructure:"namespace" json:"Namespace" yaml:"Namespace"`
 	ServerFile       string   `mapstructure:"serverFile" json:"ServerFile" yaml:"ServerFile"`

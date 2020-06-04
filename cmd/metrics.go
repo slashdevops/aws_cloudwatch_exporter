@@ -90,7 +90,6 @@ func init() {
 	// Output parameters
 	metricsGetCmd.PersistentFlags().StringVar(&outFormat, "outFormat", "yaml", "Output format for results. (supported [yaml|json] only)")
 	metricsGetCmd.PersistentFlags().StringVar(&outFile, "outFile", "", "Filename Save the result")
-
 }
 
 func getCmd(cmd *cobra.Command, args []string) {

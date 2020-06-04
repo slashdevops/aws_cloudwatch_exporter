@@ -21,6 +21,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/prometheus/common/version"
 	"github.com/sirupsen/logrus"
 	"github.com/slashdevops/aws_cloudwatch_exporter/config"
 	"github.com/spf13/cobra"
@@ -102,8 +103,13 @@ func parseConfFiles(c *config.All) {
 	conf.Application.Namespace = Namespace
 	conf.Application.Description = appDescription
 	conf.Application.MetricsPath = appMetricsPath
-
-	viper.SetDefault("application.namespace", &conf.Application.Namespace)
+	conf.Application.Version = version.Version
+	conf.Application.Revision = version.Revision
+	conf.Application.GoVersion = version.GoVersion
+	conf.Application.BuildUser = version.BuildUser
+	conf.Application.BuildDate = version.BuildDate
+	conf.Application.Info = version.Info()
+	conf.Application.BuildInfo = version.BuildContext()
 
 	// Config files to be load
 	files := []string{
