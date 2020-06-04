@@ -3,7 +3,7 @@ go:
   # be updated.
   version: 1.14
 repository:
-  path: github.com/prometheus/mysqld_exporter
+  path: github.com/slashdevops/aws_cloudwatch_exporter
 build:
   flags: -mod=mod -a -tags netgo
   ldflags: |
@@ -15,7 +15,6 @@ build:
 tarball:
   files:
     - LICENSE
-    - NOTICE
 crossbuild:
   platforms:
     - linux/amd64

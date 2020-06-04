@@ -27,7 +27,8 @@ var versionCmd = &cobra.Command{
 	Short: "Print the version number of aws_cloudwatch_exporter",
 	Long:  `Print the version number of aws_cloudwatch_exporter`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("version called")
+		fmt.Printf("Application info: %s\n", conf.Info)
+		fmt.Printf("Application build info: %s\n", conf.BuildInfo)
 	},
 }
 
