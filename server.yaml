@@ -1,6 +1,12 @@
 server:
   address: "127.0.0.1"
   port: 9690
+  readTimeout: 2s
+  writeTimeout: 5s
+  idleTimeout: 60s
+  ReadHeaderTimeout: 2s
+  KeepAlivesEnabled: true
+  LogFormat: text
 
 application:
   metricStatPeriod: 5m

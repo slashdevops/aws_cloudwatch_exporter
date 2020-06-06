@@ -1,5 +1,5 @@
 /*
-Copyright © 2020 NAME HERE christian@slashdevops.com
+Copyright © 2020 Christian González Di Antonio christian@slashdevops.com
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -31,8 +31,10 @@ import (
 const (
 	Namespace      = "aws_cloudwatch_exporter"
 	appName        = "aws_cloudwatch_exporter"
-	appDescription = "AWS CloudWatch Exporter for Gatherer metrics"
-	appMetricsPath = "/metrics"
+	appDescription = `This is a AWS CloudWatch exporter for prometheus.io, this scrape metrics using
+GetMetricData API method`
+	appDescriptionShort = "AWS CloudWatch exporter for prometheus.io"
+	appMetricsPath      = "/metrics"
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -41,9 +43,9 @@ var (
 	conf config.All
 
 	rootCmd = &cobra.Command{
-		Use:   "aws_cloudwatch_exporter",
-		Short: "AWS CloudWatch Exporter for prometheus.io",
-		Long:  `aws_cloudwatch_exporter is an AWS CloudWatch exporter for prometheus.io`,
+		Use:   Namespace,
+		Short: appDescriptionShort,
+		Long:  appDescription,
 	}
 	log = logrus.New()
 )
@@ -83,22 +85,19 @@ func init() {
 }
 
 func initConfig() {
-	log.SetFormatter(&logrus.JSONFormatter{})
+	if conf.Server.LogFormat == "json" {
+		log.SetFormatter(&logrus.JSONFormatter{})
+	} else {
+		log.SetFormatter(&logrus.TextFormatter{})
+	}
+
 	log.SetOutput(os.Stdout)
 	log.SetLevel(logrus.DebugLevel)
 	// Set the output of the message for the current logrus instance,
 	// Output of logrus instance can be set to any io.writer
 	log.Out = os.Stdout
 
-	parseConfFiles(&conf)
-	parseMetricsFiles(&conf)
-	// fmt.Println(conf.ToJson())
-	fmt.Println(conf.ToJson())
-	// fmt.Println(conf.ToYaml())
-}
-
-// Unmarshall Yaml files into c config structure
-func parseConfFiles(c *config.All) {
+	// Set default values
 	conf.Application.Name = appName
 	conf.Application.Namespace = Namespace
 	conf.Application.Description = appDescription
@@ -110,7 +109,19 @@ func parseConfFiles(c *config.All) {
 	conf.Application.BuildDate = version.BuildDate
 	conf.Application.Info = version.Info()
 	conf.Application.BuildInfo = version.BuildContext()
+}
 
+// this will be used for every commands that needs conf in files
+func ReadConfFromFiles() {
+	parseConfFiles(&conf)
+	parseMetricsFiles(&conf)
+	// fmt.Println(conf.ToJson())
+	fmt.Println(conf.ToJson())
+	// fmt.Println(conf.ToYaml())
+}
+
+// Unmarshall Yaml files into c config structure
+func parseConfFiles(c *config.All) {
 	// Config files to be load
 	files := []string{
 		conf.ServerFile,

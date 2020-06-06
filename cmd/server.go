@@ -56,7 +56,7 @@ func startCmd(cmd *cobra.Command, args []string) {
 	c := collector.New(&conf, m, sess)
 	prometheus.MustRegister(c)
 
-	http.Handle("/metrics", promhttp.Handler())
+	http.Handle(conf.Application.MetricsPath, promhttp.Handler())
 
 	log.Info("Starting Server")
 	log.Fatal(http.ListenAndServe(":8080", nil))

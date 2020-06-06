@@ -1,5 +1,5 @@
 /*
-Copyright © 2020 NAME HERE christian@slashdevops.com
+Copyright © 2020 Christian González Di Antonio christian@slashdevops.com
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -35,9 +35,6 @@ import (
 
 // metricsCmd represents the metrics command
 var (
-	outFormat string = "yaml"
-	outFile   string = "yaml"
-
 	metricsCmd = &cobra.Command{
 		Use:   "metrics [COMMANDS]",
 		Short: "useful to get metrics",
@@ -87,9 +84,10 @@ func init() {
 	if err := viper.BindPFlag("application.metricTimeWindow", metricsGetCmd.PersistentFlags().Lookup("metricTimeWindow")); err != nil {
 		log.Error(err)
 	}
+
 	// Output parameters
-	metricsGetCmd.PersistentFlags().StringVar(&outFormat, "outFormat", "yaml", "Output format for results. (supported [yaml|json] only)")
-	metricsGetCmd.PersistentFlags().StringVar(&outFile, "outFile", "", "Filename Save the result")
+	metricsGetCmd.Flags().StringP("outFormat", "", "yaml", "Output format for results. (supported [yaml|json] only)")
+	metricsGetCmd.Flags().StringP("outFile", "", "", "Filename Save the result")
 }
 
 func getCmd(cmd *cobra.Command, args []string) {
@@ -110,6 +108,7 @@ func getCmd(cmd *cobra.Command, args []string) {
 
 	var outMetrics []byte
 
+	outFormat, _ := cmd.Flags().GetString("outFormat")
 	if outFormat == "yaml" {
 		out, err := yaml.Marshal(mdo)
 		if err != nil {
@@ -125,8 +124,10 @@ func getCmd(cmd *cobra.Command, args []string) {
 	} else {
 		log.Errorf("Invalid flag value outFormat: %s", outFormat)
 	}
+
+	outFile, _ := cmd.Flags().GetString("outFormat")
 	if outFile != "" {
-		if err := ioutil.WriteFile(outFile, []byte(outMetrics), 0644); err != nil {
+		if err := ioutil.WriteFile(outFile, outMetrics, 0644); err != nil {
 			log.Panic(err)
 		}
 	} else {

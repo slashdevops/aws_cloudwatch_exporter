@@ -1,5 +1,5 @@
 /*
-Copyright © 2020 NAME HERE christian@slashdevops.com
+Copyright © 2020 Christian González Di Antonio christian@slashdevops.com
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -27,11 +27,23 @@ var versionCmd = &cobra.Command{
 	Short: "Print the version number of aws_cloudwatch_exporter",
 	Long:  `Print the version number of aws_cloudwatch_exporter`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("Application info: %s\n", conf.Info)
-		fmt.Printf("Application build info: %s\n", conf.BuildInfo)
+		ext, _ := cmd.Flags().GetBool("extended")
+		if ext {
+			fmt.Printf(
+				"version: %s, "+
+					"revision: %s, "+
+					"branch: %s\n",
+				conf.Version,
+				conf.Revision,
+				conf.Branch)
+		} else {
+			fmt.Printf("version: %s\n", conf.Version)
+		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(versionCmd)
+
+	versionCmd.Flags().BoolP("extended", "", false, "Show the extended version information")
 }

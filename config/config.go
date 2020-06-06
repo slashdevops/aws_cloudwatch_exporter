@@ -2,6 +2,7 @@ package config
 
 import (
 	"encoding/json"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/prometheus/client_golang/prometheus"
@@ -41,8 +42,14 @@ type ServerConf struct {
 }
 
 type Server struct {
-	Address string `mapstructure:"address" json:"Address"`
-	Port    uint16 `mapstructure:"port" json:"Port"`
+	Address           string        `mapstructure:"address" json:"Address"`
+	Port              uint16        `mapstructure:"port" json:"Port"`
+	ReadTimeout       time.Duration `mapstructure:"readTimeout" json:"ReadTimeout"`
+	WriteTimeout      time.Duration `mapstructure:"writeTimeout" json:"WriteTimeout"`
+	IdleTimeout       time.Duration `mapstructure:"idleTimeout" json:"IdleTimeout"`
+	ReadHeaderTimeout time.Duration `mapstructure:"readHeaderTimeout" json:"ReadHeaderTimeout"`
+	KeepAlivesEnabled bool          `mapstructure:"keepAlivesEnabled" json:"KeepAlivesEnabled"`
+	LogFormat         string        `mapstructure:"logFormat" json:"LogFormat"`
 }
 
 // This is a convenient structure to allow config files nested (application.[keys])
