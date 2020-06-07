@@ -44,7 +44,7 @@ func (s *Server) ListenOSSignals(done *chan bool) {
 		signal.Notify(osSignals, syscall.SIGINT)
 		signal.Notify(osSignals, syscall.SIGQUIT)
 
-		log.Info("Listen Operating System signals")
+		log.Info("Server is listening operating system signals")
 		sig := <-osSignals
 		log.Infof("Received signal %s from operation system", sig)
 		s.doGracefullyShutdown()
@@ -69,7 +69,7 @@ func (s *Server) doGracefullyShutdown() {
 }
 
 func (s *Server) Start() (err error) {
-	log.Info("Server starting")
+	log.Infof("Server starting on %s:%v", s.c.Server.Address, s.c.Server.Port)
 	if err := s.s.ListenAndServe(); err != http.ErrServerClosed {
 		return err
 	}
