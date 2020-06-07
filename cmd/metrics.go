@@ -36,13 +36,13 @@ import (
 // metricsCmd represents the metrics command
 var (
 	metricsCmd = &cobra.Command{
-		Use:   "metrics [COMMANDS]",
-		Short: "useful to get metrics",
+		Use:   "metrics [commands]",
+		Short: "Useful to debug your metrics",
 		Long:  `metrics commands`,
 	}
 
 	metricsGetCmd = &cobra.Command{
-		Use:   "get [OPTIONS] [ARGS]",
+		Use:   "get [options] [args]",
 		Short: "get metrics",
 		Long:  `Get metrics from CloudWatch using the metrics queries defined in the yaml files`,
 		Run: func(cmd *cobra.Command, args []string) {
@@ -51,7 +51,7 @@ var (
 	}
 
 	metricsDisplayPromDescCmd = &cobra.Command{
-		Use:   "display [OPTIONS] [ARGS]",
+		Use:   "display [options] [args]",
 		Short: "display promDesc",
 		Long:  `Display prometheus metrics definitions`,
 		Run: func(cmd *cobra.Command, args []string) {
@@ -60,7 +60,7 @@ var (
 	}
 
 	metricsCollectCmd = &cobra.Command{
-		Use:   "collect [OPTIONS] [ARGS]",
+		Use:   "collect [options] [args]",
 		Short: "collect metrics",
 		Long:  `Collect metrics from AWS CloudWatch using prometheus collector`,
 		Run: func(cmd *cobra.Command, args []string) {

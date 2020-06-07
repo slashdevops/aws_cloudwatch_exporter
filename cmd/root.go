@@ -200,6 +200,7 @@ func ReadConfFromFiles() {
 	parseConfFiles(&conf)
 	parseMetricsFiles(&conf)
 
+	// expose all the configuration, just to check
 	if conf.Server.Debug {
 		log.Debug(conf.ToJson())
 		// log.VersionInfo(conf.ToYaml())
@@ -210,20 +211,24 @@ func ReadConfFromFiles() {
 func parseConfFiles(c *config.All) {
 	// Config files to be load
 	files := []string{
-		conf.ServerFile,
+		c.Application.ServerFile,
 		c.Application.CredentialsFile,
 	}
 
 	for _, file := range files {
+		fileNameNoExt := strings.TrimSuffix(file, filepath.Ext(file))
+
 		log.Debugf("Parsing configuration file: %s", file)
 		log.Debugf("file: %s", filepath.Base(file))
+		log.Debugf("file without ext: %s", fileNameNoExt)
 		log.Debugf("Location: %s", filepath.Dir(file))
 		log.Debugf("Kind: %s", filepath.Ext(file)[1:])
 
-		viper.SetConfigName(filepath.Base(file))
+		viper.SetConfigName(fileNameNoExt)
 		viper.AddConfigPath(filepath.Dir(file))
 		viper.SetConfigType(filepath.Ext(file)[1:])
 
+		// Read env vars equals as the mapstructure is defined into the config.go
 		viper.AutomaticEnv()
 		viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
@@ -244,12 +249,15 @@ func parseConfFiles(c *config.All) {
 func parseMetricsFiles(c *config.All) {
 
 	for i, file := range c.Application.MetricsFiles {
+		fileNameNoExt := strings.TrimSuffix(file, filepath.Ext(file))
+
 		log.Debugf("Configuration file: %s", file)
 		log.Debugf("file: %s", filepath.Base(file))
+		log.Debugf("file without ext: %s", fileNameNoExt)
 		log.Debugf("Location: %s", filepath.Dir(file))
 		log.Debugf("Kind: %s", filepath.Ext(file)[1:])
 
-		viper.SetConfigName(filepath.Base(file))
+		viper.SetConfigName(fileNameNoExt)
 		viper.AddConfigPath(filepath.Dir(file))
 		viper.SetConfigType(filepath.Ext(file)[1:])
 

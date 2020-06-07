@@ -34,14 +34,14 @@ import (
 // serverCmd represents the server command
 var (
 	serverCmd = &cobra.Command{
-		Use:   "server",
-		Short: "Server commands",
+		Use:   "server [commands]",
+		Short: "Useful to start server",
 		Long:  `A longer description that spans `,
 	}
 
 	serverStartCmd = &cobra.Command{
 		Use:   "start",
-		Short: "Start the http server",
+		Short: "Start the http server to expose the metrics",
 		Long:  `This start the http server to handle connections for metrics endpoint`,
 		Run: func(cmd *cobra.Command, args []string) {
 			startCmd(cmd, args)
