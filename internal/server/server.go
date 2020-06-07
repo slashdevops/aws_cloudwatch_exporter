@@ -2,13 +2,13 @@ package server
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"strconv"
 	"syscall"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/slashdevops/aws_cloudwatch_exporter/config"
 )
 
@@ -44,9 +44,9 @@ func (s *Server) ListenOSSignals(done *chan bool) {
 		signal.Notify(osSignals, syscall.SIGINT)
 		signal.Notify(osSignals, syscall.SIGQUIT)
 
-		log.Println("Listen Operating System signals")
+		log.Info("Listen Operating System signals")
 		sig := <-osSignals
-		log.Printf("Received signal %s from operation system", sig)
+		log.Infof("Received signal %s from operation system", sig)
 		s.doGracefullyShutdown()
 
 		// Notify main routine shutdown is done
@@ -55,7 +55,7 @@ func (s *Server) ListenOSSignals(done *chan bool) {
 }
 
 func (s *Server) doGracefullyShutdown() {
-	log.Printf("Graceful shutdown, wait %vs\n", s.c.Server.ShutdownTimeout.Seconds())
+	log.Infof("Graceful shutdown, wait %vs\n", s.c.Server.ShutdownTimeout.Seconds())
 
 	ctx, cancel := context.WithTimeout(context.Background(), s.c.ShutdownTimeout)
 	defer cancel()
@@ -65,11 +65,11 @@ func (s *Server) doGracefullyShutdown() {
 	if err := s.s.Shutdown(ctx); err != nil {
 		log.Fatalf("Server was shutdown, %s\n", err)
 	}
-	log.Println("Server stopped")
+	log.Info("Server stopped")
 }
 
 func (s *Server) Start() (err error) {
-	log.Println("Server starting")
+	log.Info("Server starting")
 	if err := s.s.ListenAndServe(); err != http.ErrServerClosed {
 		return err
 	}

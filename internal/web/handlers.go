@@ -3,7 +3,7 @@ package web
 import (
 	"net/http"
 
-	"github.com/google/martian/log"
+	log "github.com/sirupsen/logrus"
 	"github.com/slashdevops/aws_cloudwatch_exporter/config"
 
 	"text/template"

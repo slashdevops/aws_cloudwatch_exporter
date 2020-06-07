@@ -5,7 +5,7 @@ import (
 	"reflect"
 
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/prometheus/common/log"
+	log "github.com/sirupsen/logrus"
 	"github.com/slashdevops/aws_cloudwatch_exporter/config"
 
 	"github.com/aws/aws-sdk-go/aws"

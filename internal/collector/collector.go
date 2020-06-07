@@ -73,14 +73,14 @@ func New(c *config.All, m metrics.Metrics, s *session.Session) *Collector {
 				prometheus.GaugeOpts{
 					Namespace: c.Application.Namespace,
 					Name:      "metrics_total",
-					Help:      "Total number of metrics to be scrapped " + c.Application.Namespace + " exporter and defined into yaml files.",
+					Help:      "The total number of metrics to be scraped and defined into YAML files.",
 				},
 			),
 			ScrapesSuccess: prometheus.NewCounter(
 				prometheus.CounterOpts{
 					Namespace:   c.Application.Namespace,
 					Name:        "scrapes_success_total",
-					Help:        "Total number of times of AWS CloudWatch API was scraped for metrics with success result.",
+					Help:        "The total number of times of AWS CloudWatch API scraped for metrics with successful results.",
 					ConstLabels: nil,
 				},
 			),
@@ -89,7 +89,7 @@ func New(c *config.All, m metrics.Metrics, s *session.Session) *Collector {
 					Namespace:   c.Application.Namespace,
 					Subsystem:   "collector",
 					Name:        "scrapes_errors_total",
-					Help:        "Total number of times of AWS CloudWatch API was scraped for metrics with error result.",
+					Help:        "The total number of times of AWS CloudWatch API scraped for metrics with error results.",
 					ConstLabels: nil,
 				},
 			),
@@ -98,7 +98,7 @@ func New(c *config.All, m metrics.Metrics, s *session.Session) *Collector {
 					Namespace:   c.Application.Namespace,
 					Subsystem:   "collector",
 					Name:        "scrapes_messages_total",
-					Help:        "Total number of times of AWS CloudWatch API was scraped for metrics with some message result. (see the logs)",
+					Help:        "The total number of times of AWS CloudWatch API scraped for metrics and we got some message results. (see exporter logs)",
 					ConstLabels: nil,
 				},
 			),
@@ -107,7 +107,7 @@ func New(c *config.All, m metrics.Metrics, s *session.Session) *Collector {
 					Namespace:   c.Application.Namespace,
 					Subsystem:   "collector",
 					Name:        "metrics_scrapes_success_total",
-					Help:        "Total number of metrics of AWS CloudWatch API was scraped with success result.",
+					Help:        "The total number of metrics of AWS CloudWatch API scraped with successful results.",
 					ConstLabels: nil,
 				},
 			),
@@ -116,7 +116,7 @@ func New(c *config.All, m metrics.Metrics, s *session.Session) *Collector {
 					Namespace:   c.Application.Namespace,
 					Subsystem:   "collector",
 					Name:        "metrics_scrapes_errors_total",
-					Help:        "Total number of metrics of AWS CloudWatch API was scraped with errors result.",
+					Help:        "The total number of metrics of AWS CloudWatch API scraped with errors results.",
 					ConstLabels: nil,
 				},
 			),
@@ -125,7 +125,7 @@ func New(c *config.All, m metrics.Metrics, s *session.Session) *Collector {
 					Namespace:   c.Application.Namespace,
 					Subsystem:   "collector",
 					Name:        "metrics_scrapes_empty_total",
-					Help:        "Total number of metrics of AWS CloudWatch API was scraped with empty result.",
+					Help:        "The total number of metrics of AWS CloudWatch API scraped with empty results.",
 					ConstLabels: nil,
 				},
 			),
@@ -134,7 +134,7 @@ func New(c *config.All, m metrics.Metrics, s *session.Session) *Collector {
 					Namespace:   c.Application.Namespace,
 					Subsystem:   "collector",
 					Name:        "metrics_scrapes_messages_total",
-					Help:        "Total number of metrics of AWS CloudWatch API was scraped with some messages result. (see the logs)",
+					Help:        "The total number of metrics of AWS CloudWatch API scraped and we got some messages results. (see exporter logs)",
 					ConstLabels: nil,
 				},
 			),
@@ -166,7 +166,7 @@ func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 	c.mutex.Lock() // To protect metrics from concurrent collects.
 	defer c.mutex.Unlock()
 
-	// this information is constant
+	// this metrics is constant
 	c.ownMetrics.Info.Set(1)
 	ch <- c.ownMetrics.Info
 
@@ -191,7 +191,7 @@ func (c *Collector) scrape(ch chan<- prometheus.Metric) {
 	// TODO: Implement the paginator using nextoken
 	mdi := c.metrics.GetMetricDataInput(startTime, endTime, period, "")
 
-	// number of metrics to be scrapped and defined in yaml files
+	// number of metrics to be scrape and defined in yaml files
 	c.ownMetrics.MetricsTotal.Set(float64(len(mdi.MetricDataQueries)))
 
 	// TODO: Remove it from here and implement a new interface and package to collect metrics

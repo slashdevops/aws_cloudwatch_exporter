@@ -6,14 +6,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/prometheus/common/log"
+	log "github.com/sirupsen/logrus"
 	"github.com/slashdevops/aws_cloudwatch_exporter/config"
-
-	"github.com/sirupsen/logrus"
-)
-
-const (
-	LogLevel = logrus.DebugLevel
 )
 
 func TestNewSessionWithEnvVars(t *testing.T) {
