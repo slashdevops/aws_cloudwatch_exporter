@@ -55,59 +55,58 @@ func init() {
 
 	// Server variables
 	// Address
-	serverCmd.PersistentFlags().StringVar(&conf.Server.Address, "address", "", "Server address, empty means all addresses")
-	if err := viper.BindPFlag("server.address", rootCmd.PersistentFlags().Lookup("address")); err != nil {
+	serverCmd.PersistentFlags().StringVar(&conf.Server.Address, "address", "127.0.0.1", "Server address, empty means all addresses")
+	if err := viper.BindPFlag("server.address", serverCmd.PersistentFlags().Lookup("address")); err != nil {
 		log.Error(err)
 	}
 
 	// Port
 	serverCmd.PersistentFlags().Uint16Var(&conf.Server.Port, "port", 9690, "Server port")
-	if err := viper.BindPFlag("server.port", rootCmd.PersistentFlags().Lookup("port")); err != nil {
+	if err := viper.BindPFlag("server.port", serverCmd.PersistentFlags().Lookup("port")); err != nil {
 		log.Error(err)
 	}
 
 	// ReadTimeout
 	serverCmd.PersistentFlags().DurationVar(&conf.Server.ReadTimeout, "readTimeout", 2*time.Second, "Server ReadTimeout in duration nomenclature, see https://golang.org/pkg/net/http/")
-	if err := viper.BindPFlag("server.readTimeout", rootCmd.PersistentFlags().Lookup("readTimeout")); err != nil {
+	if err := viper.BindPFlag("server.readTimeout", serverCmd.PersistentFlags().Lookup("readTimeout")); err != nil {
 		log.Error(err)
 	}
 
 	// WriteTimeout
 	serverCmd.PersistentFlags().DurationVar(&conf.Server.WriteTimeout, "writeTimeout", 5*time.Second, "Server WriteTimeout in duration nomenclature, see https://golang.org/pkg/net/http/")
-	if err := viper.BindPFlag("server.writeTimeout", rootCmd.PersistentFlags().Lookup("writeTimeout")); err != nil {
+	if err := viper.BindPFlag("server.writeTimeout", serverCmd.PersistentFlags().Lookup("writeTimeout")); err != nil {
 		log.Error(err)
 	}
 
 	// IdleTimeout
 	serverCmd.PersistentFlags().DurationVar(&conf.Server.IdleTimeout, "idleTimeout", 60*time.Second, "Server IdleTimeout in duration nomenclature, see https://golang.org/pkg/net/http/")
-	if err := viper.BindPFlag("server.idleTimeout", rootCmd.PersistentFlags().Lookup("idleTimeout")); err != nil {
+	if err := viper.BindPFlag("server.idleTimeout", serverCmd.PersistentFlags().Lookup("idleTimeout")); err != nil {
 		log.Error(err)
 	}
 
 	// ReadHeaderTimeout
 	serverCmd.PersistentFlags().DurationVar(&conf.Server.ReadHeaderTimeout, "readHeaderTimeout", 5*time.Second, "Server ReadHeaderTimeout in duration nomenclature, see https://golang.org/pkg/net/http/")
-	if err := viper.BindPFlag("server.readHeaderTimeout", rootCmd.PersistentFlags().Lookup("readHeaderTimeout")); err != nil {
+	if err := viper.BindPFlag("server.readHeaderTimeout", serverCmd.PersistentFlags().Lookup("readHeaderTimeout")); err != nil {
 		log.Error(err)
 	}
 
 	// ShutdownTimeout
 	serverCmd.PersistentFlags().DurationVar(&conf.Server.ShutdownTimeout, "shutdownTimeout", 30*time.Second, "Server ShutdownTimeout in duration nomenclature, the time waiting until graceful shutdown")
-	if err := viper.BindPFlag("server.shutdownTimeout", rootCmd.PersistentFlags().Lookup("shutdownTimeout")); err != nil {
+	if err := viper.BindPFlag("server.shutdownTimeout", serverCmd.PersistentFlags().Lookup("shutdownTimeout")); err != nil {
 		log.Error(err)
 	}
 
 	// KeepAlivesEnabled
 	serverCmd.PersistentFlags().BoolVar(&conf.Server.KeepAlivesEnabled, "keepAlivesEnabled", true, "Server KeepAlivesEnabled, see https://golang.org/pkg/net/http/")
-	if err := viper.BindPFlag("server.keepAlivesEnabled", rootCmd.PersistentFlags().Lookup("keepAlivesEnabled")); err != nil {
+	if err := viper.BindPFlag("server.keepAlivesEnabled", serverCmd.PersistentFlags().Lookup("keepAlivesEnabled")); err != nil {
 		log.Error(err)
 	}
 
 	// LogFormat
 	serverCmd.PersistentFlags().StringVar(&conf.Server.LogFormat, "logFormat", "text", "Server LogFormat, possible values: text|json")
-	if err := viper.BindPFlag("server.logFormat", rootCmd.PersistentFlags().Lookup("logFormat")); err != nil {
+	if err := viper.BindPFlag("server.logFormat", serverCmd.PersistentFlags().Lookup("logFormat")); err != nil {
 		log.Error(err)
 	}
-
 }
 
 func startCmd(cmd *cobra.Command, args []string) {
@@ -136,13 +135,13 @@ func startCmd(cmd *cobra.Command, args []string) {
 
 	// this channel is to wait routines before finis this
 	done := make(chan bool, 1)
-	server := server.New(mux, &conf)
+	s := server.New(mux, &conf)
 
 	// This run a go routine to listen Operating System signals
 	// and execute a Gracefully shutdown when those occurs
-	server.ListenOSSignals(&done)
+	s.ListenOSSignals(&done)
 
-	if err := server.Start(); err != nil {
+	if err := s.Start(); err != nil {
 		log.Fatalf("Server could not be started, %s", err.Error())
 	}
 
