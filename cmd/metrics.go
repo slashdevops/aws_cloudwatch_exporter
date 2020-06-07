@@ -86,6 +86,8 @@ func init() {
 	}
 
 	// Output parameters
+	metricsGetCmd.Flags().StringP("address", "", "127.0.0.1", "Test server address, empty means all addresses")
+	metricsGetCmd.Flags().StringP("port", "", "8080", "Test server port")
 	metricsGetCmd.Flags().StringP("outFormat", "", "yaml", "Output format for results, possible values: [yaml|json]")
 	metricsGetCmd.Flags().StringP("outFile", "", "", "Output file where to store the results.")
 }
@@ -160,6 +162,9 @@ func collectCmd(cmd *cobra.Command, args []string) {
 	prometheus.MustRegister(c)
 	http.Handle("/metrics", promhttp.Handler())
 
-	log.Info("Starting Server")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	a, _ := cmd.Flags().GetString("address")
+	p, _ := cmd.Flags().GetString("port")
+	soc := fmt.Sprintf("%s:%v", a, p)
+	log.Infof("Starting Server on %s", soc)
+	log.Fatal(http.ListenAndServe(soc, nil))
 }
