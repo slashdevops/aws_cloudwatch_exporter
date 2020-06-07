@@ -188,11 +188,13 @@ func (c *Collector) scrape(ch chan<- prometheus.Metric) {
 		c.conf.Application.MetricStatPeriod,
 		c.conf.Application.MetricTimeWindow)
 
+	// TODO: Implement the paginator using nextoken
 	mdi := c.metrics.GetMetricDataInput(startTime, endTime, period, "")
 
 	// number of metrics to be scrapped and defined in yaml files
-	c.ownMetrics.MetricsTotal.Add(float64(len(mdi.MetricDataQueries)))
+	c.ownMetrics.MetricsTotal.Set(float64(len(mdi.MetricDataQueries)))
 
+	// TODO: Remove it from here and implement a new interface and package to collect metrics
 	svc := cloudwatch.New(c.sess)
 
 	// Scrape CloudWatch Metrics
@@ -201,8 +203,9 @@ func (c *Collector) scrape(ch chan<- prometheus.Metric) {
 		c.ownMetrics.Up.Set(0)
 		c.ownMetrics.ScrapesErrors.Inc()
 		log.Errorf("Error getting metrics %v", err)
+	} else {
+		c.ownMetrics.ScrapesSuccess.Inc()
 	}
-	c.ownMetrics.ScrapesSuccess.Inc()
 
 	// Some information came from the metrics scrape
 	if len(mdo.Messages) > 0 {

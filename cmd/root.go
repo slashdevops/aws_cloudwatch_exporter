@@ -132,7 +132,7 @@ func ReadConfFromFiles() {
 	parseMetricsFiles(&conf)
 
 	if conf.Server.Debug {
-		log.Info(conf.ToJson())
+		log.Debug(conf.ToJson())
 		// log.VersionInfo(conf.ToYaml())
 	}
 }

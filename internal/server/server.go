@@ -69,9 +69,9 @@ func (s *Server) doGracefullyShutdown() {
 }
 
 func (s *Server) Start() (err error) {
+	log.Println("Server starting")
 	if err := s.s.ListenAndServe(); err != http.ErrServerClosed {
 		return err
 	}
-	log.Println("Server started")
 	return
 }
