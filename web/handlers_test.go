@@ -15,7 +15,7 @@ func TestHandlers_Handler(t *testing.T) {
 		expectedBody   string
 	}{
 		{
-			name:           "Test Home",
+			name:           "TestHome",
 			in:             httptest.NewRequest(http.MethodGet, "/", nil),
 			out:            httptest.NewRecorder(),
 			expectedStatus: http.StatusOK,

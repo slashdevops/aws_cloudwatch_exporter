@@ -6,7 +6,9 @@ server:
   idleTimeout: 60s
   ReadHeaderTimeout: 2s
   KeepAlivesEnabled: true
+  shutdownTimeout: 30s
   LogFormat: text
+  Debug: false
 
 application:
   metricStatPeriod: 5m

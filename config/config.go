@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/prometheus/client_golang/prometheus"
 	"gopkg.in/yaml.v2"
 )
 
@@ -42,14 +40,16 @@ type ServerConf struct {
 }
 
 type Server struct {
-	Address           string        `mapstructure:"address" json:"Address"`
-	Port              uint16        `mapstructure:"port" json:"Port"`
-	ReadTimeout       time.Duration `mapstructure:"readTimeout" json:"ReadTimeout"`
-	WriteTimeout      time.Duration `mapstructure:"writeTimeout" json:"WriteTimeout"`
-	IdleTimeout       time.Duration `mapstructure:"idleTimeout" json:"IdleTimeout"`
-	ReadHeaderTimeout time.Duration `mapstructure:"readHeaderTimeout" json:"ReadHeaderTimeout"`
-	KeepAlivesEnabled bool          `mapstructure:"keepAlivesEnabled" json:"KeepAlivesEnabled"`
-	LogFormat         string        `mapstructure:"logFormat" json:"LogFormat"`
+	Address           string        `mapstructure:"address" json:"Address" yaml:"Address"`
+	Port              uint16        `mapstructure:"port" json:"Port" yaml:"Port"`
+	ReadTimeout       time.Duration `mapstructure:"readTimeout" json:"ReadTimeout" yaml:"ReadTimeout"`
+	WriteTimeout      time.Duration `mapstructure:"writeTimeout" json:"WriteTimeout" yaml:"WriteTimeout"`
+	IdleTimeout       time.Duration `mapstructure:"idleTimeout" json:"IdleTimeout" yaml:"IdleTimeout"`
+	ReadHeaderTimeout time.Duration `mapstructure:"readHeaderTimeout" json:"ReadHeaderTimeout" yaml:"ReadHeaderTimeout"`
+	KeepAlivesEnabled bool          `mapstructure:"keepAlivesEnabled" json:"KeepAlivesEnabled" yaml:"KeepAlivesEnabled"`
+	ShutdownTimeout   time.Duration `mapstructure:"shutdownTimeout" json:"ShutdownTimeout" yaml:"ShutdownTimeout"`
+	LogFormat         string        `mapstructure:"logFormat" json:"LogFormat" yaml:"LogFormat"`
+	Debug             bool          `mapstructure:"debug" json:"Debug" yaml:"Debug"`
 }
 
 // This is a convenient structure to allow config files nested (application.[keys])
@@ -75,12 +75,11 @@ type Application struct {
 	Namespace        string   `mapstructure:"namespace" json:"Namespace" yaml:"Namespace"`
 	ServerFile       string   `mapstructure:"serverFile" json:"ServerFile" yaml:"ServerFile"`
 	CredentialsFile  string   `mapstructure:"credentialsFile" json:"SharedCredentialsFile" yaml:"SharedCredentialsFile"`
+	HealthPath       string   `mapstructure:"healthPath" json:"HealthPath" yaml:"HealthPath"`
 	MetricsPath      string   `mapstructure:"metricsPath" json:"MetricsPath" yaml:"MetricsPath"`
 	MetricsFiles     []string `mapstructure:"metricsFiles" json:"MetricsFiles" yaml:"MetricsFiles"`
 	MetricStatPeriod string   `mapstructure:"metricStatPeriod" json:"MetricStatPeriod" yaml:"MetricStatPeriod"`
 	MetricTimeWindow string   `mapstructure:"metricTimeWindow" json:"MetricTimeWindow" yaml:"MetricTimeWindow"`
-	Gatherer         prometheus.Gatherer
-	AWSSession       *session.Session
 }
 
 // https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html

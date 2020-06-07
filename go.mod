@@ -5,10 +5,11 @@ go 1.14
 require (
 	github.com/VividCortex/gohistogram v1.0.0 // indirect
 	github.com/alecthomas/units v0.0.0-20190924025748-f65c72e2690d // indirect
-	github.com/aws/aws-sdk-go v1.31.8
+	github.com/aws/aws-sdk-go v1.31.12
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/golang/protobuf v1.4.2 // indirect
 	github.com/google/go-github/v25 v25.1.3 // indirect
+	github.com/google/martian v2.1.0+incompatible
 	github.com/imdario/mergo v0.3.9 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/mapstructure v1.3.1 // indirect
@@ -16,8 +17,9 @@ require (
 	github.com/prometheus/client_golang v1.6.0
 	github.com/prometheus/common v0.10.0
 	github.com/prometheus/mysqld_exporter v0.12.1 // indirect
+	github.com/prometheus/procfs v0.1.0 // indirect
 	github.com/prometheus/promu v0.5.0 // indirect
-	github.com/sirupsen/logrus v1.5.0
+	github.com/sirupsen/logrus v1.6.0
 	github.com/spf13/afero v1.2.2 // indirect
 	github.com/spf13/cast v1.3.1 // indirect
 	github.com/spf13/cobra v1.0.0

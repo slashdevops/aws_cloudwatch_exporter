@@ -35,6 +35,7 @@ const (
 GetMetricData API method`
 	appDescriptionShort = "AWS CloudWatch exporter for prometheus.io"
 	appMetricsPath      = "/metrics"
+	appHealthPath       = "/health"
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -59,6 +60,12 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
+
+	// Debug
+	rootCmd.PersistentFlags().BoolVar(&conf.Server.Debug, "debug", false, "Enable debug messages in logs")
+	if err := viper.BindPFlag("server.debug", rootCmd.PersistentFlags().Lookup("debug")); err != nil {
+		log.Error(err)
+	}
 
 	// Files
 	rootCmd.PersistentFlags().StringVar(&conf.ServerFile, "serverFile", "server.yaml", "The server configuration file")
@@ -91,8 +98,14 @@ func initConfig() {
 		log.SetFormatter(&logrus.TextFormatter{})
 	}
 
+	if conf.Server.Debug {
+		log.SetLevel(logrus.DebugLevel)
+	} else {
+		log.SetLevel(logrus.InfoLevel)
+	}
+
 	log.SetOutput(os.Stdout)
-	log.SetLevel(logrus.DebugLevel)
+
 	// Set the output of the message for the current logrus instance,
 	// Output of logrus instance can be set to any io.writer
 	log.Out = os.Stdout
@@ -102,6 +115,7 @@ func initConfig() {
 	conf.Application.Namespace = Namespace
 	conf.Application.Description = appDescription
 	conf.Application.MetricsPath = appMetricsPath
+	conf.Application.HealthPath = appHealthPath
 	conf.Application.Version = version.Version
 	conf.Application.Revision = version.Revision
 	conf.Application.GoVersion = version.GoVersion
@@ -115,7 +129,7 @@ func initConfig() {
 func ReadConfFromFiles() {
 	parseConfFiles(&conf)
 	parseMetricsFiles(&conf)
-	// fmt.Println(conf.ToJson())
+
 	fmt.Println(conf.ToJson())
 	// fmt.Println(conf.ToYaml())
 }

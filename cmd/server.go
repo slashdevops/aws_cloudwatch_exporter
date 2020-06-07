@@ -17,12 +17,15 @@ package cmd
 
 import (
 	"net/http"
+	"net/http/pprof"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/slashdevops/aws_cloudwatch_exporter/collector"
 	"github.com/slashdevops/aws_cloudwatch_exporter/internal/awshelper"
 	"github.com/slashdevops/aws_cloudwatch_exporter/internal/metrics"
+	"github.com/slashdevops/aws_cloudwatch_exporter/internal/server"
+	"github.com/slashdevops/aws_cloudwatch_exporter/web"
 	"github.com/spf13/cobra"
 )
 
@@ -50,14 +53,35 @@ func init() {
 }
 
 func startCmd(cmd *cobra.Command, args []string) {
+	ReadConfFromFiles()
 
 	m := metrics.New(&conf)
 	sess, _ := awshelper.NewSession(&conf.AWS)
-	c := collector.New(&conf, m, sess)
-	prometheus.MustRegister(c)
+	collector := collector.New(&conf, m, sess)
+	prometheus.MustRegister(collector)
 
-	http.Handle(conf.Application.MetricsPath, promhttp.Handler())
+	handlers := web.NewHandlers(&conf)
 
-	log.Info("Starting Server")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", handlers.Home)
+	mux.HandleFunc(conf.Application.HealthPath, handlers.Health)
+	mux.Handle(conf.Application.MetricsPath, promhttp.Handler())
+
+	// Debug & Profiling
+	mux.HandleFunc("/debug/pprof/", pprof.Index)
+	mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+	mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
+	mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+	mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
+
+	//
+	done := make(chan bool, 1)
+	server := server.New(mux, &conf, &done)
+	server.ListenOSSignals()
+
+	if err := server.Start(); err != nil {
+		log.Fatalf("Starting server error: %s", err)
+	}
+
+	<-done
 }

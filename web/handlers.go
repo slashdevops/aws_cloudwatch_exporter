@@ -2,9 +2,8 @@ package web
 
 import (
 	"net/http"
-	"net/http/pprof"
 
-	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/google/martian/log"
 	"github.com/slashdevops/aws_cloudwatch_exporter/config"
 
 	"text/template"
@@ -20,31 +19,28 @@ func NewHandlers(c *config.All) *Handlers {
 	}
 }
 
-func (h *Handlers) SetupRoutes(mux *http.ServeMux) {
-	mux.HandleFunc("/", h.Home)
-	mux.HandleFunc("/healthz", h.health)
-
-	// Gatherer endopoint
-	//mux.Handle(h.conf.Server.MetricsPath, promhttp.Handler())
-	mux.Handle(h.conf.Server.MetricsPath, promhttp.HandlerFor(h.conf.Gatherer, promhttp.HandlerOpts{}))
-
-	// Debug & Profiling
-	mux.HandleFunc("/debug/pprof/", pprof.Index)
-	mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
-	mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
-	mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
-	mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
-}
-
 func (h *Handlers) Home(w http.ResponseWriter, r *http.Request) {
+	indexHtmlTmpl := `
+<html>
+<head>
+    <title>{{.Title}}</title>
+</head>
+<body>
+    <h1><a href="{{.MetricHandler}}">metrics</a></h1>
+</body>
+</html>
+`
 	data := struct {
 		Title         string
 		MetricHandler string
-	}{h.conf.Application.Description, h.conf.Server.MetricsPath}
-	t := template.Must(template.ParseFiles("web/templates/index.html"))
-	t.Execute(w, data)
+	}{h.conf.Application.Description, h.conf.Application.MetricsPath}
+
+	t := template.Must(template.New("index").Parse(indexHtmlTmpl))
+	if err := t.Execute(w, data); err != nil {
+		log.Errorf("Error rendering template %s", err)
+	}
 }
 
-func (h *Handlers) health(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) Health(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, http.StatusText(http.StatusOK), http.StatusOK)
 }

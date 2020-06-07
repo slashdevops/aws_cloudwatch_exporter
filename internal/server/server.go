@@ -1,0 +1,80 @@
+package server
+
+import (
+	"context"
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"strconv"
+	"syscall"
+
+	"github.com/slashdevops/aws_cloudwatch_exporter/config"
+)
+
+type Server struct {
+	c    *config.All
+	s    *http.Server
+	done *chan bool
+}
+
+func New(mux *http.ServeMux, c *config.All, done *chan bool) *Server {
+	httpServer := &http.Server{
+		ReadTimeout:       c.Server.ReadTimeout,
+		WriteTimeout:      c.Server.WriteTimeout,
+		IdleTimeout:       c.Server.IdleTimeout,
+		ReadHeaderTimeout: c.Server.ReadHeaderTimeout,
+		Addr:              c.Server.Address + ":" + strconv.Itoa(int(c.Server.Port)),
+		Handler:           mux,
+	}
+
+	httpServer.SetKeepAlivesEnabled(c.Server.KeepAlivesEnabled)
+
+	server := &Server{
+		c:    c,
+		s:    httpServer,
+		done: done,
+	}
+	return server
+}
+
+func (s *Server) ListenOSSignals() {
+	go func(s *Server) {
+		osSignals := make(chan os.Signal, 1)
+		signal.Notify(osSignals, os.Interrupt)
+		signal.Notify(osSignals, syscall.SIGTERM)
+		signal.Notify(osSignals, syscall.SIGINT)
+		signal.Notify(osSignals, syscall.SIGQUIT)
+
+		log.Println("Listen for Operating System signals")
+		sig := <-osSignals
+		log.Printf("Received Signal: %s from the Operation System", sig)
+		s.doGracefullyShutdown()
+
+		// Notify main routine shutdown is done
+		*s.done <- true
+	}(s)
+}
+
+func (s *Server) doGracefullyShutdown() {
+	log.Printf("Doing gratefully shutdown")
+
+	ctx, cancel := context.WithTimeout(context.Background(), s.c.ShutdownTimeout)
+	defer cancel()
+
+	s.s.SetKeepAlivesEnabled(false)
+
+	if err := s.s.Shutdown(ctx); err != nil {
+		log.Fatalf("Server shutting down: %s", err)
+	}
+	log.Println("Server stopped")
+}
+
+func (s *Server) Start() (err error) {
+	log.Println("Server starting")
+
+	if err := s.s.ListenAndServe(); err != http.ErrServerClosed {
+		return err
+	}
+	return
+}
