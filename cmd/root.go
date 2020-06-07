@@ -29,11 +29,11 @@ import (
 )
 
 const (
-	Namespace      = "aws_cloudwatch_exporter"
-	appName        = "aws_cloudwatch_exporter"
-	appDescription = `This is a AWS CloudWatch exporter for prometheus.io, this scrape metrics using
-GetMetricData API method`
+	Namespace           = "aws_cloudwatch_exporter"
+	appName             = "aws_cloudwatch_exporter"
+	appDescription      = `This is an AWS CloudWatch exporter for prometheus.io`
 	appDescriptionShort = "AWS CloudWatch exporter for prometheus.io"
+	appGitRepository    = "https://github.com/slashdevops/aws_cloudwatch_exporter"
 	appMetricsPath      = "/metrics"
 	appHealthPath       = "/health"
 )
@@ -114,6 +114,7 @@ func initConfig() {
 	conf.Application.Name = appName
 	conf.Application.Namespace = Namespace
 	conf.Application.Description = appDescription
+	conf.Application.GitRepository = appGitRepository
 	conf.Application.MetricsPath = appMetricsPath
 	conf.Application.HealthPath = appHealthPath
 	conf.Application.Version = version.Version
@@ -121,7 +122,7 @@ func initConfig() {
 	conf.Application.GoVersion = version.GoVersion
 	conf.Application.BuildUser = version.BuildUser
 	conf.Application.BuildDate = version.BuildDate
-	conf.Application.Info = version.Info()
+	conf.Application.VersionInfo = version.Info()
 	conf.Application.BuildInfo = version.BuildContext()
 }
 
@@ -130,8 +131,10 @@ func ReadConfFromFiles() {
 	parseConfFiles(&conf)
 	parseMetricsFiles(&conf)
 
-	fmt.Println(conf.ToJson())
-	// fmt.Println(conf.ToYaml())
+	if conf.Server.Debug {
+		log.Info(conf.ToJson())
+		// log.VersionInfo(conf.ToYaml())
+	}
 }
 
 // Unmarshall Yaml files into c config structure

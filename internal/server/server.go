@@ -13,12 +13,11 @@ import (
 )
 
 type Server struct {
-	c    *config.All
-	s    *http.Server
-	done *chan bool
+	c *config.All
+	s *http.Server
 }
 
-func New(mux *http.ServeMux, c *config.All, done *chan bool) *Server {
+func New(mux *http.ServeMux, c *config.All) *Server {
 	httpServer := &http.Server{
 		ReadTimeout:       c.Server.ReadTimeout,
 		WriteTimeout:      c.Server.WriteTimeout,
@@ -31,33 +30,32 @@ func New(mux *http.ServeMux, c *config.All, done *chan bool) *Server {
 	httpServer.SetKeepAlivesEnabled(c.Server.KeepAlivesEnabled)
 
 	server := &Server{
-		c:    c,
-		s:    httpServer,
-		done: done,
+		c: c,
+		s: httpServer,
 	}
 	return server
 }
 
-func (s *Server) ListenOSSignals() {
-	go func(s *Server) {
+func (s *Server) ListenOSSignals(done *chan bool) {
+	go func(s *Server, done *chan bool) {
 		osSignals := make(chan os.Signal, 1)
 		signal.Notify(osSignals, os.Interrupt)
 		signal.Notify(osSignals, syscall.SIGTERM)
 		signal.Notify(osSignals, syscall.SIGINT)
 		signal.Notify(osSignals, syscall.SIGQUIT)
 
-		log.Println("Listen for Operating System signals")
+		log.Println("Listen Operating System signals")
 		sig := <-osSignals
-		log.Printf("Received Signal: %s from the Operation System", sig)
+		log.Printf("Received signal %s from operation system", sig)
 		s.doGracefullyShutdown()
 
 		// Notify main routine shutdown is done
-		*s.done <- true
-	}(s)
+		*done <- true
+	}(s, done)
 }
 
 func (s *Server) doGracefullyShutdown() {
-	log.Printf("Doing gratefully shutdown")
+	log.Printf("Graceful shutdown, wait %vs\n", s.c.Server.ShutdownTimeout.Seconds())
 
 	ctx, cancel := context.WithTimeout(context.Background(), s.c.ShutdownTimeout)
 	defer cancel()
@@ -65,16 +63,15 @@ func (s *Server) doGracefullyShutdown() {
 	s.s.SetKeepAlivesEnabled(false)
 
 	if err := s.s.Shutdown(ctx); err != nil {
-		log.Fatalf("Server shutting down: %s", err)
+		log.Fatalf("Server was shutdown, %s\n", err)
 	}
 	log.Println("Server stopped")
 }
 
 func (s *Server) Start() (err error) {
-	log.Println("Server starting")
-
 	if err := s.s.ListenAndServe(); err != http.ErrServerClosed {
 		return err
 	}
+	log.Println("Server started")
 	return
 }

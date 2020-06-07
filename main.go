@@ -15,7 +15,9 @@ limitations under the License.
 */
 package main
 
-import "github.com/slashdevops/aws_cloudwatch_exporter/cmd"
+import (
+	"github.com/slashdevops/aws_cloudwatch_exporter/cmd"
+)
 
 func main() {
 	cmd.Execute()

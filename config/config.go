@@ -62,21 +62,22 @@ type ApplicationConf struct {
 }
 
 type Application struct {
-	Name             string   `mapstructure:"name" json:"Name" yaml:"Name"`
-	Description      string   `mapstructure:"description" json:"Description" yaml:"Description"`
-	Version          string   `mapstructure:"version" json:"Version" yaml:"Version"`
-	Revision         string   `mapstructure:"revision" json:"Revision" yaml:"Revision"`
-	Branch           string   `mapstructure:"branch" json:"Branch" yaml:"Branch"`
-	BuildUser        string   `mapstructure:"buildUser" json:"BuildUser" yaml:"BuildUser"`
-	BuildDate        string   `mapstructure:"buildDate" json:"BuildDate" yaml:"BuildDate"`
-	GoVersion        string   `mapstructure:"goVersion" json:"GoVersion" yaml:"GoVersion"`
-	Info             string   `mapstructure:"info" json:"Info" yaml:"Info"`
-	BuildInfo        string   `mapstructure:"buildInfo" json:"BuildInfo" yaml:"BuildInfo"`
-	Namespace        string   `mapstructure:"namespace" json:"Namespace" yaml:"Namespace"`
+	Name             string   `json:"Name" yaml:"Name"`
+	Description      string   `json:"Description" yaml:"Description"`
+	GitRepository    string   `json:"GitRepository" yaml:"GitRepository"`
+	Version          string   `json:"Version" yaml:"Version"`
+	Revision         string   `json:"Revision" yaml:"Revision"`
+	Branch           string   `json:"Branch" yaml:"Branch"`
+	BuildUser        string   `json:"BuildUser" yaml:"BuildUser"`
+	BuildDate        string   `json:"BuildDate" yaml:"BuildDate"`
+	GoVersion        string   `json:"GoVersion" yaml:"GoVersion"`
+	VersionInfo      string   `json:"VersionInfo" yaml:"VersionInfo"`
+	BuildInfo        string   `json:"BuildInfo" yaml:"BuildInfo"`
+	Namespace        string   `json:"Namespace" yaml:"Namespace"`
 	ServerFile       string   `mapstructure:"serverFile" json:"ServerFile" yaml:"ServerFile"`
 	CredentialsFile  string   `mapstructure:"credentialsFile" json:"SharedCredentialsFile" yaml:"SharedCredentialsFile"`
-	HealthPath       string   `mapstructure:"healthPath" json:"HealthPath" yaml:"HealthPath"`
-	MetricsPath      string   `mapstructure:"metricsPath" json:"MetricsPath" yaml:"MetricsPath"`
+	HealthPath       string   `json:"HealthPath" yaml:"HealthPath"`
+	MetricsPath      string   `json:"MetricsPath" yaml:"MetricsPath"`
 	MetricsFiles     []string `mapstructure:"metricsFiles" json:"MetricsFiles" yaml:"MetricsFiles"`
 	MetricStatPeriod string   `mapstructure:"metricStatPeriod" json:"MetricStatPeriod" yaml:"MetricStatPeriod"`
 	MetricTimeWindow string   `mapstructure:"metricTimeWindow" json:"MetricTimeWindow" yaml:"MetricTimeWindow"`

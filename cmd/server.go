@@ -68,20 +68,26 @@ func startCmd(cmd *cobra.Command, args []string) {
 	mux.Handle(conf.Application.MetricsPath, promhttp.Handler())
 
 	// Debug & Profiling
-	mux.HandleFunc("/debug/pprof/", pprof.Index)
-	mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
-	mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
-	mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
-	mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
-
-	//
-	done := make(chan bool, 1)
-	server := server.New(mux, &conf, &done)
-	server.ListenOSSignals()
-
-	if err := server.Start(); err != nil {
-		log.Fatalf("Starting server error: %s", err)
+	if conf.Server.Debug {
+		mux.HandleFunc("/debug/pprof/", pprof.Index)
+		mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+		mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
+		mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+		mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
 	}
 
+	// this channel is to wait routines before finis this
+	done := make(chan bool, 1)
+	server := server.New(mux, &conf)
+
+	// This run a go routine to listen Operating System signals
+	// and execute a Gracefully shutdown when those occurs
+	server.ListenOSSignals(&done)
+
+	if err := server.Start(); err != nil {
+		log.Fatalf("Server could not be started, %s", err.Error())
+	}
+
+	// Blocked until others routines finished
 	<-done
 }
