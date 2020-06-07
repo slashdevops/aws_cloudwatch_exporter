@@ -103,7 +103,7 @@ func init() {
 	}
 
 	// LogFormat
-	serverCmd.PersistentFlags().StringVar(&conf.Server.LogFormat, "logFormat", "text", "Server LogFormat, possible values: text|json")
+	serverCmd.PersistentFlags().StringVar(&conf.Server.LogFormat, "logFormat", "text", "Server LogFormat, possible values: [text|json]")
 	if err := viper.BindPFlag("server.logFormat", serverCmd.PersistentFlags().Lookup("logFormat")); err != nil {
 		log.Error(err)
 	}

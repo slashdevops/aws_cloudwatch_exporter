@@ -86,8 +86,8 @@ func init() {
 	}
 
 	// Output parameters
-	metricsGetCmd.Flags().StringP("outFormat", "", "yaml", "Output format for results. (supported [yaml|json] only)")
-	metricsGetCmd.Flags().StringP("outFile", "", "", "Filename Save the result")
+	metricsGetCmd.Flags().StringP("outFormat", "", "yaml", "Output format for results, possible values: [yaml|json]")
+	metricsGetCmd.Flags().StringP("outFile", "", "", "Output file where to store the results.")
 }
 
 func getCmd(cmd *cobra.Command, args []string) {
