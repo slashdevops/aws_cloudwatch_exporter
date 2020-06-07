@@ -46,8 +46,8 @@ type Server struct {
 	WriteTimeout      time.Duration `mapstructure:"writeTimeout" json:"writeTimeout" yaml:"writeTimeout"`
 	IdleTimeout       time.Duration `mapstructure:"idleTimeout" json:"idleTimeout" yaml:"idleTimeout"`
 	ReadHeaderTimeout time.Duration `mapstructure:"readHeaderTimeout" json:"readHeaderTimeout" yaml:"readHeaderTimeout"`
-	KeepAlivesEnabled bool          `mapstructure:"keepAlivesEnabled" json:"keepAlivesEnabled" yaml:"keepAlivesEnabled"`
 	ShutdownTimeout   time.Duration `mapstructure:"shutdownTimeout" json:"shutdownTimeout" yaml:"shutdownTimeout"`
+	KeepAlivesEnabled bool          `mapstructure:"keepAlivesEnabled" json:"keepAlivesEnabled" yaml:"keepAlivesEnabled"`
 	LogFormat         string        `mapstructure:"logFormat" json:"logFormat" yaml:"logFormat"`
 	Debug             bool          `mapstructure:"debug" json:"debug" yaml:"debug"`
 }

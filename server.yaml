@@ -4,9 +4,9 @@ server:
   readTimeout: 2s
   writeTimeout: 5s
   idleTimeout: 60s
-  ReadHeaderTimeout: 2s
-  KeepAlivesEnabled: true
+  ReadHeaderTimeout: 5s
   shutdownTimeout: 30s
+  KeepAlivesEnabled: true
   LogFormat: text
   Debug: false
 

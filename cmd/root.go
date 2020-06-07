@@ -29,6 +29,7 @@ import (
 )
 
 const (
+	appServerFile       = "server.yaml"
 	Namespace           = "aws_cloudwatch_exporter"
 	appName             = "aws_cloudwatch_exporter"
 	appDescription      = `This is an AWS CloudWatch exporter for prometheus.io`
@@ -68,12 +69,7 @@ func init() {
 	}
 
 	// Files
-	rootCmd.PersistentFlags().StringVar(&conf.ServerFile, "serverFile", "server.yaml", "The server configuration file")
-	if err := viper.BindPFlag("application.serverFile", rootCmd.PersistentFlags().Lookup("serverFile")); err != nil {
-		log.Error(err)
-	}
-
-	rootCmd.PersistentFlags().StringVar(&conf.Application.CredentialsFile, "credentialsFile", "credentials.yaml", "The metrics files with the AWS CloudWatch Metrics Queries")
+	rootCmd.PersistentFlags().StringVar(&conf.Application.CredentialsFile, "credentialsFile", "credentials.yaml", "The file with the AWS Credentials configuration")
 	if err := viper.BindPFlag("application.credentialsFile", rootCmd.PersistentFlags().Lookup("credentialsFile")); err != nil {
 		log.Error(err)
 	}
@@ -83,12 +79,84 @@ func init() {
 		log.Error(err)
 	}
 
-	//
-	rootCmd.PersistentFlags().StringVar(&conf.AWS.Profile, "profile", "", "The AWS CLI profile name defined in .aws/config or .aws/credential")
+	// AWS Credentials conf
+	// AccessKeyID
+	rootCmd.PersistentFlags().StringVar(&conf.AWS.AccessKeyID, "access_key_id", "", "The AWS AccessKeyID, see: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html")
+	if err := viper.BindPFlag("aws.access_key_id", rootCmd.PersistentFlags().Lookup("access_key_id")); err != nil {
+		log.Error(err)
+	}
+
+	// SecretAccessKey
+	rootCmd.PersistentFlags().StringVar(&conf.AWS.SecretAccessKey, "secret_access_key", "", "The AWS SecretAccessKey, see: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html")
+	if err := viper.BindPFlag("aws.secret_access_key", rootCmd.PersistentFlags().Lookup("secret_access_key")); err != nil {
+		log.Error(err)
+	}
+
+	// SessionToken
+	rootCmd.PersistentFlags().StringVar(&conf.AWS.SessionToken, "session_token", "", "The AWS SessionToken, see: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html")
+	if err := viper.BindPFlag("aws.session_token", rootCmd.PersistentFlags().Lookup("session_token")); err != nil {
+		log.Error(err)
+	}
+
+	// Region
+	rootCmd.PersistentFlags().StringVar(&conf.AWS.Region, "region", "", "The AWS Region, see: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html")
+	if err := viper.BindPFlag("aws.region", rootCmd.PersistentFlags().Lookup("region")); err != nil {
+		log.Error(err)
+	}
+
+	// Profile
+	rootCmd.PersistentFlags().StringVar(&conf.AWS.Profile, "profile", "", "The AWS profile name defined in .aws/config or .aws/credential")
 	if err := viper.BindPFlag("aws.profile", rootCmd.PersistentFlags().Lookup("profile")); err != nil {
 		log.Error(err)
 	}
 
+	// RoleArn
+	rootCmd.PersistentFlags().StringVar(&conf.AWS.RoleArn, "role_arn", "", "The AWS RoleArn, see: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html")
+	if err := viper.BindPFlag("aws.role_arn", rootCmd.PersistentFlags().Lookup("role_arn")); err != nil {
+		log.Error(err)
+	}
+
+	// RoleSessionName
+	rootCmd.PersistentFlags().StringVar(&conf.AWS.RoleSessionName, "role_session_name", "", "The AWS RoleSessionName, see: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html")
+	if err := viper.BindPFlag("aws.role_session_name", rootCmd.PersistentFlags().Lookup("role_session_name")); err != nil {
+		log.Error(err)
+	}
+
+	// WebIdentityTokenFile
+	rootCmd.PersistentFlags().StringVar(&conf.AWS.WebIdentityTokenFile, "web_identity_token_file", "", "The AWS WebIdentityTokenFile, see: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html")
+	if err := viper.BindPFlag("aws.web_identity_token_file", rootCmd.PersistentFlags().Lookup("web_identity_token_file")); err != nil {
+		log.Error(err)
+	}
+
+	// ExternalID
+	rootCmd.PersistentFlags().StringVar(&conf.AWS.ExternalID, "external_id", "", "The AWS ExternalID, see: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html")
+	if err := viper.BindPFlag("aws.external_id", rootCmd.PersistentFlags().Lookup("external_id")); err != nil {
+		log.Error(err)
+	}
+
+	// MFASerial
+	rootCmd.PersistentFlags().StringVar(&conf.AWS.MFASerial, "mfa_serial", "", "The AWS MFASerial, see: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html")
+	if err := viper.BindPFlag("aws.mfa_serial", rootCmd.PersistentFlags().Lookup("mfa_serial")); err != nil {
+		log.Error(err)
+	}
+
+	// SharedConfigState
+	rootCmd.PersistentFlags().BoolVar(&conf.AWS.SharedConfigState, "shared_config_state", true, "The AWS SharedConfigState, see: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html")
+	if err := viper.BindPFlag("aws.shared_config_state", rootCmd.PersistentFlags().Lookup("shared_config_state")); err != nil {
+		log.Error(err)
+	}
+
+	// SharedCredentialsFile
+	rootCmd.PersistentFlags().StringSliceVar(&conf.AWS.SharedCredentialsFile, "shared_credential_file", nil, "The AWS SharedCredentialsFile, example: --shared_credential_file ~/.aws/credentials --shared_credential_file /etc/aws/credentials")
+	if err := viper.BindPFlag("aws.shared_credential_file", rootCmd.PersistentFlags().Lookup("shared_credential_file")); err != nil {
+		log.Error(err)
+	}
+
+	// ConfigFile
+	rootCmd.PersistentFlags().StringSliceVar(&conf.AWS.ConfigFile, "config_file", nil, "The AWS ConfigFile, example: --config_file ~/.aws/config --config_file /etc/aws/config")
+	if err := viper.BindPFlag("aws.config_file", rootCmd.PersistentFlags().Lookup("config_file")); err != nil {
+		log.Error(err)
+	}
 }
 
 func initConfig() {
@@ -111,6 +179,7 @@ func initConfig() {
 	log.Out = os.Stdout
 
 	// Set default values
+	conf.Application.ServerFile = appServerFile
 	conf.Application.Name = appName
 	conf.Application.Namespace = Namespace
 	conf.Application.Description = appDescription
@@ -191,6 +260,8 @@ func parseMetricsFiles(c *config.All) {
 			}
 		} else {
 			log.Debugf("Merging configuration of file: %s", file)
+			// TODO: This is not working well, doesn't work properly in deep merge of structures
+			// https://github.com/spf13/viper/issues/910
 			if err := viper.MergeInConfig(); err != nil {
 				log.Errorf("Error merging config file, %s", err)
 			}
