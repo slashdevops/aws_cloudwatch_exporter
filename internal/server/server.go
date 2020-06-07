@@ -55,7 +55,7 @@ func (s *Server) ListenOSSignals(done *chan bool) {
 }
 
 func (s *Server) doGracefullyShutdown() {
-	log.Infof("Graceful shutdown, wait %vs\n", s.c.Server.ShutdownTimeout.Seconds())
+	log.Infof("Graceful shutdown, wait at least %vs before stop\n", s.c.Server.ShutdownTimeout.Seconds())
 
 	ctx, cancel := context.WithTimeout(context.Background(), s.c.ShutdownTimeout)
 	defer cancel()

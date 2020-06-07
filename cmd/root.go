@@ -146,7 +146,7 @@ func parseConfFiles(c *config.All) {
 	}
 
 	for _, file := range files {
-		log.Debugf("Configuration file: %s", file)
+		log.Debugf("Parsing configuration file: %s", file)
 		log.Debugf("file: %s", filepath.Base(file))
 		log.Debugf("Location: %s", filepath.Dir(file))
 		log.Debugf("Kind: %s", filepath.Ext(file)[1:])

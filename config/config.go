@@ -36,20 +36,20 @@ func (c *All) ToYaml() string {
 //   address:
 //   port:
 type ServerConf struct {
-	Server `mapstructure:"server" json:"Server" yaml:"Server"`
+	Server `mapstructure:"server" json:"server" yaml:"server"`
 }
 
 type Server struct {
-	Address           string        `mapstructure:"address" json:"Address" yaml:"Address"`
-	Port              uint16        `mapstructure:"port" json:"Port" yaml:"Port"`
-	ReadTimeout       time.Duration `mapstructure:"readTimeout" json:"ReadTimeout" yaml:"ReadTimeout"`
-	WriteTimeout      time.Duration `mapstructure:"writeTimeout" json:"WriteTimeout" yaml:"WriteTimeout"`
-	IdleTimeout       time.Duration `mapstructure:"idleTimeout" json:"IdleTimeout" yaml:"IdleTimeout"`
-	ReadHeaderTimeout time.Duration `mapstructure:"readHeaderTimeout" json:"ReadHeaderTimeout" yaml:"ReadHeaderTimeout"`
-	KeepAlivesEnabled bool          `mapstructure:"keepAlivesEnabled" json:"KeepAlivesEnabled" yaml:"KeepAlivesEnabled"`
-	ShutdownTimeout   time.Duration `mapstructure:"shutdownTimeout" json:"ShutdownTimeout" yaml:"ShutdownTimeout"`
-	LogFormat         string        `mapstructure:"logFormat" json:"LogFormat" yaml:"LogFormat"`
-	Debug             bool          `mapstructure:"debug" json:"Debug" yaml:"Debug"`
+	Address           string        `mapstructure:"address" json:"address" yaml:"address"`
+	Port              uint16        `mapstructure:"port" json:"port" yaml:"port"`
+	ReadTimeout       time.Duration `mapstructure:"readTimeout" json:"readTimeout" yaml:"readTimeout"`
+	WriteTimeout      time.Duration `mapstructure:"writeTimeout" json:"writeTimeout" yaml:"writeTimeout"`
+	IdleTimeout       time.Duration `mapstructure:"idleTimeout" json:"idleTimeout" yaml:"idleTimeout"`
+	ReadHeaderTimeout time.Duration `mapstructure:"readHeaderTimeout" json:"readHeaderTimeout" yaml:"readHeaderTimeout"`
+	KeepAlivesEnabled bool          `mapstructure:"keepAlivesEnabled" json:"keepAlivesEnabled" yaml:"keepAlivesEnabled"`
+	ShutdownTimeout   time.Duration `mapstructure:"shutdownTimeout" json:"shutdownTimeout" yaml:"shutdownTimeout"`
+	LogFormat         string        `mapstructure:"logFormat" json:"logFormat" yaml:"logFormat"`
+	Debug             bool          `mapstructure:"debug" json:"debug" yaml:"debug"`
 }
 
 // This is a convenient structure to allow config files nested (application.[keys])
@@ -58,29 +58,29 @@ type Server struct {
 //   name:
 //   description:
 type ApplicationConf struct {
-	Application `mapstructure:"application" json:"Application" yaml:"Application"`
+	Application `mapstructure:"application" json:"application" yaml:"application"`
 }
 
 type Application struct {
-	Name             string   `json:"Name" yaml:"Name"`
-	Description      string   `json:"Description" yaml:"Description"`
-	GitRepository    string   `json:"GitRepository" yaml:"GitRepository"`
-	Version          string   `json:"Version" yaml:"Version"`
-	Revision         string   `json:"Revision" yaml:"Revision"`
-	Branch           string   `json:"Branch" yaml:"Branch"`
-	BuildUser        string   `json:"BuildUser" yaml:"BuildUser"`
-	BuildDate        string   `json:"BuildDate" yaml:"BuildDate"`
-	GoVersion        string   `json:"GoVersion" yaml:"GoVersion"`
-	VersionInfo      string   `json:"VersionInfo" yaml:"VersionInfo"`
-	BuildInfo        string   `json:"BuildInfo" yaml:"BuildInfo"`
-	Namespace        string   `json:"Namespace" yaml:"Namespace"`
-	ServerFile       string   `mapstructure:"serverFile" json:"ServerFile" yaml:"ServerFile"`
-	CredentialsFile  string   `mapstructure:"credentialsFile" json:"SharedCredentialsFile" yaml:"SharedCredentialsFile"`
-	HealthPath       string   `json:"HealthPath" yaml:"HealthPath"`
-	MetricsPath      string   `json:"MetricsPath" yaml:"MetricsPath"`
-	MetricsFiles     []string `mapstructure:"metricsFiles" json:"MetricsFiles" yaml:"MetricsFiles"`
-	MetricStatPeriod string   `mapstructure:"metricStatPeriod" json:"MetricStatPeriod" yaml:"MetricStatPeriod"`
-	MetricTimeWindow string   `mapstructure:"metricTimeWindow" json:"MetricTimeWindow" yaml:"MetricTimeWindow"`
+	Name             string   `json:"name" yaml:"name"`
+	Description      string   `json:"description" yaml:"description"`
+	GitRepository    string   `json:"gitRepository" yaml:"gitRepository"`
+	Version          string   `json:"version" yaml:"version"`
+	Revision         string   `json:"revision" yaml:"revision"`
+	Branch           string   `json:"branch" yaml:"branch"`
+	BuildUser        string   `json:"buildUser" yaml:"buildUser"`
+	BuildDate        string   `json:"buildDate" yaml:"buildDate"`
+	GoVersion        string   `json:"goVersion" yaml:"goVersion"`
+	VersionInfo      string   `json:"versionInfo" yaml:"versionInfo"`
+	BuildInfo        string   `json:"buildInfo" yaml:"buildInfo"`
+	Namespace        string   `json:"namespace" yaml:"namespace"`
+	ServerFile       string   `mapstructure:"serverFile" json:"serverFile" yaml:"serverFile"`
+	CredentialsFile  string   `mapstructure:"credentialsFile" json:"sharedCredentialsFile" yaml:"sharedCredentialsFile"`
+	HealthPath       string   `json:"healthPath" yaml:"healthPath"`
+	MetricsPath      string   `json:"metricsPath" yaml:"metricsPath"`
+	MetricsFiles     []string `mapstructure:"metricsFiles" json:"metricsFiles" yaml:"metricsFiles"`
+	MetricStatPeriod string   `mapstructure:"metricStatPeriod" json:"metricStatPeriod" yaml:"metricStatPeriod"`
+	MetricTimeWindow string   `mapstructure:"metricTimeWindow" json:"metricTimeWindow" yaml:"metricTimeWindow"`
 }
 
 // https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html
@@ -96,19 +96,19 @@ type AWSConf struct {
 }
 
 type AWS struct {
-	AccessKeyID           string   `mapstructure:"access_key_id" json:"AccessKeyID" yaml:"AccessKeyID"`
-	SecretAccessKey       string   `mapstructure:"secret_access_key" json:"SecretAccessKey" yaml:"SecretAccessKey"`
-	SessionToken          string   `mapstructure:"session_token" json:"SessionToken" yaml:"SessionToken"`
-	Region                string   `mapstructure:"region" json:"Region" yaml:"Region"`
-	Profile               string   `mapstructure:"profile" json:"Profile" yaml:"Profile"`
-	RoleArn               string   `mapstructure:"role_arn" json:"RoleArn" yaml:"RoleArn"`
-	RoleSessionName       string   `mapstructure:"role_session_name" json:"RoleSessionName" yaml:"RoleSessionName"`
-	WebIdentityTokenFile  string   `mapstructure:"web_identity_token_file" json:"WebIdentityTokenFile" yaml:"WebIdentityTokenFile"`
-	ExternalID            string   `mapstructure:"external_id" json:"ExternalID" yaml:"ExternalID"`
+	AccessKeyID           string   `mapstructure:"access_key_id" json:"accessKeyID" yaml:"accessKeyID"`
+	SecretAccessKey       string   `mapstructure:"secret_access_key" json:"secretAccessKey" yaml:"secretAccessKey"`
+	SessionToken          string   `mapstructure:"session_token" json:"sessionToken" yaml:"sessionToken"`
+	Region                string   `mapstructure:"region" json:"region" yaml:"region"`
+	Profile               string   `mapstructure:"profile" json:"profile" yaml:"profile"`
+	RoleArn               string   `mapstructure:"role_arn" json:"roleArn" yaml:"roleArn"`
+	RoleSessionName       string   `mapstructure:"role_session_name" json:"roleSessionName" yaml:"roleSessionName"`
+	WebIdentityTokenFile  string   `mapstructure:"web_identity_token_file" json:"webIdentityTokenFile" yaml:"webIdentityTokenFile"`
+	ExternalID            string   `mapstructure:"external_id" json:"externalID" yaml:"externalID"`
 	MFASerial             string   `mapstructure:"mfa_serial" json:"MFASerial" yaml:"MFASerial"`
-	SharedConfigState     bool     `mapstructure:"shared_config_state" json:"SharedConfigState" yaml:"SharedConfigState"`
-	SharedCredentialsFile []string `mapstructure:"shared_credential_file" json:"SharedCredentialsFile" yaml:"SharedCredentialsFile"`
-	ConfigFile            []string `mapstructure:"config_file" json:"ConfigFile" yaml:"ConfigFile"`
+	SharedConfigState     bool     `mapstructure:"shared_config_state" json:"sharedConfigState" yaml:"sharedConfigState"`
+	SharedCredentialsFile []string `mapstructure:"shared_credential_file" json:"sharedCredentialsFile" yaml:"sharedCredentialsFile"`
+	ConfigFile            []string `mapstructure:"config_file" json:"configFile" yaml:"configFile"`
 }
 
 // This is a convenient structure to allow config files nested (MetricDataQueries.[keys])
