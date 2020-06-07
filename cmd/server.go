@@ -21,11 +21,11 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/slashdevops/aws_cloudwatch_exporter/collector"
 	"github.com/slashdevops/aws_cloudwatch_exporter/internal/awshelper"
+	"github.com/slashdevops/aws_cloudwatch_exporter/internal/collector"
 	"github.com/slashdevops/aws_cloudwatch_exporter/internal/metrics"
 	"github.com/slashdevops/aws_cloudwatch_exporter/internal/server"
-	"github.com/slashdevops/aws_cloudwatch_exporter/web"
+	"github.com/slashdevops/aws_cloudwatch_exporter/internal/web"
 	"github.com/spf13/cobra"
 )
 
