@@ -114,6 +114,7 @@ func startCmd(cmd *cobra.Command, args []string) {
 
 	m := metrics.New(&conf)
 	sess, _ := awshelper.NewSession(&conf.AWS)
+
 	collector := collector.New(&conf, m, sess)
 	prometheus.MustRegister(collector)
 

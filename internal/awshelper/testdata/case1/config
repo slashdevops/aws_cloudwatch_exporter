@@ -1,6 +1,9 @@
 [default]
-region = us-west-2
+region = us-west-1
 output = json
 
-[profile case2]
+[profile case1]
+role_arn = arn:aws:iam::123456789012:role/no-role
 source_profile = default
+region = us-west-1
+output = json

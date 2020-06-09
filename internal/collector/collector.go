@@ -195,6 +195,9 @@ func (c *Collector) scrape(ch chan<- prometheus.Metric) {
 	c.ownMetrics.MetricsTotal.Set(float64(len(mdi.MetricDataQueries)))
 
 	// TODO: Remove it from here and implement a new interface and package to collect metrics
+	// but it is here because every time the exporter going to scrape metrics the
+	// cloudwatch session is refreshed, I need to be sure that credential never expired
+	// when move it from here
 	svc := cloudwatch.New(c.sess)
 
 	// Scrape CloudWatch Metrics
