@@ -105,7 +105,7 @@ func getCmd(cmd *cobra.Command, args []string) {
 	m := metrics.New(&conf)
 	mdi := m.GetMetricDataInput(startTime, endTime, period, "")
 
-	sess, _ := awshelper.NewSession(&conf.AWS)
+	sess := awshelper.NewSession(&conf.AWS)
 	svc := cloudwatch.New(sess)
 	mdo, err := svc.GetMetricData(mdi)
 	if err != nil {
@@ -157,7 +157,7 @@ func collectCmd(cmd *cobra.Command, args []string) {
 	ReadConfFromFiles()
 
 	m := metrics.New(&conf)
-	sess, _ := awshelper.NewSession(&conf.AWS)
+	sess := awshelper.NewSession(&conf.AWS)
 
 	c := collector.New(&conf, m, sess)
 	prometheus.MustRegister(c)
