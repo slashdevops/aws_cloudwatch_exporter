@@ -2,42 +2,27 @@
 
 Prometheus exporter for AWS CloudWatch
 
+This exporter used the AWS CloudWatch GetMetricsData API call, please it is important you read
+* https://aws.amazon.com/premiumsupport/knowledge-center/cloudwatch-getmetricdata-api/
+
 ## Config files
 
-* server.yaml
-* credentials.yaml
-* metrics.yaml
+* [server.yaml](docs/server.md)
+* [credentials.yaml](docs/credentials.md)
+* [metrics.yaml](docs/metrics.md)
 
-## Building and release tools
+## Development / Contributing
+
+### Building and release tools
 
 * https://github.com/prometheus/promu
 
-## References
+## License
 
-* https://aws.amazon.com/premiumsupport/knowledge-center/cloudwatch-getmetricdata-api/
+This software is released under the APACHE LICENSE, VERSION 2.0:
 
-## Development Notes
+* [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-### Metrics suffix
+## Author Information
 
-AWS CloudWatch GetMetricsData Stat conversion to prometheus suffix
-Minimum     -->
-Maximum     -->
-Sum         --> _sum
-Average     --> 
-SampleCount --> _count
-
-### Exporter metrics
-
-https://prometheus.io/docs/practices/naming/
-
-```text
-<metric name>{<label name>=<label value>, ...}
-
-<exporter>_build_info
-<exporter>_scrape_duration_seconds
-<exporter>_requests_total {state="successful|failed", ...}
-<exporter>_request_duration_seconds {state="successful|failed", ...}
-<exporter>_points_total {state="successful|failed", ...}
-<exporter>_metrics_total {state="successful|failed", ...}
-```
+* [Christian González Di Antonio](https://github.com/christiangda)

@@ -73,7 +73,6 @@ type Application struct {
 	GoVersion        string   `json:"goVersion" yaml:"goVersion"`
 	VersionInfo      string   `json:"versionInfo" yaml:"versionInfo"`
 	BuildInfo        string   `json:"buildInfo" yaml:"buildInfo"`
-	Namespace        string   `json:"namespace" yaml:"namespace"`
 	ServerFile       string   `mapstructure:"serverFile" json:"serverFile" yaml:"serverFile"`
 	CredentialsFile  string   `mapstructure:"credentialsFile" json:"sharedCredentialsFile" yaml:"sharedCredentialsFile"`
 	HealthPath       string   `json:"healthPath" yaml:"healthPath"`

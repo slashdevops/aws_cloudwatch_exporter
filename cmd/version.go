@@ -24,8 +24,8 @@ import (
 // versionCmd represents the version command
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "Print the version number of aws_cloudwatch_exporter",
-	Long:  `Print the version number of aws_cloudwatch_exporter`,
+	Short: "Print the application version",
+	Long:  `Print the application version`,
 	Run: func(cmd *cobra.Command, args []string) {
 		ext, _ := cmd.Flags().GetBool("extended")
 		if ext {

@@ -16,7 +16,7 @@ limitations under the License.
 package cmd
 
 import (
-	"errors"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -33,8 +33,6 @@ import (
 )
 
 const (
-	appServerFile       = "server.yaml"
-	Namespace           = "aws_cloudwatch_exporter"
 	appName             = "aws_cloudwatch_exporter"
 	appDescription      = `This is an AWS CloudWatch exporter for prometheus.io`
 	appDescriptionShort = "AWS CloudWatch exporter for prometheus.io"
@@ -49,7 +47,7 @@ var (
 	conf config.All
 
 	rootCmd = &cobra.Command{
-		Use:   Namespace,
+		Use:   appName,
 		Short: appDescriptionShort,
 		Long:  appDescription,
 	}
@@ -73,6 +71,11 @@ func init() {
 	}
 
 	// Files
+	rootCmd.PersistentFlags().StringVar(&conf.Application.ServerFile, "serverFile", "server.yaml", "The file with the server configuration, see: README.md")
+	if err := viper.BindPFlag("application.serverFile", rootCmd.PersistentFlags().Lookup("serverFile")); err != nil {
+		log.Error(err)
+	}
+
 	rootCmd.PersistentFlags().StringVar(&conf.Application.CredentialsFile, "credentialsFile", "credentials.yaml", "The file with the AWS Credentials configuration")
 	if err := viper.BindPFlag("application.credentialsFile", rootCmd.PersistentFlags().Lookup("credentialsFile")); err != nil {
 		log.Error(err)
@@ -183,9 +186,7 @@ func initConfig() {
 	log.Out = os.Stdout
 
 	// Set default values
-	conf.Application.ServerFile = appServerFile
 	conf.Application.Name = appName
-	conf.Application.Namespace = Namespace
 	conf.Application.Description = appDescription
 	conf.Application.GitRepository = appGitRepository
 	conf.Application.MetricsPath = appMetricsPath
@@ -200,9 +201,10 @@ func initConfig() {
 }
 
 // this will be used for every commands that needs conf in files
-func ReadConfFromFiles() {
-	parseConfFiles(&conf)
+func ReadAndValidateConfFromFiles() {
+	parseConfigFiles(&conf)
 	parseMetricsFiles(&conf)
+	validateMetricsQueries(&conf)
 
 	// expose all the configuration, just to check
 	if conf.Server.Debug {
@@ -212,7 +214,7 @@ func ReadConfFromFiles() {
 }
 
 // Unmarshall Yaml files into c config structure
-func parseConfFiles(c *config.All) {
+func parseConfigFiles(c *config.All) {
 	// Config files to be load
 	files := []string{
 		c.Application.ServerFile,
@@ -222,13 +224,13 @@ func parseConfFiles(c *config.All) {
 	for _, file := range files {
 		log.Infof("Reading configuration file: %s", file)
 
-		fileNameNoExt := strings.TrimSuffix(file, filepath.Ext(file))
+		// fileNameNoExt := strings.TrimSuffix(file, filepath.Ext(file))
 
 		log.Debugf("Parsing configuration file path: %s", file)
-		log.Debugf("file: %s", filepath.Base(file))
-		log.Debugf("file without ext: %s", fileNameNoExt)
+		log.Debugf("File: %s", filepath.Base(file))
+		// log.Debugf("File without ext: %s", fileNameNoExt)
 		log.Debugf("Location: %s", filepath.Dir(file))
-		log.Debugf("Kind: %s", filepath.Ext(file)[1:])
+		log.Debugf("File ext: %s", filepath.Ext(file)[1:])
 
 		// viper.SetConfigName(fileNameNoExt)
 		viper.SetConfigName(filepath.Base(file))
@@ -241,60 +243,87 @@ func parseConfFiles(c *config.All) {
 
 		log.Debugf("Loading configuration from file: %s", file)
 		if err := viper.ReadInConfig(); err != nil {
-			log.Errorf("Error reading config file, %s", err)
+			log.Fatalf("Error reading config file, %s", err)
 		}
 
 		log.Debugf("Filling configuration structure from file: %s", file)
 		err := viper.Unmarshal(&c)
 		if err != nil {
-			log.Errorf("Unable to decode into struct, %v", err)
+			log.Fatalf("Unable to decode into struct, %v", err)
 		}
 	}
 }
 
 // Unmarshall Yaml files into c config structure
+// NOTE: Unfortunately viper.MergeInConfig() do the merge using override, so
+// this is the reason to do not user it.
 func parseMetricsFiles(c *config.All) {
 
-	confFiles := MergeFiles(c.Application.MetricsFiles)
+	metricsQueries := MergeMetricsFiles(c.Application.MetricsFiles)
 
-	if err := viper.MergeConfigMap(confFiles); err != nil {
-		log.Error(err)
+	if err := viper.MergeConfigMap(metricsQueries); err != nil {
+		log.Errorf("Error merging MetricsQueries read from files into config structure: %s", err.Error())
 	}
 
 	if len(c.Application.MetricsFiles) > 0 {
 		log.Debugf("Filling configuration structure from file: %s", c.Application.MetricsFiles)
 		err := viper.Unmarshal(&c)
 		if err != nil {
-			log.Errorf("Unable to decode into struct, %v", err)
+			log.Errorf("Unable to unmarshal viper config into config struct, %s", err.Error())
 		}
 	} else {
 		log.Errorf("Metrics configuration file: \"%v\" doesn't exist", c.Application.MetricsFiles)
 	}
 }
 
-func MergeFiles(files []string) map[string]interface{} {
-	if len(files) <= 0 {
-		if err := errors.New("You must provide at least one filename for reading Values"); err != nil {
-			log.Error(err)
-		}
-	}
+// This function merge files with metrics queries into a map without override keys
+func MergeMetricsFiles(files []string) map[string]interface{} {
 	var resultValues map[string]interface{}
-	for _, filename := range files {
+	for _, file := range files {
+
+		fileExt := strings.ToLower(filepath.Ext(file)[1:])
+		log.Infof("Reading configuration file: %s", file)
+		log.Debugf("File type: %s", fileExt)
 
 		var override map[string]interface{}
-		bs, err := ioutil.ReadFile(filename)
+		bs, err := ioutil.ReadFile(file)
 		if err != nil {
-			log.Info(err)
-			continue
-		}
-		if err := yaml.Unmarshal(bs, &override); err != nil {
-			log.Info(err)
+			log.Errorf("Error processing file: %s, %s", file, err.Error())
 			continue
 		}
 
+		switch fileExt {
+		case "yaml":
+			if err := yaml.Unmarshal(bs, &override); err != nil {
+				log.Errorf("Error unmarshalling file: %s, %s", file, err.Error())
+				continue
+			}
+		case "yml":
+			if err := yaml.Unmarshal(bs, &override); err != nil {
+				log.Errorf("Error unmarshalling file: %s, %s", file, err.Error())
+				continue
+			}
+		case "json":
+			if err := json.Unmarshal(bs, &override); err != nil {
+				log.Errorf("Error unmarshalling file: %s, %s", file, err.Error())
+				continue
+			}
+		default:
+			log.Errorf("Unknown file: %s, this cannot be processed", file)
+		}
 		if err := mergo.Map(&resultValues, override, mergo.WithAppendSlice); err != nil {
-			log.Error(err)
+			log.Errorf("Error merging file: %s, %s", file, err.Error())
+			continue
 		}
 	}
 	return resultValues
+}
+
+func validateMetricsQueries(c *config.All) {
+	log.Info("Validating Metrics Queries")
+	if len(c.MetricDataQueries) > 0 {
+		log.Infof("Total metrics queries: %v", len(c.MetricDataQueries))
+	} else {
+		log.Fatal("Metrics Queries are empty, you need to defined at least one metric in metrics file")
+	}
 }

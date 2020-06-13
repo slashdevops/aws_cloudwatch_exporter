@@ -110,7 +110,7 @@ func init() {
 }
 
 func startCmd(cmd *cobra.Command, args []string) {
-	ReadConfFromFiles()
+	ReadAndValidateConfFromFiles()
 
 	m := metrics.New(&conf)
 	sess := awshelper.NewSession(&conf.AWS)

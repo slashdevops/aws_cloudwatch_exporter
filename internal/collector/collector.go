@@ -49,13 +49,13 @@ func New(c *config.All, m metrics.Metrics, s *session.Session) *Collector {
 		metrics: m,
 		ownMetrics: &OwnMetrics{
 			Up: prometheus.NewGauge(prometheus.GaugeOpts{
-				Namespace: c.Application.Namespace,
+				Namespace: c.Application.Name,
 				Name:      "up",
 				Help:      "Was the last scrape of " + c.Application.Name + " successful.",
 			}),
 			Info: prometheus.NewGauge(
 				prometheus.GaugeOpts{
-					Namespace: c.Application.Namespace,
+					Namespace: c.Application.Name,
 					Name:      "build_info",
 					Help: fmt.Sprintf(
 						"A metric with a constant '1' value labeled by version, revision, branch, and goversion from which %s was built.",
@@ -71,14 +71,14 @@ func New(c *config.All, m metrics.Metrics, s *session.Session) *Collector {
 			),
 			MetricsTotal: prometheus.NewGauge(
 				prometheus.GaugeOpts{
-					Namespace: c.Application.Namespace,
+					Namespace: c.Application.Name,
 					Name:      "metrics_total",
 					Help:      "The total number of metrics to be scraped and defined into YAML files.",
 				},
 			),
 			ScrapesSuccess: prometheus.NewCounter(
 				prometheus.CounterOpts{
-					Namespace:   c.Application.Namespace,
+					Namespace:   c.Application.Name,
 					Name:        "scrapes_success_total",
 					Help:        "The total number of times of AWS CloudWatch API scraped for metrics with successful results.",
 					ConstLabels: nil,
@@ -86,7 +86,7 @@ func New(c *config.All, m metrics.Metrics, s *session.Session) *Collector {
 			),
 			ScrapesErrors: prometheus.NewCounter(
 				prometheus.CounterOpts{
-					Namespace:   c.Application.Namespace,
+					Namespace:   c.Application.Name,
 					Subsystem:   "collector",
 					Name:        "scrapes_errors_total",
 					Help:        "The total number of times of AWS CloudWatch API scraped for metrics with error results.",
@@ -95,7 +95,7 @@ func New(c *config.All, m metrics.Metrics, s *session.Session) *Collector {
 			),
 			ScrapesMessages: prometheus.NewCounter(
 				prometheus.CounterOpts{
-					Namespace:   c.Application.Namespace,
+					Namespace:   c.Application.Name,
 					Subsystem:   "collector",
 					Name:        "scrapes_messages_total",
 					Help:        "The total number of times of AWS CloudWatch API scraped for metrics and we got some message results. (see exporter logs)",
@@ -104,7 +104,7 @@ func New(c *config.All, m metrics.Metrics, s *session.Session) *Collector {
 			),
 			MetricsScrapesSuccess: prometheus.NewGauge(
 				prometheus.GaugeOpts{
-					Namespace:   c.Application.Namespace,
+					Namespace:   c.Application.Name,
 					Subsystem:   "collector",
 					Name:        "metrics_scrapes_success_total",
 					Help:        "The total number of metrics of AWS CloudWatch API scraped with successful results.",
@@ -113,7 +113,7 @@ func New(c *config.All, m metrics.Metrics, s *session.Session) *Collector {
 			),
 			MetricsScrapesErrors: prometheus.NewGauge(
 				prometheus.GaugeOpts{
-					Namespace:   c.Application.Namespace,
+					Namespace:   c.Application.Name,
 					Subsystem:   "collector",
 					Name:        "metrics_scrapes_errors_total",
 					Help:        "The total number of metrics of AWS CloudWatch API scraped with errors results.",
@@ -122,7 +122,7 @@ func New(c *config.All, m metrics.Metrics, s *session.Session) *Collector {
 			),
 			MetricsScrapesEmpty: prometheus.NewGauge(
 				prometheus.GaugeOpts{
-					Namespace:   c.Application.Namespace,
+					Namespace:   c.Application.Name,
 					Subsystem:   "collector",
 					Name:        "metrics_scrapes_empty_total",
 					Help:        "The total number of metrics of AWS CloudWatch API scraped with empty results.",
@@ -131,7 +131,7 @@ func New(c *config.All, m metrics.Metrics, s *session.Session) *Collector {
 			),
 			MetricsScrapesMessages: prometheus.NewGauge(
 				prometheus.GaugeOpts{
-					Namespace:   c.Application.Namespace,
+					Namespace:   c.Application.Name,
 					Subsystem:   "collector",
 					Name:        "metrics_scrapes_messages_total",
 					Help:        "The total number of metrics of AWS CloudWatch API scraped and we got some messages results. (see exporter logs)",

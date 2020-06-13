@@ -48,6 +48,8 @@ func (h *Handlers) Home(w http.ResponseWriter, r *http.Request) {
 		<li><a href="{{.}}">{{.}}</a></li>
 		{{ end }}
 	</ul>
+	{{ else }}
+	<h2>Debug is disabled, you cannot see application performance profile</h2>
 	{{ end }}
 
 	<h3><a href="https://prometheus.io/">https://prometheus.io</a></h3>
@@ -86,7 +88,7 @@ func (h *Handlers) Home(w http.ResponseWriter, r *http.Request) {
 
 	t := template.Must(template.New("index").Parse(indexHtmlTmpl))
 	if err := t.Execute(w, data); err != nil {
-		log.Errorf("Error rendering template %s", err)
+		log.Errorf("Error rendering template: %s", err)
 	}
 }
 

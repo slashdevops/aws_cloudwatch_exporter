@@ -95,7 +95,7 @@ func init() {
 
 func getCmd(cmd *cobra.Command, args []string) {
 
-	ReadConfFromFiles()
+	ReadAndValidateConfFromFiles()
 
 	startTime, endTime, period := metrics.GetTimeStamps(time.Now(), conf.Application.MetricStatPeriod, conf.Application.MetricTimeWindow)
 	log.Debugf("Start Time: %s", startTime.Format(time.RFC3339))
@@ -143,7 +143,7 @@ func getCmd(cmd *cobra.Command, args []string) {
 
 func displayPromDescCmd(cmd *cobra.Command, args []string) {
 
-	ReadConfFromFiles()
+	ReadAndValidateConfFromFiles()
 
 	m := metrics.New(&conf)
 
@@ -154,7 +154,7 @@ func displayPromDescCmd(cmd *cobra.Command, args []string) {
 
 func collectCmd(cmd *cobra.Command, args []string) {
 
-	ReadConfFromFiles()
+	ReadAndValidateConfFromFiles()
 
 	m := metrics.New(&conf)
 	sess := awshelper.NewSession(&conf.AWS)
