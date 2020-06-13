@@ -17,4 +17,5 @@ DOCKER_ARCHS ?= amd64 armv7 arm64
 include Makefile.common
 
 DOCKER_IMAGE_NAME   ?= aws-cloudwatch-exporter
-#DOCKER_IMAGE_TAG    ?= $(subst /,-,$(shell git rev-parse --abbrev-ref HEAD))
+
+GOLANGCI_LINT_VERSION ?= v1.27.0
