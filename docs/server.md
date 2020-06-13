@@ -4,8 +4,8 @@ This is the server configuration file options
 
 ```yaml
 server:                               # This is related to the http service configuration
-  address: "127.0.0.1"                # Type: string, IP Address in the host where you want to the application listen 
-  port: 9690                          # Type: int, Port in the host where you want to the application listen
+  address: "127.0.0.1"                # Type: string, IP Address in the host where you want the service listen 
+  port: 9690                          # Type: int, Port in the host where you want the service listen
   readTimeout: 2s                     # Type: time.Duration, ReadTimeout is the maximum duration for reading the entire request, including the body. see: https://golang.org/pkg/net/http/
   writeTimeout: 5s                    # Type: time.Duration, WriteTimeout is the maximum duration before timing out writes of the response. see: https://golang.org/pkg/net/http/ 
   idleTimeout: 60s                    # Type: time.Duration, IdleTimeout is the maximum amount of time to wait for the next request when keep-alives are enabled. see: https://golang.org/pkg/net/http/

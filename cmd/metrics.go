@@ -44,7 +44,7 @@ var (
 	metricsGetCmd = &cobra.Command{
 		Use:   "get [options] [args]",
 		Short: "get metrics",
-		Long:  `Get metrics from CloudWatch using the metrics queries defined in the yaml files`,
+		Long:  `Get metrics from AWS CloudWatch using the metrics queries defined in the [yaml|json] files`,
 		Run: func(cmd *cobra.Command, args []string) {
 			getCmd(cmd, args)
 		},

@@ -33,8 +33,9 @@ import (
 )
 
 const (
-	appName             = "aws_cloudwatch_exporter"
-	appDescription      = `This is an AWS CloudWatch exporter for prometheus.io`
+	appName        = "aws_cloudwatch_exporter"
+	appDescription = `AWS CloudWatch exporter for prometheus.io
+This exporter use GetMetricData API to get the metrics from AWS CloudWatch`
 	appDescriptionShort = "AWS CloudWatch exporter for prometheus.io"
 	appGitRepository    = "https://github.com/slashdevops/aws_cloudwatch_exporter"
 	appMetricsPath      = "/metrics"
@@ -65,7 +66,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	// Debug
-	rootCmd.PersistentFlags().BoolVar(&conf.Server.Debug, "debug", false, "Enable debug messages in logs")
+	rootCmd.PersistentFlags().BoolVar(&conf.Server.Debug, "debug", false, "If this is enabled, the log debug messages are visible in the log output")
 	if err := viper.BindPFlag("server.debug", rootCmd.PersistentFlags().Lookup("debug")); err != nil {
 		log.Error(err)
 	}
