@@ -37,7 +37,7 @@ var versionCmd = &cobra.Command{
 				conf.Revision,
 				conf.Branch)
 		} else {
-			fmt.Printf("version: %s\n", conf.Version)
+			fmt.Println(conf.Version)
 		}
 	},
 }
