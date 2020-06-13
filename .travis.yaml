@@ -1,0 +1,22 @@
+language: go
+
+services:
+  - docker
+
+go:
+  - 1.14
+  - master
+
+os:
+  - linux
+
+install:
+  - make promu
+
+before_script:
+  - tree
+
+script:
+  - make
+  - git diff --exit-code
+  - rm -v aws_cloudwatch_exporter
