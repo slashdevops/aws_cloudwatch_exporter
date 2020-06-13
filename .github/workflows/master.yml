@@ -1,4 +1,4 @@
-name: Go
+name: Build, Test and Publish
 
 on:
   push:
@@ -25,8 +25,11 @@ jobs:
     - name: Install promu
       run: make promu
 
-    - name: Build
-      run: make
+    - name: Build Cross-Platform
+      run: promu crossbuild -v
 
-    - name: Test
-      run: make test
+    - name: Build Docker Images
+      run: make docker DOCKER_REPO=docker.io/slashdevops
+
+    - name: Show Docker Images
+      run: docker images
