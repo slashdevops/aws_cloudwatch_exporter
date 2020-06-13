@@ -131,7 +131,7 @@ func getCmd(cmd *cobra.Command, args []string) {
 		log.Errorf("Invalid flag value outFormat: %s", outFormat)
 	}
 
-	outFile, _ := cmd.Flags().GetString("outFormat")
+	outFile, _ := cmd.Flags().GetString("outFile")
 	if outFile != "" {
 		if err := ioutil.WriteFile(outFile, outMetrics, 0644); err != nil {
 			log.Panic(err)
