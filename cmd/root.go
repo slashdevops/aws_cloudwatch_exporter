@@ -16,16 +16,20 @@ limitations under the License.
 package cmd
 
 import (
+	"errors"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/imdario/mergo"
 	"github.com/prometheus/common/version"
 	"github.com/sirupsen/logrus"
 	"github.com/slashdevops/aws_cloudwatch_exporter/config"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"gopkg.in/yaml.v2"
 )
 
 const (
@@ -74,7 +78,7 @@ func init() {
 		log.Error(err)
 	}
 
-	rootCmd.PersistentFlags().StringSliceVar(&conf.Application.MetricsFiles, "metricsFiles", nil, "Metrics files, example: --metricsFile ~/tmp/queries/m1.yaml --metricsFile ~/tmp/queries/m2.yml")
+	rootCmd.PersistentFlags().StringSliceVar(&conf.Application.MetricsFiles, "metricsFiles", nil, "Metrics files, example: --metricsFiles ~/tmp/queries/m1.yaml --metricsFiles ~/tmp/queries/m2.yml")
 	if err := viper.BindPFlag("application.metricsFiles", rootCmd.PersistentFlags().Lookup("metricsFiles")); err != nil {
 		log.Error(err)
 	}
@@ -216,15 +220,18 @@ func parseConfFiles(c *config.All) {
 	}
 
 	for _, file := range files {
+		log.Infof("Reading configuration file: %s", file)
+
 		fileNameNoExt := strings.TrimSuffix(file, filepath.Ext(file))
 
-		log.Debugf("Parsing configuration file: %s", file)
+		log.Debugf("Parsing configuration file path: %s", file)
 		log.Debugf("file: %s", filepath.Base(file))
 		log.Debugf("file without ext: %s", fileNameNoExt)
 		log.Debugf("Location: %s", filepath.Dir(file))
 		log.Debugf("Kind: %s", filepath.Ext(file)[1:])
 
-		viper.SetConfigName(fileNameNoExt)
+		// viper.SetConfigName(fileNameNoExt)
+		viper.SetConfigName(filepath.Base(file))
 		viper.AddConfigPath(filepath.Dir(file))
 		viper.SetConfigType(filepath.Ext(file)[1:])
 
@@ -232,12 +239,12 @@ func parseConfFiles(c *config.All) {
 		viper.AutomaticEnv()
 		viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
-		log.Debugf("Reading configuration from file: %s", file)
+		log.Debugf("Loading configuration from file: %s", file)
 		if err := viper.ReadInConfig(); err != nil {
 			log.Errorf("Error reading config file, %s", err)
 		}
 
-		log.Debug("Filling conf structure")
+		log.Debugf("Filling configuration structure from file: %s", file)
 		err := viper.Unmarshal(&c)
 		if err != nil {
 			log.Errorf("Unable to decode into struct, %v", err)
@@ -248,36 +255,14 @@ func parseConfFiles(c *config.All) {
 // Unmarshall Yaml files into c config structure
 func parseMetricsFiles(c *config.All) {
 
-	for i, file := range c.Application.MetricsFiles {
-		fileNameNoExt := strings.TrimSuffix(file, filepath.Ext(file))
+	confFiles := MergeFiles(c.Application.MetricsFiles)
 
-		log.Debugf("Configuration file: %s", file)
-		log.Debugf("file: %s", filepath.Base(file))
-		log.Debugf("file without ext: %s", fileNameNoExt)
-		log.Debugf("Location: %s", filepath.Dir(file))
-		log.Debugf("Kind: %s", filepath.Ext(file)[1:])
-
-		viper.SetConfigName(fileNameNoExt)
-		viper.AddConfigPath(filepath.Dir(file))
-		viper.SetConfigType(filepath.Ext(file)[1:])
-
-		if i < 1 {
-			log.Debugf("Reading configuration from file: %s", file)
-			if err := viper.ReadInConfig(); err != nil {
-				log.Errorf("Error reading config file, %s", err)
-			}
-		} else {
-			log.Debugf("Merging configuration of file: %s", file)
-			// TODO: This is not working well, doesn't work properly in deep merge of structures
-			// https://github.com/spf13/viper/issues/910
-			if err := viper.MergeInConfig(); err != nil {
-				log.Errorf("Error merging config file, %s", err)
-			}
-		}
+	if err := viper.MergeConfigMap(confFiles); err != nil {
+		log.Error(err)
 	}
 
 	if len(c.Application.MetricsFiles) > 0 {
-		log.Debug("Filling conf structure")
+		log.Debugf("Filling configuration structure from file: %s", c.Application.MetricsFiles)
 		err := viper.Unmarshal(&c)
 		if err != nil {
 			log.Errorf("Unable to decode into struct, %v", err)
@@ -285,4 +270,31 @@ func parseMetricsFiles(c *config.All) {
 	} else {
 		log.Errorf("Metrics configuration file: \"%v\" doesn't exist", c.Application.MetricsFiles)
 	}
+}
+
+func MergeFiles(files []string) map[string]interface{} {
+	if len(files) <= 0 {
+		if err := errors.New("You must provide at least one filename for reading Values"); err != nil {
+			log.Error(err)
+		}
+	}
+	var resultValues map[string]interface{}
+	for _, filename := range files {
+
+		var override map[string]interface{}
+		bs, err := ioutil.ReadFile(filename)
+		if err != nil {
+			log.Info(err)
+			continue
+		}
+		if err := yaml.Unmarshal(bs, &override); err != nil {
+			log.Info(err)
+			continue
+		}
+
+		if err := mergo.Map(&resultValues, override, mergo.WithAppendSlice); err != nil {
+			log.Error(err)
+		}
+	}
+	return resultValues
 }
