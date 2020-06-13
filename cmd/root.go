@@ -208,8 +208,8 @@ func ReadAndValidateConfFromFiles() {
 
 	// expose all the configuration, just to check
 	if conf.Server.Debug {
-		log.Debug(conf.ToJson())
-		// log.VersionInfo(conf.ToYaml())
+		log.Debug(conf.ToJSON())
+		// log.VersionInfo(conf.ToYAML())
 	}
 }
 
