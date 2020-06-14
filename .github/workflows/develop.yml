@@ -37,6 +37,9 @@ jobs:
           name: root
           path: .
 
+      - name: Show Project Files
+        run: tree
+
   test:
     name: Test
     needs: prepare_tools
@@ -46,6 +49,9 @@ jobs:
         uses: actions/download-artifact@v1
         with:
           name: root
+
+      - name: Show Project Files
+        run: tree
 
       - name: Build and Test
         run: make
