@@ -7,13 +7,37 @@ on:
     branches-ignore:
       - '**'
 
+
 env:
   DOCKER_HUB_REPO: docker.io/slashdevops
 
 jobs:
 
-  build_test_publish:
-    name: Build Test and Publish Release
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go 1.x
+        uses: actions/setup-go@v2
+        with:
+          go-version: ^1.14
+        id: go
+
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+
+      - name: Install promu
+        run: make promu
+
+      - name: Build and Test Linux Platform Only
+        run: make
+
+      - name: Check code modifications
+        run: git diff --exit-code
+
+  build:
+    name: Build
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - name: Set up Go 1.x
@@ -31,26 +55,125 @@ jobs:
       - name: Build Cross-Platform
         run: promu crossbuild -v
 
+      - name: List Workspace Files
+        run: ls -la .
+
+      - name: List .build Files
+        run: ls -R .build
+
+      - name: Upload .build artifacts
+        uses: actions/upload-artifact@v1
+        with:
+          name: .build
+          path: .build
+
+  publish_docker_images:
+    name: Publish Docker Images
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go 1.x
+        uses: actions/setup-go@v2
+        with:
+          go-version: ^1.14
+        id: go
+
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+
+      - name: Install promu
+        run: make promu
+
+      - name: Show Package Information
+        run: promu info
+
+      - name: Docker Version
+        run: docker version
+
+      - name: Download .build artifacts from Build Step
+        uses: actions/download-artifact@v1
+        with:
+          name: .build
+          path: .build
+
+      - name: List Workspace Files
+        run: ls -la .
+
+      - name: List .build Files
+        run: ls -R .build
+
       - name: Build Docker Images
         run: make docker DOCKER_REPO=docker.io/slashdevops
 
       - name: Docker Tag Images Latest
         run: make docker-tag-latest DOCKER_REPO=docker.io/slashdevops
 
-      - name: Show Docker Images
+      - name: Show Local Docker Images
         run: docker images
 
       - name: Loging in Docker Hub
         run: echo ${{ secrets.DOCKER_HUB_PASSWORD }} | docker login -u ${{ secrets.DOCKER_HUB_USER }} --password-stdin
 
-      - name: Publish images in Docker Hub
+      - name: Publish Images in Docker Hub
         run: make docker-publish DOCKER_REPO=$DOCKER_HUB_REPO
 
-      - name: Publish manifest in Docker Hub
+      - name: Publish Manifest in Docker Hub
         run: make docker-manifest DOCKER_REPO=$DOCKER_HUB_REPO
+
+  create_release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: |
+            [WIP] Changes in this Release
+            - First Change
+            - Second Change
+          draft: false
+          prerelease: false
+
+  publish_tarballs:
+    name: Publish Tarballs
+    needs: create_release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go 1.x
+        uses: actions/setup-go@v2
+        with:
+          go-version: ^1.14
+        id: go
+
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+
+      - name: Install promu
+        run: make promu
 
       - name: Show Package Information
         run: promu info
+
+      - name: Download .build artifacts from Build Step
+        uses: actions/download-artifact@v1
+        with:
+          name: .build
+          path: .build
+
+      - name: List Workspace Files
+        run: ls -la .
+
+      - name: List .build Files
+        run: ls -R .build
 
       - name: Build Tarballs Files
         run: promu crossbuild tarballs
@@ -61,9 +184,9 @@ jobs:
       - name: Release Tarballs Files
         run: promu release -v .tarballs
         env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload artifacts to Github
+      - name: Upload Artifacts to Github
         uses: actions/upload-artifact@v1
         with:
           name: releases

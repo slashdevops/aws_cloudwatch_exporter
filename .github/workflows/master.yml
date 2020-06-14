@@ -64,7 +64,7 @@ jobs:
         run: ls -la .
 
       - name: List .build Files
-        run: ls -la .build
+        run: ls -R .build
 
       - name: Upload .build artifacts
         uses: actions/upload-artifact@v1
@@ -72,7 +72,7 @@ jobs:
           name: .build
           path: .build
 
-  publish:
+  publish_docker_images:
     name: Publish Docker Images
     needs: build
     runs-on: ubuntu-latest
@@ -102,7 +102,7 @@ jobs:
         run: ls -la .
 
       - name: List .build Files
-        run: ls -la .build
+        run: ls -R .build
 
       - name: Build Docker Images
         run: make docker DOCKER_REPO=docker.io/slashdevops
