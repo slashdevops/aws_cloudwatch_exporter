@@ -168,7 +168,7 @@ func init() {
 }
 
 func initConfig() {
-	if conf.Server.LogFormat == "json" {
+	if strings.ToLower(conf.Server.LogFormat) == "json" {
 		log.SetFormatter(&logrus.JSONFormatter{})
 	} else {
 		log.SetFormatter(&logrus.TextFormatter{})
@@ -203,8 +203,12 @@ func initConfig() {
 
 // this will be used for every commands that needs conf in files
 func ReadAndValidateConfFromFiles() {
-	parseConfigFiles(&conf)
-	parseMetricsFiles(&conf)
+	// Read env vars equals as the mapstructure defined into the config.go
+	viper.AutomaticEnv()
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+
+	loadFromConfigFiles(&conf)
+	loadFromMetricsFiles(&conf)
 	validateMetricsQueries(&conf)
 
 	// expose all the configuration, just to check
@@ -215,7 +219,7 @@ func ReadAndValidateConfFromFiles() {
 }
 
 // Unmarshall Yaml files into c config structure
-func parseConfigFiles(c *config.All) {
+func loadFromConfigFiles(c *config.All) {
 	// Config files to be load
 	files := []string{
 		c.Application.ServerFile,
@@ -238,10 +242,6 @@ func parseConfigFiles(c *config.All) {
 		viper.AddConfigPath(filepath.Dir(file))
 		viper.SetConfigType(filepath.Ext(file)[1:])
 
-		// Read env vars equals as the mapstructure is defined into the config.go
-		viper.AutomaticEnv()
-		viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-
 		log.Debugf("Loading configuration from file: %s", file)
 		if err := viper.ReadInConfig(); err != nil {
 			log.Fatalf("Error reading config file, %s", err)
@@ -256,9 +256,9 @@ func parseConfigFiles(c *config.All) {
 }
 
 // Unmarshall Yaml files into c config structure
-// NOTE: Unfortunately viper.MergeInConfig() do the merge using override, so
+// NOTE: Unfortunately viper.MergeInConfig() does the merge using override, so
 // this is the reason to do not user it.
-func parseMetricsFiles(c *config.All) {
+func loadFromMetricsFiles(c *config.All) {
 
 	metricsQueries := MergeMetricsFiles(c.Application.MetricsFiles)
 
