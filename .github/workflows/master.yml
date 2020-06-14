@@ -63,8 +63,8 @@ jobs:
           path: .build
 
       - name: Copy .build/ into build/
-          run: cp -rv .build build
-          shell: bash
+        run: cp -rv .build build
+        shell: bash
 
       - name: Build Docker Images
         run: make docker DOCKER_REPO=docker.io/slashdevops
