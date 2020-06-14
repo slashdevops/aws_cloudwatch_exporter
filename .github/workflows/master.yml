@@ -96,6 +96,7 @@ jobs:
         uses: actions/download-artifact@v1
         with:
           name: dot_build
+          path: .build
 
       - name: List Workspace Files
         run: ls -la .
