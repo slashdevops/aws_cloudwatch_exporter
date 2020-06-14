@@ -34,7 +34,7 @@ jobs:
       - name: Upload Project Source Code
         uses: actions/upload-artifact@v1
         with:
-          name: src
+          name: prj_src
           path: .
 
       - name: Show Project Files
@@ -51,7 +51,7 @@ jobs:
           name: src
 
       - name: Move Project Source Code to Root Path
-        run: mv src/* . && rm -rf src/
+        run: mv prj_src/* . && rm -rf prj_src/
         shell: bash
 
       - name: Show Project Files
