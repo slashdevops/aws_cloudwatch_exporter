@@ -1,0 +1,70 @@
+name: Release workflow
+
+on:
+  push:
+    tags:
+      - v[12].[0-9]+.[0-9]+ # https://help.github.com/es/actions/reference/workflow-syntax-for-github-actions#filter-pattern-cheat-sheet
+    branches-ignore:
+      - '**'
+
+env:
+  DOCKER_HUB_REPO: docker.io/slashdevops
+
+jobs:
+
+  build_test_publish:
+    name: Build Test and Publish Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go 1.x
+        uses: actions/setup-go@v2
+        with:
+          go-version: ^1.14
+        id: go
+
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+
+      - name: Install promu
+        run: make promu
+
+      - name: Build Cross-Platform
+        run: promu crossbuild -v
+
+      - name: Build Docker Images
+        run: make docker DOCKER_REPO=docker.io/slashdevops
+
+      - name: Docker Tag Images Latest
+        run: make docker-tag-latest DOCKER_REPO=docker.io/slashdevops
+
+      - name: Show Docker Images
+        run: docker images
+
+      - name: Loging in Docker Hub
+        run: echo ${{ secrets.DOCKER_HUB_PASSWORD }} | docker login -u ${{ secrets.DOCKER_HUB_USER }} --password-stdin
+
+      - name: Publish images in Docker Hub
+        run: make docker-publish DOCKER_REPO=$DOCKER_HUB_REPO
+
+      - name: Publish manifest in Docker Hub
+        run: make docker-manifest DOCKER_REPO=$DOCKER_HUB_REPO
+
+      - name: Show Package Information
+        run: promu info
+
+      - name: Build Tarballs Files
+        run: promu crossbuild tarballs
+
+      - name: Checksum Tarballs Files
+        run: promu checksum .tarballs
+
+      - name: Release Tarballs Files
+        run: promu release -v .tarballs
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+      - name: Upload artifacts to Github
+        uses: actions/upload-artifact@v1
+        with:
+          name: releases
+          path: .tarballs

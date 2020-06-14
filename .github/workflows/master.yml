@@ -18,8 +18,8 @@ env:
 
 jobs:
 
-  build_test_publish:
-    name: Build Test and Publish
+  test:
+    name: Test
     runs-on: ubuntu-latest
     steps:
       - name: Set up Go 1.x
@@ -40,8 +40,55 @@ jobs:
       - name: Check code modifications
         run: git diff --exit-code
 
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go 1.x
+        uses: actions/setup-go@v2
+        with:
+          go-version: ^1.14
+        id: go
+
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+
+      - name: Install promu
+        run: make promu
+
       - name: Build Cross-Platform
         run: promu crossbuild -v
+
+      - name: Upload .build artifacts
+        uses: actions/upload-artifact@v1
+        with:
+          name: dot_build
+          path: .build
+
+  publish:
+    name: Publish Docker Images
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go 1.x
+        uses: actions/setup-go@v2
+        with:
+          go-version: ^1.14
+        id: go
+
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+
+      - name: Install promu
+        run: make promu
+
+      - name: Docker Version
+        run: docker version
+
+      - name: Download .build artifacts from Build Step
+        uses: actions/download-artifact@v1
+        with:
+          name: dot_build
 
       - name: Build Docker Images
         run: make docker DOCKER_REPO=docker.io/slashdevops
@@ -49,31 +96,14 @@ jobs:
       - name: Docker Tag Images Latest
         run: make docker-tag-latest DOCKER_REPO=docker.io/slashdevops
 
-      - name: Show Docker Images
+      - name: Show Local Docker Images
         run: docker images
 
       - name: Loging in Docker Hub
         run: echo ${{ secrets.DOCKER_HUB_PASSWORD }} | docker login -u ${{ secrets.DOCKER_HUB_USER }} --password-stdin
 
-      - name: Publish images in Docker Hub
+      - name: Publish Images in Docker Hub
         run: make docker-publish DOCKER_REPO=$DOCKER_HUB_REPO
 
-      - name: Publish manifest in Docker Hub
+      - name: Publish Manifest in Docker Hub
         run: make docker-manifest DOCKER_REPO=$DOCKER_HUB_REPO
-
-      - name: Build Tarballs Files
-        run: promu crossbuild tarballs
-
-      - name: Checksum Tarballs Files
-        run: promu checksum .tarballs
-
-      - name: Release Tarballs Files
-        run: promu release .tarballs
-        env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-
-      - name: Upload artifacts to Github
-        uses: actions/upload-artifact@v1
-        with:
-          name: releases
-          path: .tarballs
