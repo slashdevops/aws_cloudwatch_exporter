@@ -1,5 +1,8 @@
 # aws_cloudwatch_exporter
 
+[![Master branch workflow](https://github.com/slashdevops/aws_cloudwatch_exporter/workflows/Master%20branch%20workflow/badge.svg)][Github Action]
+[![Docker Pulls](https://img.shields.io/docker/pulls/slashdevops/aws_cloudwatch_exporter.svg?maxAge=604800)][hub]
+
 Prometheus exporter for AWS CloudWatch
 
 This exporter used the AWS CloudWatch GetMetricsData API call, please it is important you read
