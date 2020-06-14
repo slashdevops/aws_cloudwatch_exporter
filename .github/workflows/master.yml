@@ -53,7 +53,7 @@ jobs:
         run: docker images
 
       - name: Loging in Docker Hub
-        run: docker login -u ${{ secrets.DOCKER_HUB_USER }} -p ${{ secrets.DOCKER_HUB_PASSWORD }}
+        run: echo ${{ secrets.DOCKER_HUB_PASSWORD }} | docker login -u ${{ secrets.DOCKER_HUB_USER }} --password-stdin
 
       - name: Publish images in Docker Hub
         run: make docker-publish DOCKER_REPO=$DOCKER_HUB_REPO
@@ -68,6 +68,8 @@ jobs:
         run: promu checksum .tarballs
 
       - name: Release Tarballs Files
+        env:
+          GITHUB_TOKEN: {{secrets.GITHUB_TOKEN}}
         run: promu release .tarballs
 
       - name: Upload artifacts to Github
