@@ -2,8 +2,11 @@
 /.build
 /.release
 /.tarballs
-/consul_exporter
 *.tar.gz
+
+/build
+/release
+/tarballs
 
 # Test binary, built with `go test -c`
 *.test

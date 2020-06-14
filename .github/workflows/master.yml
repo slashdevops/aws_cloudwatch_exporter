@@ -6,11 +6,15 @@ on:
       - master
     paths-ignore:
       - '**.md'
+
   pull_request:
     branches:
       - master
     paths-ignore:
       - '**.md'
+
+env:
+  DOCKER_HUB_REPO: docker.io/slashdevops
 
 jobs:
 
@@ -58,14 +62,34 @@ jobs:
           name: dot-build-dir
           path: .build
 
-      - name: Upload .build folder
-        uses: actions/upload-artifact@v1
-        with:
-          name: build-dir
-          path: .build
+      - name: Copy .build/ into build/
+          run: cp -rv .build build
+          shell: bash
 
       - name: Build Docker Images
         run: make docker DOCKER_REPO=docker.io/slashdevops
 
+      - name: Docker Tag Images Latest
+        run: make docker-tag-latest DOCKER_REPO=docker.io/slashdevops
+
       - name: Show Docker Images
         run: docker images
+
+  publish_docker_images:
+    name: Publish Docker Images to Registry
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Show Docker Images
+        run: docker images
+
+      - name: Loging in Docker Hub
+        run: docker login -u ${{ secrets.DOCKER_HUB_USER }} -p ${{ secrets.DOCKER_HUB_PASSWORD }}
+
+      - name: Publish images in Docker Hub
+        run: make docker-publish DOCKER_REPO=$DOCKER_HUB_REPO
+
+      - name: Publish manifest in Docker Hub
+        run: make docker-manifest DOCKER_REPO=$DOCKER_HUB_REPO
+
+
