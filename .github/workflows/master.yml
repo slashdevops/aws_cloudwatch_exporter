@@ -61,4 +61,17 @@ jobs:
       - name: Publish manifest in Docker Hub
         run: make docker-manifest DOCKER_REPO=$DOCKER_HUB_REPO
 
+      - name: Build Tarballs Files
+        run: promu crossbuild tarballs
 
+      - name: Checksum Tarballs Files
+        run: promu checksum .tarballs
+
+      - name: Release Tarballs Files
+        run: promu release .tarballs
+
+      - name: Upload artifacts to Github
+        uses: actions/upload-artifact@v1
+        with:
+          name: releases
+          path: .tarballs
