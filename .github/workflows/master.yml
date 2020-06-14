@@ -18,7 +18,7 @@ env:
 
 jobs:
 
-  build:
+  build_test_publish:
     name: Build Test and Publish
     runs-on: ubuntu-latest
     steps:
@@ -48,9 +48,6 @@ jobs:
 
       - name: Docker Tag Images Latest
         run: make docker-tag-latest DOCKER_REPO=docker.io/slashdevops
-
-      - name: Show Docker Images
-        run: docker images
 
       - name: Show Docker Images
         run: docker images
