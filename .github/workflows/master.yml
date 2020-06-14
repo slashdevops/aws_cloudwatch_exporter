@@ -68,9 +68,9 @@ jobs:
         run: promu checksum .tarballs
 
       - name: Release Tarballs Files
-        env:
-          GITHUB_TOKEN: {{secrets.GITHUB_TOKEN}}
         run: promu release .tarballs
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
       - name: Upload artifacts to Github
         uses: actions/upload-artifact@v1
