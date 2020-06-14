@@ -1,4 +1,4 @@
-name: Build Test
+name: Build And Test
 
 on:
   push:
@@ -31,10 +31,10 @@ jobs:
       - name: Install promu
         run: make promu
 
-      - name: Upload root
+      - name: Upload Project Source Code
         uses: actions/upload-artifact@v1
         with:
-          name: .
+          name: src
           path: .
 
       - name: Show Project Files
@@ -45,10 +45,14 @@ jobs:
     needs: prepare_tools
     runs-on: ubuntu-latest
     steps:
-      - name: Download root
+      - name: Download Project Source Code
         uses: actions/download-artifact@v1
         with:
-          name: .
+          name: src
+
+      - name: Move Project Source Code to Root Path
+        run: mv src/* . && rm -rf src/
+        shell: bash
 
       - name: Show Project Files
         run: ls -la
