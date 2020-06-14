@@ -38,7 +38,7 @@ jobs:
           path: .
 
       - name: Show Project Files
-        run: tree
+        run: ls -la
 
   test:
     name: Test
@@ -51,7 +51,7 @@ jobs:
           name: root
 
       - name: Show Project Files
-        run: tree
+        run: ls -la
 
       - name: Build and Test
         run: make
