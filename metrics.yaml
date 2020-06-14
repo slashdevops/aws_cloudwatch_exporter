@@ -41,14 +41,3 @@ MetricDataQueries:
           - Name: RuleGroup
             Value: CheckCloudFrontCustomHeader
       Stat: Sum
-  - Id: m5
-    MetricStat:
-      Metric:
-        Namespace: KinesisProducerLibrary
-        MetricName: KinesisRecordsDataPut
-        Dimensions:
-          - Name: StreamName
-            Value: com.aleaplay.logs.session-transaction-trace.v1
-      Period: 300
-      Stat: Minimum
-      Unit: Bytes
