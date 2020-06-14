@@ -34,7 +34,7 @@ jobs:
       - name: Upload root
         uses: actions/upload-artifact@v1
         with:
-          name: root
+          name: .
           path: .
 
       - name: Show Project Files
@@ -48,7 +48,7 @@ jobs:
       - name: Download root
         uses: actions/download-artifact@v1
         with:
-          name: root
+          name: .
 
       - name: Show Project Files
         run: ls -la
