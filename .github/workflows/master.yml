@@ -2,34 +2,70 @@ name: Build, Test and Publish
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - master
+    paths-ignore:
+      - '**.md'
   pull_request:
-    branches: [ master ]
+    branches:
+      - master
+    paths-ignore:
+      - '**.md'
 
 jobs:
 
-  build:
-    name: Build
+  prepare_tools:
+    name: Prepare the Tools
+    runs-on: ubuntu-latest
+      steps:
+        - name: Set up Go 1.x
+          uses: actions/setup-go@v2
+          with:
+            go-version: ^1.14
+          id: go
+
+        - name: Check out code into the Go module directory
+          uses: actions/checkout@v2
+
+        - name: Install promu
+          run: make promu
+
+  test:
+    name: Test
+    needs: prepare_tools
     runs-on: ubuntu-latest
     steps:
+      - name: Build and Test
+        run: make
 
-    - name: Set up Go 1.x
-      uses: actions/setup-go@v2
-      with:
-        go-version: ^1.14
-      id: go
+      - name: Check code modifications
+        run: git diff --exit-code
 
-    - name: Check out code into the Go module directory
-      uses: actions/checkout@v2
+      - name: Remove artifacts
+        run: rm -v aws_cloudwatch_exporter
 
-    - name: Install promu
-      run: make promu
+  build:
+    name: Build
+    needs: prepare_tools
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build Cross-Platform
+        run: promu crossbuild -v
 
-    - name: Build Cross-Platform
-      run: promu crossbuild -v
+      - name: Upload .build folder
+        uses: actions/upload-artifact@v1
+        with:
+          name: dot-build-dir
+          path: .build
 
-    - name: Build Docker Images
-      run: make docker DOCKER_REPO=docker.io/slashdevops
+      - name: Upload .build folder
+        uses: actions/upload-artifact@v1
+        with:
+          name: build-dir
+          path: .build
 
-    - name: Show Docker Images
-      run: docker images
+      - name: Build Docker Images
+        run: make docker DOCKER_REPO=docker.io/slashdevops
+
+      - name: Show Docker Images
+        run: docker images
