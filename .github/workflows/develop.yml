@@ -1,4 +1,4 @@
-name: Build And Test
+name: Develop branch workflow
 
 on:
   push:
@@ -16,7 +16,7 @@ on:
 jobs:
 
   build:
-    name: Prepare the Tools
+    name: Build and Test
     runs-on: ubuntu-latest
     steps:
       - name: Set up Go 1.x
