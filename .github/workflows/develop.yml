@@ -48,7 +48,7 @@ jobs:
       - name: Download Project Source Code
         uses: actions/download-artifact@v1
         with:
-          name: src
+          name: prj_src
 
       - name: Move Project Source Code to Root Path
         run: mv prj_src/* . && rm -rf prj_src/
