@@ -31,11 +31,22 @@ jobs:
       - name: Install promu
         run: make promu
 
+      - name: Upload root
+        uses: actions/upload-artifact@v1
+        with:
+          name: root
+          path: .
+
   test:
     name: Test
     needs: prepare_tools
     runs-on: ubuntu-latest
     steps:
+      - name: Download root
+        uses: actions/download-artifact@v1
+        with:
+          name: root
+
       - name: Build and Test
         run: make
 
