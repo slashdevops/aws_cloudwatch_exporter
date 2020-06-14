@@ -1,4 +1,4 @@
-name: Build Test Publish
+name: Master branch workflow
 
 on:
   push:
@@ -18,8 +18,8 @@ env:
 
 jobs:
 
-  prepare_tools:
-    name: Prepare the Tools
+  build:
+    name: Build Test and Publish
     runs-on: ubuntu-latest
     steps:
       - name: Set up Go 1.x
@@ -34,37 +34,14 @@ jobs:
       - name: Install promu
         run: make promu
 
-  test:
-    name: Test
-    needs: prepare_tools
-    runs-on: ubuntu-latest
-    steps:
-      - name: Build and Test
+      - name: Build and Test Linux Platform Only
         run: make
 
       - name: Check code modifications
         run: git diff --exit-code
 
-      - name: Remove artifacts
-        run: rm -v aws_cloudwatch_exporter
-
-  build:
-    name: Build
-    needs: prepare_tools
-    runs-on: ubuntu-latest
-    steps:
       - name: Build Cross-Platform
         run: promu crossbuild -v
-
-      - name: Upload .build folder
-        uses: actions/upload-artifact@v1
-        with:
-          name: dot-build-dir
-          path: .build
-
-      - name: Copy .build/ into build/
-        run: cp -rv .build build
-        shell: bash
 
       - name: Build Docker Images
         run: make docker DOCKER_REPO=docker.io/slashdevops
@@ -75,11 +52,6 @@ jobs:
       - name: Show Docker Images
         run: docker images
 
-  publish_docker_images:
-    name: Publish Docker Images to Registry
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
       - name: Show Docker Images
         run: docker images
 
