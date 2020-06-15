@@ -95,7 +95,7 @@ func init() {
 
 func getCmd(cmd *cobra.Command, args []string) {
 
-	ReadAndValidateConfFromFiles()
+	ReadAndValidateMetricsFromFiles()
 
 	startTime, endTime, period := metrics.GetTimeStamps(time.Now(), conf.Application.MetricStatPeriod, conf.Application.MetricTimeWindow)
 	log.Debugf("Start Time: %s", startTime.Format(time.RFC3339))

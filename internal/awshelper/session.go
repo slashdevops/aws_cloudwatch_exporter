@@ -37,6 +37,8 @@ func NewSession(c *config.AWS) *session.Session {
 	awsSession := &session.Session{}
 	awsSession.Config = &awsConf
 
+	log.Debug("Creating AWS Session")
+
 	// Case 1: When config.AWS structure is empty, use default credentials chain providers
 	// Trying to use default credential provider chain to find AWS credentials
 	// 1. Environment variables.

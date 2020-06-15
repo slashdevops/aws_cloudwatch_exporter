@@ -82,7 +82,7 @@ func init() {
 		log.Error(err)
 	}
 
-	rootCmd.PersistentFlags().StringSliceVar(&conf.Application.MetricsFiles, "metricsFiles", nil, "Metrics files, example: --metricsFiles ~/tmp/queries/m1.yaml --metricsFiles ~/tmp/queries/m2.yml")
+	rootCmd.PersistentFlags().StringSliceVar(&conf.Application.MetricsFiles, "metricsFiles", []string{"metrics.yaml"}, "Metrics files, example: --metricsFiles ~/tmp/queries/m1.yaml --metricsFiles ~/tmp/queries/m2.yml")
 	if err := viper.BindPFlag("application.metricsFiles", rootCmd.PersistentFlags().Lookup("metricsFiles")); err != nil {
 		log.Error(err)
 	}
@@ -218,6 +218,22 @@ func ReadAndValidateConfFromFiles() {
 	}
 }
 
+// this will be used for every commands that needs conf in files
+func ReadAndValidateMetricsFromFiles() {
+	// Read env vars equals as the mapstructure defined into the config.go
+	viper.AutomaticEnv()
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+
+	loadFromMetricsFiles(&conf)
+	validateMetricsQueries(&conf)
+
+	// expose all the configuration, just to check
+	if conf.Server.Debug {
+		log.Debug(conf.ToJSON())
+		// log.VersionInfo(conf.ToYAML())
+	}
+}
+
 // Unmarshall Yaml files into c config structure
 func loadFromConfigFiles(c *config.All) {
 	// Config files to be load
@@ -227,6 +243,12 @@ func loadFromConfigFiles(c *config.All) {
 	}
 
 	for _, file := range files {
+
+		if !fileExists(file) {
+			log.Warnf("The file %s doesn't exist, I will try to use configuration values from flags or ENV vars", file)
+			break
+		}
+
 		log.Infof("Reading configuration file: %s", file)
 
 		// fileNameNoExt := strings.TrimSuffix(file, filepath.Ext(file))
@@ -263,17 +285,17 @@ func loadFromMetricsFiles(c *config.All) {
 	metricsQueries := MergeMetricsFiles(c.Application.MetricsFiles)
 
 	if err := viper.MergeConfigMap(metricsQueries); err != nil {
-		log.Errorf("Error merging MetricsQueries read from files into config structure: %s", err.Error())
+		log.Fatalf("Error merging MetricsQueries read from files into config structure, check your metrics queries: %s", err.Error())
 	}
 
 	if len(c.Application.MetricsFiles) > 0 {
-		log.Debugf("Filling configuration structure from file: %s", c.Application.MetricsFiles)
+		log.Debugf("Filling configuration structure from metrics queries file: %s", c.Application.MetricsFiles)
 		err := viper.Unmarshal(&c)
 		if err != nil {
-			log.Errorf("Unable to unmarshal viper config into config struct, %s", err.Error())
+			log.Fatalf("Unable to unmarshal Metrics queries files into config struct, %s", err.Error())
 		}
 	} else {
-		log.Errorf("Metrics configuration file: \"%v\" doesn't exist", c.Application.MetricsFiles)
+		log.Fatal("Metrics queries files don't provided, you need to provide at least one to continue")
 	}
 }
 
@@ -282,8 +304,12 @@ func MergeMetricsFiles(files []string) map[string]interface{} {
 	var resultValues map[string]interface{}
 	for _, file := range files {
 
+		if !fileExists(file) {
+			log.Fatalf("The file %s does not exist, you need to provide valid metrics queries file", file)
+		}
+
 		fileExt := strings.ToLower(filepath.Ext(file)[1:])
-		log.Infof("Reading configuration file: %s", file)
+		log.Infof("Reading metrics queries file: %s", file)
 		log.Debugf("File type: %s", fileExt)
 
 		var override map[string]interface{}
@@ -327,4 +353,12 @@ func validateMetricsQueries(c *config.All) {
 	} else {
 		log.Fatal("Metrics Queries are empty, you need to defined at least one metric in metrics file")
 	}
+}
+
+func fileExists(filename string) bool {
+	info, err := os.Stat(filename)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return !info.IsDir()
 }
