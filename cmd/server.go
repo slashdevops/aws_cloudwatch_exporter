@@ -110,7 +110,15 @@ func init() {
 }
 
 func startCmd(cmd *cobra.Command, args []string) {
-	ReadAndValidateConfFromFiles()
+
+	loadFromConfigFiles(conf.Application.ServerFile, &conf)
+	loadFromConfigFiles(conf.Application.CredentialsFile, &conf)
+	loadFromMetricsFiles(&conf)
+	validateMetricsQueries(&conf)
+
+	if conf.Server.Debug {
+		log.Debug(conf.ToJSON())
+	}
 
 	m := metrics.New(&conf)
 	sess := awshelper.NewSession(&conf.AWS)
@@ -128,6 +136,11 @@ func startCmd(cmd *cobra.Command, args []string) {
 	// Debug & Profiling
 	if conf.Server.Debug {
 		mux.HandleFunc("/debug/pprof/", pprof.Index)
+		mux.HandleFunc("/debug/pprof/heap", pprof.Index)
+		mux.HandleFunc("/debug/pprof/mutex", pprof.Index)
+		mux.HandleFunc("/debug/pprof/goroutine", pprof.Index)
+		mux.HandleFunc("/debug/pprof/threadcreate", pprof.Index)
+		mux.HandleFunc("/debug/pprof/block", pprof.Index)
 		mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
 		mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
 		mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)

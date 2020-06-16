@@ -12,6 +12,7 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+
 */
 package cmd
 
@@ -29,7 +30,7 @@ import (
 	"github.com/slashdevops/aws_cloudwatch_exporter/config"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 const (
@@ -88,24 +89,6 @@ func init() {
 	}
 
 	// AWS Credentials conf
-	// AccessKeyID
-	rootCmd.PersistentFlags().StringVar(&conf.AWS.AccessKeyID, "access_key_id", "", "The AWS AccessKeyID, see: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html")
-	if err := viper.BindPFlag("aws.access_key_id", rootCmd.PersistentFlags().Lookup("access_key_id")); err != nil {
-		log.Error(err)
-	}
-
-	// SecretAccessKey
-	rootCmd.PersistentFlags().StringVar(&conf.AWS.SecretAccessKey, "secret_access_key", "", "The AWS SecretAccessKey, see: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html")
-	if err := viper.BindPFlag("aws.secret_access_key", rootCmd.PersistentFlags().Lookup("secret_access_key")); err != nil {
-		log.Error(err)
-	}
-
-	// SessionToken
-	rootCmd.PersistentFlags().StringVar(&conf.AWS.SessionToken, "session_token", "", "The AWS SessionToken, see: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html")
-	if err := viper.BindPFlag("aws.session_token", rootCmd.PersistentFlags().Lookup("session_token")); err != nil {
-		log.Error(err)
-	}
-
 	// Region
 	rootCmd.PersistentFlags().StringVar(&conf.AWS.Region, "region", "", "The AWS Region, see: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html")
 	if err := viper.BindPFlag("aws.region", rootCmd.PersistentFlags().Lookup("region")); err != nil {
@@ -121,48 +104,6 @@ func init() {
 	// RoleArn
 	rootCmd.PersistentFlags().StringVar(&conf.AWS.RoleArn, "role_arn", "", "The AWS RoleArn, see: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html")
 	if err := viper.BindPFlag("aws.role_arn", rootCmd.PersistentFlags().Lookup("role_arn")); err != nil {
-		log.Error(err)
-	}
-
-	// RoleSessionName
-	rootCmd.PersistentFlags().StringVar(&conf.AWS.RoleSessionName, "role_session_name", "", "The AWS RoleSessionName, see: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html")
-	if err := viper.BindPFlag("aws.role_session_name", rootCmd.PersistentFlags().Lookup("role_session_name")); err != nil {
-		log.Error(err)
-	}
-
-	// WebIdentityTokenFile
-	rootCmd.PersistentFlags().StringVar(&conf.AWS.WebIdentityTokenFile, "web_identity_token_file", "", "The AWS WebIdentityTokenFile, see: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html")
-	if err := viper.BindPFlag("aws.web_identity_token_file", rootCmd.PersistentFlags().Lookup("web_identity_token_file")); err != nil {
-		log.Error(err)
-	}
-
-	// ExternalID
-	rootCmd.PersistentFlags().StringVar(&conf.AWS.ExternalID, "external_id", "", "The AWS ExternalID, see: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html")
-	if err := viper.BindPFlag("aws.external_id", rootCmd.PersistentFlags().Lookup("external_id")); err != nil {
-		log.Error(err)
-	}
-
-	// MFASerial
-	rootCmd.PersistentFlags().StringVar(&conf.AWS.MFASerial, "mfa_serial", "", "The AWS MFASerial, see: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html")
-	if err := viper.BindPFlag("aws.mfa_serial", rootCmd.PersistentFlags().Lookup("mfa_serial")); err != nil {
-		log.Error(err)
-	}
-
-	// SharedConfigState
-	rootCmd.PersistentFlags().BoolVar(&conf.AWS.SharedConfigState, "shared_config_state", true, "The AWS SharedConfigState, see: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html")
-	if err := viper.BindPFlag("aws.shared_config_state", rootCmd.PersistentFlags().Lookup("shared_config_state")); err != nil {
-		log.Error(err)
-	}
-
-	// SharedCredentialsFile
-	rootCmd.PersistentFlags().StringSliceVar(&conf.AWS.SharedCredentialsFile, "shared_credential_file", nil, "The AWS SharedCredentialsFile, example: --shared_credential_file ~/.aws/credentials --shared_credential_file /etc/aws/credentials")
-	if err := viper.BindPFlag("aws.shared_credential_file", rootCmd.PersistentFlags().Lookup("shared_credential_file")); err != nil {
-		log.Error(err)
-	}
-
-	// ConfigFile
-	rootCmd.PersistentFlags().StringSliceVar(&conf.AWS.ConfigFile, "config_file", nil, "The AWS ConfigFile, example: --config_file ~/.aws/config --config_file /etc/aws/config")
-	if err := viper.BindPFlag("aws.config_file", rootCmd.PersistentFlags().Lookup("config_file")); err != nil {
 		log.Error(err)
 	}
 }
@@ -201,80 +142,43 @@ func initConfig() {
 	conf.Application.BuildInfo = version.BuildContext()
 }
 
-// this will be used for every commands that needs conf in files
-func ReadAndValidateConfFromFiles() {
-	// Read env vars equals as the mapstructure defined into the config.go
-	viper.AutomaticEnv()
-	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-
-	loadFromConfigFiles(&conf)
-	loadFromMetricsFiles(&conf)
-	validateMetricsQueries(&conf)
-
-	// expose all the configuration, just to check
-	if conf.Server.Debug {
-		log.Debug(conf.ToJSON())
-		// log.VersionInfo(conf.ToYAML())
-	}
-}
-
-// this will be used for every commands that needs conf in files
-func ReadAndValidateMetricsFromFiles() {
-	// Read env vars equals as the mapstructure defined into the config.go
-	viper.AutomaticEnv()
-	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-
-	loadFromMetricsFiles(&conf)
-	validateMetricsQueries(&conf)
-
-	// expose all the configuration, just to check
-	if conf.Server.Debug {
-		log.Debug(conf.ToJSON())
-		// log.VersionInfo(conf.ToYAML())
-	}
-}
-
 // Unmarshall Yaml files into c config structure
-func loadFromConfigFiles(c *config.All) {
-	// Config files to be load
-	files := []string{
-		c.Application.ServerFile,
-		c.Application.CredentialsFile,
+func loadFromConfigFiles(fileName string, c *config.All) {
+
+	if !fileExists(fileName) {
+		log.Warnf("The file %s doesn't exist, I will try to use configuration values from flags or ENV vars", fileName)
 	}
 
-	for _, file := range files {
+	log.Infof("Reading configuration file: %s", fileName)
 
-		if !fileExists(file) {
-			log.Warnf("The file %s doesn't exist, I will try to use configuration values from flags or ENV vars", file)
-			break
-		}
+	// fileNameNoExt := strings.TrimSuffix(file, filepath.Ext(file))
 
-		log.Infof("Reading configuration file: %s", file)
+	log.Debugf("Parsing configuration file path: %s", fileName)
+	log.Debugf("File: %s", filepath.Base(fileName))
+	// log.Debugf("File without ext: %s", fileNameNoExt)
+	log.Debugf("Location: %s", filepath.Dir(fileName))
+	log.Debugf("File ext: %s", filepath.Ext(fileName)[1:])
 
-		// fileNameNoExt := strings.TrimSuffix(file, filepath.Ext(file))
+	// viper.SetConfigName(fileNameNoExt)
+	viper.SetConfigName(filepath.Base(fileName))
+	viper.AddConfigPath(filepath.Dir(fileName))
+	viper.SetConfigType(filepath.Ext(fileName)[1:])
 
-		log.Debugf("Parsing configuration file path: %s", file)
-		log.Debugf("File: %s", filepath.Base(file))
-		// log.Debugf("File without ext: %s", fileNameNoExt)
-		log.Debugf("Location: %s", filepath.Dir(file))
-		log.Debugf("File ext: %s", filepath.Ext(file)[1:])
+	// Read env vars equals as the mapstructure defined into the config.go
+	viper.AutomaticEnv()
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
-		// viper.SetConfigName(fileNameNoExt)
-		viper.SetConfigName(filepath.Base(file))
-		viper.AddConfigPath(filepath.Dir(file))
-		viper.SetConfigType(filepath.Ext(file)[1:])
-
-		log.Debugf("Loading configuration from file: %s", file)
-		if err := viper.ReadInConfig(); err != nil {
-			log.Fatalf("Error reading config file, %s", err)
-		}
-
-		log.Debugf("Filling configuration structure from file: %s", file)
-		err := viper.Unmarshal(&c)
-		if err != nil {
-			log.Fatalf("Unable to decode into struct, %v", err)
-		}
+	log.Debugf("Loading configuration from file: %s", fileName)
+	if err := viper.ReadInConfig(); err != nil {
+		log.Fatalf("Error reading config file, %s", err)
 	}
+
+	log.Debugf("Filling configuration structure from file: %s", fileName)
+	err := viper.Unmarshal(&c)
+	if err != nil {
+		log.Fatalf("Unable to decode into struct, %v", err)
+	}
+
 }
 
 // Unmarshall Yaml files into c config structure

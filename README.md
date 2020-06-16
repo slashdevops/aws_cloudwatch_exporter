@@ -9,11 +9,23 @@ Prometheus exporter for AWS CloudWatch
 This exporter used the AWS CloudWatch GetMetricsData API call, please it is important you read
 * https://aws.amazon.com/premiumsupport/knowledge-center/cloudwatch-getmetricdata-api/
 
-## Config files
+## Configuration
+
+The configuration could be set using 3 ways:
+ 
+1. Configuration Files   (i.e.: ./server.yaml, ./credentials.yaml, ./metrics.yaml)
+2. Environment Variables (i.e.: SERVER_PORT, AWS_REGION, AWS_PROFILE, etc)
+3. Program Flags         (i.e.: --serverPort, --region, --profile)
+
+The precedence is in the same order of the list, so, if you define values into `server.yaml` and then 
+the same configuration key is defined as a `Env Var` this last will replace the file value.
+
+### Configuration Files
 
 * [server.yaml](docs/server.md)
 * [credentials.yaml](docs/credentials.md)
 * [metrics.yaml](docs/metrics.md)
+
 
 ## Development / Contributing
 

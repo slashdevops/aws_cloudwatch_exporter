@@ -95,7 +95,12 @@ func init() {
 
 func getCmd(cmd *cobra.Command, args []string) {
 
-	ReadAndValidateMetricsFromFiles()
+	loadFromMetricsFiles(&conf)
+	validateMetricsQueries(&conf)
+
+	if conf.Server.Debug {
+		log.Debug(conf.ToJSON())
+	}
 
 	startTime, endTime, period := metrics.GetTimeStamps(time.Now(), conf.Application.MetricStatPeriod, conf.Application.MetricTimeWindow)
 	log.Debugf("Start Time: %s", startTime.Format(time.RFC3339))
@@ -109,7 +114,7 @@ func getCmd(cmd *cobra.Command, args []string) {
 	svc := cloudwatch.New(sess)
 	mdo, err := svc.GetMetricData(mdi)
 	if err != nil {
-		log.Errorf("Error getting metrics %v", err)
+		log.Fatalf("Error getting metrics: %v", err)
 	}
 
 	var outMetrics []byte
@@ -137,24 +142,34 @@ func getCmd(cmd *cobra.Command, args []string) {
 			log.Panic(err)
 		}
 	} else {
-		fmt.Println(string(outMetrics))
+		log.Println(string(outMetrics))
 	}
 }
 
 func displayPromDescCmd(cmd *cobra.Command, args []string) {
 
-	ReadAndValidateConfFromFiles()
+	loadFromMetricsFiles(&conf)
+	validateMetricsQueries(&conf)
+
+	if conf.Server.Debug {
+		log.Debug(conf.ToJSON())
+	}
 
 	m := metrics.New(&conf)
 
 	for _, md := range m.GetMetricsDesc() {
-		fmt.Println(md.String())
+		log.Println(md.String())
 	}
 }
 
 func collectCmd(cmd *cobra.Command, args []string) {
 
-	ReadAndValidateConfFromFiles()
+	loadFromMetricsFiles(&conf)
+	validateMetricsQueries(&conf)
+
+	if conf.Server.Debug {
+		log.Debug(conf.ToJSON())
+	}
 
 	m := metrics.New(&conf)
 	sess := awshelper.NewSession(&conf.AWS)

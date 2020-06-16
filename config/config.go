@@ -110,19 +110,9 @@ type AWSConf struct {
 }
 
 type AWS struct {
-	AccessKeyID           string   `mapstructure:"access_key_id" json:"accessKeyID" yaml:"accessKeyID"`
-	SecretAccessKey       string   `mapstructure:"secret_access_key" json:"secretAccessKey" yaml:"secretAccessKey"`
-	SessionToken          string   `mapstructure:"session_token" json:"sessionToken" yaml:"sessionToken"`
-	Region                string   `mapstructure:"region" json:"region" yaml:"region"`
-	Profile               string   `mapstructure:"profile" json:"profile" yaml:"profile"`
-	RoleArn               string   `mapstructure:"role_arn" json:"roleArn" yaml:"roleArn"`
-	RoleSessionName       string   `mapstructure:"role_session_name" json:"roleSessionName" yaml:"roleSessionName"`
-	WebIdentityTokenFile  string   `mapstructure:"web_identity_token_file" json:"webIdentityTokenFile" yaml:"webIdentityTokenFile"`
-	ExternalID            string   `mapstructure:"external_id" json:"externalID" yaml:"externalID"`
-	MFASerial             string   `mapstructure:"mfa_serial" json:"MFASerial" yaml:"MFASerial"`
-	SharedConfigState     bool     `mapstructure:"shared_config_state" json:"sharedConfigState" yaml:"sharedConfigState"`
-	SharedCredentialsFile []string `mapstructure:"shared_credential_file" json:"sharedCredentialsFile" yaml:"sharedCredentialsFile"`
-	ConfigFile            []string `mapstructure:"config_file" json:"configFile" yaml:"configFile"`
+	Region  string `mapstructure:"region" json:"region" yaml:"region"`
+	Profile string `mapstructure:"profile" json:"profile" yaml:"profile"`
+	RoleArn string `mapstructure:"role_arn" json:"roleArn" yaml:"roleArn"`
 }
 
 // This is a convenient structure to allow config files nested (MetricDataQueries.[keys])

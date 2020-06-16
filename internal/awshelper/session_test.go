@@ -100,48 +100,55 @@ func TestNewSessionWithFiles(t *testing.T) {
 		Name        string
 		Description string
 		Args        *config.AWS
+		EnvVars     map[string]string
 		Expected    map[string]string
 	}{
 		{
 			Name:        "UsingProfileAndConfigStateFile",
 			Description: "Using ",
 			Args: &config.AWS{
-				Profile:               "default",
-				Region:                "eu-west-1",
-				SharedConfigState:     false,
-				SharedCredentialsFile: []string{"testdata/default/credentials"},
-				ConfigFile:            []string{"testdata/default/config"},
+				Profile: "default",
+				Region:  "eu-west-1",
+			},
+			EnvVars: map[string]string{
+				"AWS_SHARED_CREDENTIALS_FILE": "testdata/default/credentials", // This is very important to avoid the use of your own credentials file ~.aws/credentials
 			},
 			Expected: map[string]string{
 				"AWS_ACCESS_KEY_ID":           "AKIAIOSFODNN7EXAMPLE",
 				"AWS_SECRET_ACCESS_KEY":       "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
 				"AWS_REGION":                  "eu-west-1",
-				"AWS_SESSION_TOKEN":           "DefaultToken",
 				"AWS_SHARED_CREDENTIALS_FILE": "SharedConfigCredentials: testdata/default/credentials",
 			},
 		},
-		/*		{
-				Name:        "UsingProfileAndConfigStateFile",
-				Description: "Using cas1 profile from testdata",
-				Args: &config.AWS{
-					Profile:               "case1",
-					SharedCredentialsFile: []string{"testdata/case1/credentials"},
-					ConfigFile:            []string{"testdata/case1/config"},
-				},
-				Expected: map[string]string{
-					"AWS_ACCESS_KEY_ID":           "AKIAIOSFODNN7EXAMPLE",
-					"AWS_SECRET_ACCESS_KEY":       "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
-					"AWS_REGION":                  "us-west-2",
-					"AWS_SESSION_TOKEN":           "Case1Token",
-					"AWS_SHARED_CREDENTIALS_FILE": "SharedConfigCredentials: testdata/default/credentials",
-				},
-			},*/
+		{
+			Name:        "UsingProfileAndConfigFile",
+			Description: "Using ",
+			Args: &config.AWS{
+				Profile: "case1",
+			},
+			EnvVars: map[string]string{
+				"AWS_SHARED_CREDENTIALS_FILE": "testdata/case1/credentials", // This is very important to avoid the use of your own credentials file ~.aws/credentials
+				"AWS_CONFIG_FILE":             "testdata/case1/config",      // This is very important to avoid the use of your own credentials file ~.aws/credentials
+			},
+			Expected: map[string]string{
+				"AWS_ACCESS_KEY_ID":           "AKIAIOSFODNN7EXAMPLE",
+				"AWS_SECRET_ACCESS_KEY":       "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+				"AWS_REGION":                  "us-west-1",
+				"AWS_SHARED_CREDENTIALS_FILE": "SharedConfigCredentials: testdata/case1/credentials",
+			},
+		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.Name, func(t *testing.T) {
 			// Using the same logger of the package aws
 			log.Debug(tc.Description)
+
+			// Set the Environment Variables if exist
+			for key, value := range tc.EnvVars {
+				log.Debugf("Setting Env Var: %s", key)
+				os.Setenv(key, value)
+			}
 
 			// Create the session with the arguments
 			s := NewSession(tc.Args)
@@ -152,10 +159,9 @@ func TestNewSessionWithFiles(t *testing.T) {
 				t.Errorf("The session creation fail with error: %s", err)
 			}
 
-			// *s.Config.Region came empty, I don't know why
-			// if tc.Expected["AWS_REGION"] != *s.Config.Region {
-			// 	t.Errorf("\n\t Gotten: %s \n\t Expected: %s", *s.Config.Region, tc.Expected["AWS_REGION"])
-			// }
+			if tc.Expected["AWS_REGION"] != *s.Config.Region {
+				t.Errorf("\n\t Gotten: %s \n\t Expected: %s", *s.Config.Region, tc.Expected["AWS_REGION"])
+			}
 
 			if tc.Expected["AWS_ACCESS_KEY_ID"] != c.AccessKeyID {
 				t.Errorf("\n\t Gotten: %s \n\t Expected: %s", c.AccessKeyID, tc.Expected["AWS_ACCESS_KEY_ID"])
@@ -163,10 +169,6 @@ func TestNewSessionWithFiles(t *testing.T) {
 
 			if tc.Expected["AWS_SECRET_ACCESS_KEY"] != c.SecretAccessKey {
 				t.Errorf("\n\t Gotten: %s \n\t Expected: %s", c.SecretAccessKey, tc.Expected["AWS_SECRET_ACCESS_KEY"])
-			}
-
-			if tc.Expected["AWS_SESSION_TOKEN"] != c.SessionToken {
-				t.Errorf("\n\t Gotten: %s \n\t Expected: %s", c.SessionToken, tc.Expected["AWS_SESSION_TOKEN"])
 			}
 
 			if tc.Expected["AWS_SHARED_CREDENTIALS_FILE"] != c.ProviderName {
@@ -177,42 +179,27 @@ func TestNewSessionWithFiles(t *testing.T) {
 	}
 }
 
-func TestNewSessionWithConfig(t *testing.T) {
+func TestNewSessionWithConfigAndEnvVars(t *testing.T) {
 
 	testCases := []struct {
 		Name        string
 		Description string
 		Args        *config.AWS
+		EnvVars     map[string]string
 		Expected    map[string]string
 	}{
 		{
 			Name:        "UsingConfig",
 			Description: "Using ",
-			Args: &config.AWS{
-				AccessKeyID:     "AKIAIOSFODNN7EXAMPLE",
-				SecretAccessKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
-				SessionToken:    "ConfigToken",
-			},
-			Expected: map[string]string{
+			Args:        &config.AWS{},
+			EnvVars: map[string]string{
 				"AWS_ACCESS_KEY_ID":     "AKIAIOSFODNN7EXAMPLE",
 				"AWS_SECRET_ACCESS_KEY": "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
 				"AWS_SESSION_TOKEN":     "ConfigToken",
 			},
-		},
-		{
-			Name:        "UsingConfig",
-			Description: "Using cas1 profile from testdata",
-			Args: &config.AWS{
-				AccessKeyID:     "AKIAIOSFODNN7EXAMPLE",
-				SecretAccessKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
-				Region:          "us-west-2",
-				// RoleArn:         "arn:aws:iam::123456789012:role/role-name",
-				SessionToken: "ConfigToken",
-			},
 			Expected: map[string]string{
 				"AWS_ACCESS_KEY_ID":     "AKIAIOSFODNN7EXAMPLE",
 				"AWS_SECRET_ACCESS_KEY": "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
-				"AWS_REGION":            "us-west-2",
 				"AWS_SESSION_TOKEN":     "ConfigToken",
 			},
 		},
@@ -222,6 +209,12 @@ func TestNewSessionWithConfig(t *testing.T) {
 		t.Run(tc.Name, func(t *testing.T) {
 			// Using the same logger of the package aws
 			log.Debug(tc.Description)
+
+			// Set the Environment Variables if exist
+			for key, value := range tc.EnvVars {
+				log.Debugf("Setting Env Var: %s", key)
+				os.Setenv(key, value)
+			}
 
 			// Create the session with the arguments
 			s := NewSession(tc.Args)

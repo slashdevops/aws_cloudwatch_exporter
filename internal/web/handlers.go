@@ -94,6 +94,11 @@ func (h *Handlers) Home(w http.ResponseWriter, r *http.Request) {
 		h.conf.Server.Debug,
 		[]string{
 			"/debug/pprof/",
+			"/debug/pprof/heap",
+			"/debug/pprof/mutex",
+			"/debug/pprof/goroutine",
+			"/debug/pprof/threadcreate",
+			"/debug/pprof/block",
 			"/debug/pprof/cmdline",
 			"/debug/pprof/profile",
 			"/debug/pprof/symbol",
