@@ -21,7 +21,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/common/log"
@@ -51,16 +50,16 @@ type OwnMetrics struct {
 
 type Collector struct {
 	conf       *config.All
-	sess       *session.Session
+	svc        *cloudwatch.CloudWatch
 	metrics    metrics.Metrics
 	mutex      sync.RWMutex
 	ownMetrics *OwnMetrics
 }
 
-func New(c *config.All, m metrics.Metrics, s *session.Session) *Collector {
+func New(c *config.All, m metrics.Metrics, cwc *cloudwatch.CloudWatch) *Collector {
 	return &Collector{
 		conf:    c,
-		sess:    s,
+		svc:     cwc,
 		metrics: m,
 		ownMetrics: &OwnMetrics{
 			Up: prometheus.NewGauge(prometheus.GaugeOpts{
@@ -209,14 +208,8 @@ func (c *Collector) scrape(ch chan<- prometheus.Metric) {
 	// number of metrics to be scrape and defined in yaml files
 	c.ownMetrics.MetricsTotal.Set(float64(len(mdi.MetricDataQueries)))
 
-	// TODO: Remove it from here and implement a new interface and package to collect metrics
-	// but it is here because every time the exporter going to scrape metrics the
-	// cloudwatch session is refreshed, I need to be sure that credential never expired
-	// when move it from here
-	svc := cloudwatch.New(c.sess)
-
 	// Scrape CloudWatch Metrics
-	mdo, err := svc.GetMetricData(mdi)
+	mdo, err := c.svc.GetMetricData(mdi)
 	if err != nil {
 		c.ownMetrics.Up.Set(0)
 		c.ownMetrics.ScrapesErrors.Inc()

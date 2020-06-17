@@ -173,8 +173,10 @@ func collectCmd(cmd *cobra.Command, args []string) {
 
 	m := metrics.New(&conf)
 	sess := awshelper.NewSession(&conf.AWS)
+	cwc := cloudwatch.New(sess)
 
-	c := collector.New(&conf, m, sess)
+	c := collector.New(&conf, m, cwc)
+
 	prometheus.MustRegister(c)
 	http.Handle("/metrics", promhttp.Handler())
 

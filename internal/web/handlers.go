@@ -55,17 +55,12 @@ func (h *Handlers) Home(w http.ResponseWriter, r *http.Request) {
 		<li>{{.BuildInfo}}</li>
 	</ul>
 	
-	{{ if .Debug }}
-	<h2>Debug is enabled</h2>
-	<h3>Links:</h3>
+	<h2>Go profile is enabled</h2>
 	<ul>
-		{{range .DebugLinks}}
+		{{range .ProfileLinks}}
 		<li><a href="{{.}}">{{.}}</a></li>
 		{{ end }}
 	</ul>
-	{{ else }}
-	<h2>Debug is disabled, you cannot see application performance profile</h2>
-	{{ end }}
 
 	<h3><a href="https://prometheus.io/">https://prometheus.io</a></h3>
 </body>
@@ -80,8 +75,7 @@ func (h *Handlers) Home(w http.ResponseWriter, r *http.Request) {
 		HealthPath    string
 		VersionInfo   string
 		BuildInfo     string
-		Debug         bool
-		DebugLinks    []string
+		ProfileLinks  []string
 	}{
 		h.conf.Application.Name,
 		h.conf.Application.Name,
@@ -91,7 +85,6 @@ func (h *Handlers) Home(w http.ResponseWriter, r *http.Request) {
 		h.conf.Application.HealthPath,
 		h.conf.Application.VersionInfo,
 		h.conf.Application.BuildInfo,
-		h.conf.Server.Debug,
 		[]string{
 			"/debug/pprof/",
 			"/debug/pprof/heap",

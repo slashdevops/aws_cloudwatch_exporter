@@ -133,7 +133,7 @@ func TestNewSessionWithFiles(t *testing.T) {
 			Expected: map[string]string{
 				"AWS_ACCESS_KEY_ID":           "AKIAIOSFODNN7EXAMPLE",
 				"AWS_SECRET_ACCESS_KEY":       "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
-				"AWS_REGION":                  "us-west-1",
+				"AWS_REGION":                  "eu-west-1",
 				"AWS_SHARED_CREDENTIALS_FILE": "SharedConfigCredentials: testdata/case1/credentials",
 			},
 		},

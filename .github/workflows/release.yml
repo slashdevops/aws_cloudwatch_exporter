@@ -99,11 +99,17 @@ jobs:
       - name: List .build Files
         run: ls -R .build
 
+      - name: Set Env Var RELEASE_VERSION
+        run: echo ::set-env name=RELEASE_VERSION::${GITHUB_REF#refs/*/}
+
+      - name: Show RELEASE_VERSION
+        run: echo $RELEASE_VERSION
+
       - name: Build Docker Images
-        run: make docker DOCKER_REPO=docker.io/slashdevops
+        run: make docker DOCKER_IMAGE_TAG=$RELEASE_VERSION DOCKER_REPO=docker.io/slashdevops
 
       - name: Docker Tag Images Latest
-        run: make docker-tag-latest DOCKER_REPO=docker.io/slashdevops
+        run: make docker-tag-latest DOCKER_IMAGE_TAG=$RELEASE_VERSION DOCKER_REPO=docker.io/slashdevops
 
       - name: Show Local Docker Images
         run: docker images
@@ -112,10 +118,10 @@ jobs:
         run: echo ${{ secrets.DOCKER_HUB_PASSWORD }} | docker login -u ${{ secrets.DOCKER_HUB_USER }} --password-stdin
 
       - name: Publish Images in Docker Hub
-        run: make docker-publish DOCKER_REPO=$DOCKER_HUB_REPO
+        run: make docker-publish DOCKER_IMAGE_TAG=$RELEASE_VERSION DOCKER_REPO=$DOCKER_HUB_REPO
 
       - name: Publish Manifest in Docker Hub
-        run: make docker-manifest DOCKER_REPO=$DOCKER_HUB_REPO
+        run: make docker-manifest DOCKER_IMAGE_TAG=$RELEASE_VERSION DOCKER_REPO=$DOCKER_HUB_REPO
 
   create_release:
     name: Create Release

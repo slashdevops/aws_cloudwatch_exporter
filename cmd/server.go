@@ -20,6 +20,7 @@ import (
 	"net/http/pprof"
 	"time"
 
+	"github.com/aws/aws-sdk-go/service/cloudwatch"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/slashdevops/aws_cloudwatch_exporter/internal/awshelper"
@@ -122,9 +123,11 @@ func startCmd(cmd *cobra.Command, args []string) {
 
 	m := metrics.New(&conf)
 	sess := awshelper.NewSession(&conf.AWS)
+	cwc := cloudwatch.New(sess)
 
-	collector := collector.New(&conf, m, sess)
-	prometheus.MustRegister(collector)
+	c := collector.New(&conf, m, cwc)
+
+	prometheus.MustRegister(c)
 
 	handlers := web.NewHandlers(&conf)
 
@@ -134,20 +137,18 @@ func startCmd(cmd *cobra.Command, args []string) {
 	mux.Handle(conf.Application.MetricsPath, promhttp.Handler())
 
 	// Debug & Profiling
-	if conf.Server.Debug {
-		mux.HandleFunc("/debug/pprof/", pprof.Index)
-		mux.HandleFunc("/debug/pprof/heap", pprof.Index)
-		mux.HandleFunc("/debug/pprof/mutex", pprof.Index)
-		mux.HandleFunc("/debug/pprof/goroutine", pprof.Index)
-		mux.HandleFunc("/debug/pprof/threadcreate", pprof.Index)
-		mux.HandleFunc("/debug/pprof/block", pprof.Index)
-		mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
-		mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
-		mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
-		mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
-	}
+	mux.HandleFunc("/debug/pprof/", pprof.Index)
+	mux.HandleFunc("/debug/pprof/heap", pprof.Index)
+	mux.HandleFunc("/debug/pprof/mutex", pprof.Index)
+	mux.HandleFunc("/debug/pprof/goroutine", pprof.Index)
+	mux.HandleFunc("/debug/pprof/threadcreate", pprof.Index)
+	mux.HandleFunc("/debug/pprof/block", pprof.Index)
+	mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+	mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
+	mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+	mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
 
-	// this channel is to wait routines before finis this
+	// this channel is to wait routines
 	done := make(chan bool, 1)
 	s := server.New(mux, &conf)
 
