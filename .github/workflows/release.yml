@@ -56,7 +56,7 @@ jobs:
         run: ls -la .
 
       - name: List .build Files
-        run: ls -R .build
+        run: ls -la .build
 
       - name: Upload .build artifacts
         uses: actions/upload-artifact@v1
@@ -93,11 +93,14 @@ jobs:
           name: .build
           path: .build
 
+      - name: Assign Execution Permission to Binaries
+        run: chmod -R +x .build/*/*
+
       - name: List Workspace Files
         run: ls -la .
 
       - name: List .build Files
-        run: ls -R .build
+        run: ls -la .build
 
       - name: Set Env Var RELEASE_VERSION
         run: echo ::set-env name=RELEASE_VERSION::${GITHUB_REF#refs/*/}
@@ -172,11 +175,14 @@ jobs:
           name: .build
           path: .build
 
+      - name: Assign Execution Permission to Binaries
+        run: chmod -R +x .build/*/*
+
       - name: List Workspace Files
         run: ls -la .
 
       - name: List .build Files
-        run: ls -R .build
+        run: ls -la .build
 
       - name: Build Tarballs Files
         run: promu crossbuild tarballs

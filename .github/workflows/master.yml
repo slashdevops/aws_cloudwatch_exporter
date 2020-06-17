@@ -69,7 +69,7 @@ jobs:
         run: ls -la .
 
       - name: List .build Files
-        run: ls -R .build
+        run: ls -la .build
 
       - name: Upload .build artifacts
         uses: actions/upload-artifact@v1
@@ -103,11 +103,14 @@ jobs:
           name: .build
           path: .build
 
+      - name: Assign Execution Permission to Binaries
+        run: chmod -R +x .build/*/*
+
       - name: List Workspace Files
         run: ls -la .
 
       - name: List .build Files
-        run: ls -R .build
+        run: ls -la .build
 
       - name: Build Docker Images
         run: make docker DOCKER_REPO=docker.io/slashdevops

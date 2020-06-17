@@ -162,6 +162,8 @@ func loadFromConfigFiles(fileName string, c *config.All) {
 	// viper.SetConfigName(fileNameNoExt)
 	viper.SetConfigName(filepath.Base(fileName))
 	viper.AddConfigPath(filepath.Dir(fileName))
+	viper.AddConfigPath("/etc/" + appName)
+	viper.AddConfigPath(".")
 	viper.SetConfigType(filepath.Ext(fileName)[1:])
 
 	// Read env vars equals as the mapstructure defined into the config.go
