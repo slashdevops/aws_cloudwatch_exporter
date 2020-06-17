@@ -1,43 +1,44 @@
 # https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_GetMetricData.html
 # https://aws.amazon.com/premiumsupport/knowledge-center/cloudwatch-getmetricdata-api/
-MetricDataQueries:
-  - Id: m1
-    MetricStat:
-      Metric:
-        Namespace: AWS/EC2
-        MetricName: CPUUtilization
-        Dimensions:
-          - Name: AutoScalingGroupName
-            Value: eks-prod-01-apps-01-aeg
-      Stat: Average
-  - Id: m2
-    MetricStat:
-      Metric:
-        Namespace: AWS/DynamoDB
-        MetricName: ProvisionedWriteCapacityUnits
-        Dimensions:
-          - Name: TableName
-            Value: Player
-      Stat: Maximum
-  - Id: m3
-    MetricStat:
-      Metric:
-        Namespace: AWS/NATGateway
-        MetricName: PacketsOutToSource
-        Dimensions:
-          - Name: NatGatewayId
-            Value: nat-024c041c6e5cf5d20
-      Stat: SampleCount
-  - Id: m4
-    MetricStat:
-      Metric:
-        Namespace: AWS/WAFV2
-        MetricName: AllowedRequests
-        Dimensions:
-          - Name: Region
-            Value: eu-west-1
-          - Name: Rule
-            Value: CloudFrontCustomHeader
-          - Name: RuleGroup
-            Value: CheckCloudFrontCustomHeader
-      Stat: Sum
+# Metrics Queries Examples
+#MetricDataQueries:
+#  - Id: m1
+#    MetricStat:
+#      Metric:
+#        Namespace: AWS/EC2
+#        MetricName: CPUUtilization
+#        Dimensions:
+#          - Name: AutoScalingGroupName
+#            Value: eks-prod-01-apps-01-aeg
+#      Stat: Average
+#  - Id: m2
+#    MetricStat:
+#      Metric:
+#        Namespace: AWS/DynamoDB
+#        MetricName: ProvisionedWriteCapacityUnits
+#        Dimensions:
+#          - Name: TableName
+#            Value: Player
+#      Stat: Maximum
+#  - Id: m3
+#    MetricStat:
+#      Metric:
+#        Namespace: AWS/NATGateway
+#        MetricName: PacketsOutToSource
+#        Dimensions:
+#          - Name: NatGatewayId
+#            Value: nat-024c041c6e5cf5d20
+#      Stat: SampleCount
+#  - Id: m4
+#    MetricStat:
+#      Metric:
+#        Namespace: AWS/WAFV2
+#        MetricName: AllowedRequests
+#        Dimensions:
+#          - Name: Region
+#            Value: eu-west-1
+#          - Name: Rule
+#            Value: CloudFrontCustomHeader
+#          - Name: RuleGroup
+#            Value: CheckCloudFrontCustomHeader
+#      Stat: Sum
