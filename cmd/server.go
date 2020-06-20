@@ -115,7 +115,6 @@ func init() {
 func startCmd(cmd *cobra.Command, args []string) {
 
 	loadFromConfigFiles(conf.Application.ServerFile, &conf)
-	loadFromConfigFiles(conf.Application.CredentialsFile, &conf)
 	loadFromMetricsFiles(&conf)
 	validateMetricsQueries(&conf)
 
@@ -123,7 +122,7 @@ func startCmd(cmd *cobra.Command, args []string) {
 	log.Debugf("Available Env Vars: %s", os.Environ())
 
 	m := metrics.New(&conf)
-	sess := awshelper.NewSession(&conf.AWS)
+	sess := awshelper.NewSession()
 	cwc := cloudwatch.New(sess)
 
 	c := collector.New(&conf, m, cwc)

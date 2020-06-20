@@ -25,7 +25,6 @@ import (
 type All struct {
 	ServerConf            `mapstructure:",squash"`
 	ApplicationConf       `mapstructure:",squash"`
-	AWSConf               `mapstructure:",squash"`
 	MetricDataQueriesConf `mapstructure:",squash"`
 }
 
@@ -89,30 +88,11 @@ type Application struct {
 	VersionInfo      string   `json:"versionInfo" yaml:"versionInfo"`
 	BuildInfo        string   `json:"buildInfo" yaml:"buildInfo"`
 	ServerFile       string   `mapstructure:"serverFile" json:"serverFile" yaml:"serverFile"`
-	CredentialsFile  string   `mapstructure:"credentialsFile" json:"sharedCredentialsFile" yaml:"sharedCredentialsFile"`
 	HealthPath       string   `json:"healthPath" yaml:"healthPath"`
 	MetricsPath      string   `json:"metricsPath" yaml:"metricsPath"`
 	MetricsFiles     []string `mapstructure:"metricsFiles" json:"metricsFiles" yaml:"metricsFiles"`
 	MetricStatPeriod string   `mapstructure:"metricStatPeriod" json:"metricStatPeriod" yaml:"metricStatPeriod"`
 	MetricTimeWindow string   `mapstructure:"metricTimeWindow" json:"metricTimeWindow" yaml:"metricTimeWindow"`
-}
-
-// https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html
-// This is a convenient structure to allow config files nested (aws.[keys])
-// credentials.yaml file
-// Nested:
-// aws:
-//   access_key_id: ""
-//   secret_access_key: ""
-//   profile: ""
-type AWSConf struct {
-	AWS `mapstructure:"AWS" json:"AWS" yaml:"AWS"`
-}
-
-type AWS struct {
-	Region  string `mapstructure:"region" json:"region" yaml:"region"`
-	Profile string `mapstructure:"profile" json:"profile" yaml:"profile"`
-	RoleArn string `mapstructure:"role_arn" json:"roleArn" yaml:"roleArn"`
 }
 
 // This is a convenient structure to allow config files nested (MetricDataQueries.[keys])

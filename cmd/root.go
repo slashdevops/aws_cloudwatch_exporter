@@ -80,32 +80,8 @@ func init() {
 		log.Error(err)
 	}
 
-	rootCmd.PersistentFlags().StringVar(&conf.Application.CredentialsFile, "credentialsFile", "credentials.yaml", "The file with the AWS Credentials configuration")
-	if err := viper.BindPFlag("application.credentialsFile", rootCmd.PersistentFlags().Lookup("credentialsFile")); err != nil {
-		log.Error(err)
-	}
-
 	rootCmd.PersistentFlags().StringSliceVar(&conf.Application.MetricsFiles, "metricsFiles", []string{"metrics.yaml"}, "Metrics queries files, the file or files with the metrics queries. example: --metricsFiles ~/tmp/queries/m1.yaml --metricsFiles ~/tmp/queries/m2.yml")
 	if err := viper.BindPFlag("application.metricsFiles", rootCmd.PersistentFlags().Lookup("metricsFiles")); err != nil {
-		log.Error(err)
-	}
-
-	// AWS Credentials conf
-	// Region
-	rootCmd.PersistentFlags().StringVar(&conf.AWS.Region, "region", "", "The AWS Region, see: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html")
-	if err := viper.BindPFlag("aws.region", rootCmd.PersistentFlags().Lookup("region")); err != nil {
-		log.Error(err)
-	}
-
-	// Profile
-	rootCmd.PersistentFlags().StringVar(&conf.AWS.Profile, "profile", "", "The AWS profile name defined in .aws/config or .aws/credential")
-	if err := viper.BindPFlag("aws.profile", rootCmd.PersistentFlags().Lookup("profile")); err != nil {
-		log.Error(err)
-	}
-
-	// RoleArn
-	rootCmd.PersistentFlags().StringVar(&conf.AWS.RoleArn, "role_arn", "", "The AWS RoleArn, see: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html")
-	if err := viper.BindPFlag("aws.role_arn", rootCmd.PersistentFlags().Lookup("role_arn")); err != nil {
 		log.Error(err)
 	}
 }

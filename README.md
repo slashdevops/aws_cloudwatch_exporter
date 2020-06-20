@@ -1,8 +1,8 @@
 # aws_cloudwatch_exporter
 
-[![Master branch workflow](https://github.com/slashdevops/aws_cloudwatch_exporter/workflows/Master%20branch%20workflow/badge.svg?branch=master)][github]
+![Master branch workflow](https://github.com/slashdevops/aws_cloudwatch_exporter/workflows/Master%20branch%20workflow/badge.svg?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/slashdevops/aws_cloudwatch_exporter)](https://goreportcard.com/report/github.com/slashdevops/aws_cloudwatch_exporter)
-[![Docker Pulls](https://img.shields.io/docker/pulls/slashdevops/aws_cloudwatch_exporter.svg?maxAge=604800)][hub]
+![Docker Pulls](https://img.shields.io/docker/pulls/slashdevops/aws_cloudwatch_exporter.svg?maxAge=604800)
 
 Prometheus exporter for AWS CloudWatch
 
@@ -13,9 +13,9 @@ This exporter used the AWS CloudWatch GetMetricsData API call, please it is impo
 
 The configuration could be set using 3 ways:
  
-1. Configuration Files   (i.e.: ./server.yaml, ./credentials.yaml, ./metrics.yaml)
+1. Configuration Files   (i.e.: ./server.yaml, ./metrics.yaml)
 2. Environment Variables (i.e.: SERVER_PORT, AWS_REGION, AWS_PROFILE, etc)
-3. Program Flags         (i.e.: --serverPort, --region, --profile)
+3. Program Flags         (i.e.: --serverPort, --region)
 
 The precedence is in the same order of the list, so, if you define values into `server.yaml` and then 
 the same configuration key is defined as a `Env Var` this last will replace the file value.
@@ -40,24 +40,16 @@ docker run --rm \
 #### Binary
 
 ```bash
-make
-
 AWS_SDK_LOAD_CONFIG="true" \
 AWS_PROFILE="slashdevops" \
-./aws_cloudwatch_exporter metrics get --metricsFiles ~/tmp/queries/m1.yaml \
-    --debug
-```
-
-```bash
-./aws_cloudwatch_exporter metrics get --metricsFiles ~/tmp/queries/m1.yaml \
-    --profile slashdevops \
+./aws_cloudwatch_exporter metrics get \
+    --metricsFiles ~/tmp/queries/m1.yaml \
     --debug
 ```
 
 ### Configuration Files
 
 * [server.yaml](docs/server.md)
-* [credentials.yaml](docs/credentials.md)
 * [metrics.yaml](docs/metrics.md)
 
 

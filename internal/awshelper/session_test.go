@@ -22,7 +22,6 @@ import (
 	"testing"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/slashdevops/aws_cloudwatch_exporter/config"
 )
 
 func TestNewSessionWithEnvVars(t *testing.T) {
@@ -30,14 +29,12 @@ func TestNewSessionWithEnvVars(t *testing.T) {
 	testCases := []struct {
 		Name        string
 		Description string
-		Args        *config.AWS
 		EnvVars     map[string]string
 		Expected    map[string]string
 	}{
 		{
 			Name:        "UsingEnvVarsBasicAndToken",
 			Description: "Using AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY and AWS_SESSION_TOKEN Env Vars",
-			Args:        &config.AWS{},
 			EnvVars: map[string]string{
 				"AWS_SHARED_CREDENTIALS_FILE": "/tmp/nothing", // This is very important to avoid the use of your own credentials file ~.aws/credentials
 				"AWS_CONFIG_FILE":             "/tmp/nothing", // This is very important to avoid the use of your own config file ~.aws/config
@@ -67,7 +64,7 @@ func TestNewSessionWithEnvVars(t *testing.T) {
 			}
 
 			// Create the session with the arguments
-			s := NewSession(tc.Args)
+			s := NewSession()
 
 			// Get the result credentials and error
 			c, err := s.Config.Credentials.Get()
@@ -99,33 +96,26 @@ func TestNewSessionWithFiles(t *testing.T) {
 	testCases := []struct {
 		Name        string
 		Description string
-		Args        *config.AWS
 		EnvVars     map[string]string
 		Expected    map[string]string
 	}{
 		{
 			Name:        "UsingProfileAndConfigStateFile",
 			Description: "Using ",
-			Args: &config.AWS{
-				Profile: "default",
-				Region:  "eu-west-1",
-			},
 			EnvVars: map[string]string{
+				"AWS_SDK_LOAD_CONFIG":         "true",
 				"AWS_SHARED_CREDENTIALS_FILE": "testdata/default/credentials", // This is very important to avoid the use of your own credentials file ~.aws/credentials
 			},
 			Expected: map[string]string{
 				"AWS_ACCESS_KEY_ID":           "AKIAIOSFODNN7EXAMPLE",
 				"AWS_SECRET_ACCESS_KEY":       "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
 				"AWS_REGION":                  "eu-west-1",
-				"AWS_SHARED_CREDENTIALS_FILE": "SharedConfigCredentials: testdata/default/credentials",
+				"AWS_SHARED_CREDENTIALS_FILE": "EnvConfigCredentials",
 			},
 		},
 		{
 			Name:        "UsingProfileAndConfigFile",
 			Description: "Using ",
-			Args: &config.AWS{
-				Profile: "case1",
-			},
 			EnvVars: map[string]string{
 				"AWS_SHARED_CREDENTIALS_FILE": "testdata/case1/credentials", // This is very important to avoid the use of your own credentials file ~.aws/credentials
 				"AWS_CONFIG_FILE":             "testdata/case1/config",      // This is very important to avoid the use of your own credentials file ~.aws/credentials
@@ -134,7 +124,7 @@ func TestNewSessionWithFiles(t *testing.T) {
 				"AWS_ACCESS_KEY_ID":           "AKIAIOSFODNN7EXAMPLE",
 				"AWS_SECRET_ACCESS_KEY":       "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
 				"AWS_REGION":                  "eu-west-1",
-				"AWS_SHARED_CREDENTIALS_FILE": "SharedConfigCredentials: testdata/case1/credentials",
+				"AWS_SHARED_CREDENTIALS_FILE": "EnvConfigCredentials",
 			},
 		},
 	}
@@ -151,7 +141,7 @@ func TestNewSessionWithFiles(t *testing.T) {
 			}
 
 			// Create the session with the arguments
-			s := NewSession(tc.Args)
+			s := NewSession()
 
 			// Get the result credentials and error
 			c, err := s.Config.Credentials.Get()
@@ -184,14 +174,12 @@ func TestNewSessionWithConfigAndEnvVars(t *testing.T) {
 	testCases := []struct {
 		Name        string
 		Description string
-		Args        *config.AWS
 		EnvVars     map[string]string
 		Expected    map[string]string
 	}{
 		{
 			Name:        "UsingConfig",
 			Description: "Using ",
-			Args:        &config.AWS{},
 			EnvVars: map[string]string{
 				"AWS_ACCESS_KEY_ID":     "AKIAIOSFODNN7EXAMPLE",
 				"AWS_SECRET_ACCESS_KEY": "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
@@ -217,7 +205,7 @@ func TestNewSessionWithConfigAndEnvVars(t *testing.T) {
 			}
 
 			// Create the session with the arguments
-			s := NewSession(tc.Args)
+			s := NewSession()
 
 			// Get the result credentials and error
 			c, err := s.Config.Credentials.Get()

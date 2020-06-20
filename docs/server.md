@@ -18,7 +18,6 @@ server:                               # This is related to the http service conf
 application:                          # This is related to the application behavior
   metricStatPeriod: 5m                # Type: time.Duration, Defined the global period of time .see: https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_MetricStat.html
   metricTimeWindow: 10m               # Type: time.Duration, Defined the time windows between the StartTime and EndTime. see: https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_GetMetricData.html
-  credentialsFile: credentials.yaml   # Type: string, Define the location/path with the file that could contain the different AWS credentials information  
   metricsFiles:                       # Type: Array, List of files with the definitions of metrics queries 
     - metrics.yaml                    # Type: string, Part of the array list with the location/path of file with the metrics queries in the format defined in metrics.md file
 ```
@@ -35,12 +34,6 @@ for **metricStatPeriod and metricTimeWindow**
 * https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_Range.html
 * https://docs.aws.amazon.com/cli/latest/reference/cloudwatch/get-metric-data.html
 * https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_GetMetricData.html
-
-for **credentialsFile**
-
-* [credentials.md](credentials.md)
-* https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html
-* https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html
 
 for **metricsFiles**
 

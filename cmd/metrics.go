@@ -119,7 +119,7 @@ func getCmd(cmd *cobra.Command, args []string) {
 
 	log.Debugf("Metrics queries: %s", mdi.String())
 
-	sess := awshelper.NewSession(&conf.AWS)
+	sess := awshelper.NewSession()
 	svc := cloudwatch.New(sess)
 	mdo, err := svc.GetMetricData(mdi)
 	if err != nil {
@@ -179,7 +179,7 @@ func collectCmd(cmd *cobra.Command, args []string) {
 	log.Debugf("Available Env Vars: %s", os.Environ())
 
 	m := metrics.New(&conf)
-	sess := awshelper.NewSession(&conf.AWS)
+	sess := awshelper.NewSession()
 	cwc := cloudwatch.New(sess)
 
 	c := collector.New(&conf, m, cwc)
