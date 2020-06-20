@@ -18,11 +18,13 @@ COPY .build/${OS}-${ARCH}/aws_cloudwatch_exporter  /bin/aws_cloudwatch_exporter
 ARG PORT="9690"
 EXPOSE  ${PORT}
 
-USER    nobody
+RUN mkdir -p /home/nobody/.aws && chown -R nobody.nogroup /home/nobody
+ENV HOME="/home/nobody"
+USER nobody
 
 HEALTHCHECK CMD wget --spider -S "http://localhost:${PORT}/health" -T 60 2>&1 || exit 1
 
-VOLUME ["/metrics","/home/nobody"]
+VOLUME ["/home/nobody"]
 
 ENTRYPOINT  [ "/bin/aws_cloudwatch_exporter" ]
 # CMD  [ "/bin/aws_cloudwatch_exporter" ]

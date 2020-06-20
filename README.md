@@ -25,41 +25,16 @@ the same configuration key is defined as a `Env Var` this last will replace the 
 #### Docker
 
 ```bash
-make && \
-make promu && \
-promu build --prefix .build/darwin-amd64 && \
-make docker DOCKER_REPO=docker.io/slashdevops
-
 docker run --rm \
-    -v ~/tmp/queries/m1.yaml:/metrics/m1.yaml \
-    -v ~/.aws:/credentials \
-    -v ~/.aws:/credentials \
+    -i \
+    -u nobody:nogroup \
+    --privileged \
+    -v ~/tmp/queries/m1.yaml:/home/nobody/m1.yaml:ro \
+    -v /tmp/:/home/nobody/tmp/:rw \
+    -v ~/.aws:/home/nobody/.aws:ro \
     -e "AWS_SDK_LOAD_CONFIG=1" \
-    -e "AWS_CONFIG_FILE=/credentials/.aws/config" \
-    -e "AWS_SHARED_CREDENTIALS_FILE=/credentials/.aws/credentials" \
     -e "AWS_PROFILE=slashdevops" \
-    slashdevops/aws-cloudwatch-exporter-linux-amd64:develop metrics get --metricsFiles /metrics/m1.yaml \
-    --debug
-
-docker run --rm \
-    -v ~/tmp/queries/m1.yaml:/metrics/m1.yaml \
-    -v ~/.aws/credentials:/home/.aws/credentials:ro \
-    -v ~/.aws/config:/home/.aws/config:ro \
-    -e "AWS_PROFILE=slashdevops" \
-    slashdevops/aws-cloudwatch-exporter-linux-amd64:develop metrics get --metricsFiles /metrics/m1.yaml \
-    --debug
-
-docker run --rm \
-    -v ~/tmp/queries/m1.yaml:/metrics/m1.yaml \
-    -e "AWS_REGION=eu-west-1" \
-    slashdevops/aws-cloudwatch-exporter-linux-amd64:develop metrics get --metricsFiles /metrics/m1.yaml \
-    --debug
-
-docker run --rm \
-    -v ~/tmp/queries/m1.yaml:/metrics/m1.yaml \
-    -v $HOME/.aws/credentials:/home/nobody/.aws/credentials -u nobody \
-    -v $HOME/.aws/config:/home/nobody/.aws/config -u nobody \
-    slashdevops/aws-cloudwatch-exporter-linux-amd64:develop ls -la /home/nobody/
+    slashdevops/aws-cloudwatch-exporter-linux-amd64:develop metrics get --metricsFiles /home/nobody/m1.yaml --outFile /home/nobody/tmp/out.yaml 
 ```
 
 #### Binary

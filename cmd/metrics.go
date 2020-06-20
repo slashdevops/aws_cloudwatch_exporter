@@ -97,8 +97,8 @@ func init() {
 	metricsGetCmd.Flags().StringP("outFormat", "", "yaml", "Output format for results, possible values: [yaml|json]")
 	metricsGetCmd.Flags().StringP("outFile", "", "", "Output file where to store the results.")
 
-	metricsCollectCmd.Flags().StringP("address", "", "127.0.0.1", "Server address, empty means all addresses")
-	metricsCollectCmd.Flags().StringP("port", "", "8080", "Server port")
+	metricsCollectCmd.Flags().StringP("address", "", appIP, "Server address, empty means all addresses")
+	metricsCollectCmd.Flags().Uint16P("port", "", appPort, "Server port")
 }
 
 func getCmd(cmd *cobra.Command, args []string) {
@@ -228,7 +228,7 @@ func collectCmd(cmd *cobra.Command, args []string) {
 	})
 
 	a, _ := cmd.Flags().GetString("address")
-	p, _ := cmd.Flags().GetString("port")
+	p, _ := cmd.Flags().GetUint16("port")
 	soc := fmt.Sprintf("%s:%v", a, p)
 
 	log.Infof("Starting test server on %s", soc)
