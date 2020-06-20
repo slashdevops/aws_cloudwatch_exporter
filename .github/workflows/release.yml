@@ -144,9 +144,7 @@ jobs:
           tag_name: ${{ github.ref }}
           release_name: Release ${{ github.ref }}
           body: |
-            [WIP] Changes in this Release
-            - First Change
-            - Second Change
+            See the file: CHANGELOG.md
           draft: false
           prerelease: false
 

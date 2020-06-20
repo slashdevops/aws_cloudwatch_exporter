@@ -13,6 +13,5 @@ server:
 application:
   metricStatPeriod: 5m
   metricTimeWindow: 10m
-  credentialsFile: credentials.yaml
   metricsFiles:
     - metrics.yaml

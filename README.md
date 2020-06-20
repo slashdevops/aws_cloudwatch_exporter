@@ -1,13 +1,28 @@
 # aws_cloudwatch_exporter
 
-![Master branch workflow](https://github.com/slashdevops/aws_cloudwatch_exporter/workflows/.github/workflows/master.yaml/badge.svg)
+![Master branch workflow](https://github.com/slashdevops/aws_cloudwatch_exporter/workflows/Master%20branch%20workflow/badge.svg?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/slashdevops/aws_cloudwatch_exporter)](https://goreportcard.com/report/github.com/slashdevops/aws_cloudwatch_exporter)
 ![Docker Pulls](https://img.shields.io/docker/pulls/slashdevops/aws_cloudwatch_exporter.svg?maxAge=604800)
 
 Prometheus exporter for AWS CloudWatch
 
-This exporter used the AWS CloudWatch GetMetricsData API call, please it is important you read
+This exporter used the [AWS CloudWatch GetMetricsData API call](https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_GetMetricData.html), please it is important you read
+
 * https://aws.amazon.com/premiumsupport/knowledge-center/cloudwatch-getmetricdata-api/
+* https://aws.amazon.com/cloudwatch/pricing/?nc1=h_ls
+
+**WARNING**: 
+
+* The use of this exporter could be expensive, this need be used taking care.
+
+**NOTES**: 
+
+* When you use [AWS CloudWatch GetMetricsData API call](https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_GetMetricData.html) with 1 request you can get 500 metrics a time, so
+read the links above before use it.
+
+LIMITATIONS:
+
+* You could define 500 metrics queries in total (a future release will allow more)
 
 ## Configuration
 
