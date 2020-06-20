@@ -8,8 +8,8 @@ Prometheus exporter for AWS CloudWatch
 
 This exporter used the [AWS CloudWatch GetMetricsData API call](https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_GetMetricData.html), please it is important you read
 
-* https://aws.amazon.com/premiumsupport/knowledge-center/cloudwatch-getmetricdata-api/
-* https://aws.amazon.com/cloudwatch/pricing/?nc1=h_ls
+* [cloudwatch-getmetricdata-api](https://aws.amazon.com/premiumsupport/knowledge-center/cloudwatch-getmetricdata-api/)
+* [Amazon CloudWatch pricing](https://aws.amazon.com/cloudwatch/pricing/?nc1=h_ls)
 
 **WARNING**: 
 

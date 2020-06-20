@@ -15,7 +15,7 @@ on:
 
 env:
   DOCKER_HUB_REPO: "docker.io/slashdevops"
-  DOCKER_BUILD_ARCHS: "amd64 armv7 arm64"
+  DOCKER_BUILD_ARCHS: "amd64"
 
 jobs:
 
