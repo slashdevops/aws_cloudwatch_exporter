@@ -243,7 +243,7 @@ func validateMetricsQueries(c *config.All) {
 
 	// TODO: Allow more that 500 metrics queries and remove it
 	if len(c.MetricDataQueries) > appMaxMetricsQueries {
-		log.Fatal("You have defined %v metrics queries, the limits is %v", len(c.MetricDataQueries), appMaxMetricsQueries)
+		log.Fatalf("You have defined %v metrics queries, the limits is %v", len(c.MetricDataQueries), appMaxMetricsQueries)
 	}
 }
 
