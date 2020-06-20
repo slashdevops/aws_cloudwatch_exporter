@@ -9,7 +9,7 @@
 #        MetricName: CPUUtilization
 #        Dimensions:
 #          - Name: AutoScalingGroupName
-#            Value: eks-prod-01-apps-01-aeg
+#            Value: eks-prod-01-apps-01-asg
 #      Stat: Average
 #  - Id: m2
 #    MetricStat:

@@ -41,6 +41,8 @@ This exporter use GetMetricData API to get the metrics from AWS CloudWatch`
 	appGitRepository    = "https://github.com/slashdevops/aws_cloudwatch_exporter"
 	appMetricsPath      = "/metrics"
 	appHealthPath       = "/health"
+	appIP               = "127.0.0.1"
+	appPort             = 9690
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -67,7 +69,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	// Debug
-	rootCmd.PersistentFlags().BoolVar(&conf.Server.Debug, "debug", false, "If this is enabled, the log debug messages are visible in the log output")
+	rootCmd.PersistentFlags().BoolVar(&conf.Server.Debug, "debug", false, "If enabled, the log debug messages are visible in the log output")
 	if err := viper.BindPFlag("server.debug", rootCmd.PersistentFlags().Lookup("debug")); err != nil {
 		log.Error(err)
 	}
@@ -83,7 +85,7 @@ func init() {
 		log.Error(err)
 	}
 
-	rootCmd.PersistentFlags().StringSliceVar(&conf.Application.MetricsFiles, "metricsFiles", []string{"metrics.yaml"}, "Metrics files, example: --metricsFiles ~/tmp/queries/m1.yaml --metricsFiles ~/tmp/queries/m2.yml")
+	rootCmd.PersistentFlags().StringSliceVar(&conf.Application.MetricsFiles, "metricsFiles", []string{"metrics.yaml"}, "Metrics queries files, the file or files with the metrics queries. example: --metricsFiles ~/tmp/queries/m1.yaml --metricsFiles ~/tmp/queries/m2.yml")
 	if err := viper.BindPFlag("application.metricsFiles", rootCmd.PersistentFlags().Lookup("metricsFiles")); err != nil {
 		log.Error(err)
 	}
@@ -169,6 +171,8 @@ func loadFromConfigFiles(fileName string, c *config.All) {
 	// Read env vars equals as the mapstructure defined into the config.go
 	viper.AutomaticEnv()
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+
+	log.Debugf("Available Env Vars: %s", os.Environ())
 
 	log.Debugf("Loading configuration from file: %s", fileName)
 	if err := viper.ReadInConfig(); err != nil {
@@ -257,7 +261,7 @@ func validateMetricsQueries(c *config.All) {
 	if len(c.MetricDataQueries) > 0 {
 		log.Infof("Total metrics queries: %v", len(c.MetricDataQueries))
 	} else {
-		log.Fatal("Metrics Queries are empty, you need to defined at least one metric in metrics file")
+		log.Fatal("Metrics Queries are empty, you need to define at least one metric in metrics file")
 	}
 }
 

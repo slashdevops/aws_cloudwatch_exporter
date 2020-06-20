@@ -87,14 +87,14 @@ func New(c *config.All, m metrics.Metrics, cwc *cloudwatch.CloudWatch) *Collecto
 				prometheus.GaugeOpts{
 					Namespace: c.Application.Name,
 					Name:      "metrics_total",
-					Help:      "The total number of metrics to be scraped and defined into YAML files.",
+					Help:      "The total number of metrics to be scraped and was defined as metrics queries files.",
 				},
 			),
 			ScrapesSuccess: prometheus.NewCounter(
 				prometheus.CounterOpts{
 					Namespace:   c.Application.Name,
 					Name:        "scrapes_success_total",
-					Help:        "The total number of times of AWS CloudWatch API scraped for metrics with successful results.",
+					Help:        "The total number of times AWS CloudWatch API scraped for metrics with successful results.",
 					ConstLabels: nil,
 				},
 			),
@@ -103,7 +103,7 @@ func New(c *config.All, m metrics.Metrics, cwc *cloudwatch.CloudWatch) *Collecto
 					Namespace:   c.Application.Name,
 					Subsystem:   "collector",
 					Name:        "scrapes_errors_total",
-					Help:        "The total number of times of AWS CloudWatch API scraped for metrics with error results.",
+					Help:        "The total number of times AWS CloudWatch API scraped for metrics with error results.",
 					ConstLabels: nil,
 				},
 			),
@@ -112,7 +112,7 @@ func New(c *config.All, m metrics.Metrics, cwc *cloudwatch.CloudWatch) *Collecto
 					Namespace:   c.Application.Name,
 					Subsystem:   "collector",
 					Name:        "scrapes_messages_total",
-					Help:        "The total number of times of AWS CloudWatch API scraped for metrics and we got some message results. (see exporter logs)",
+					Help:        "The total number of times AWS CloudWatch API scraped for metrics and we got some message results. (see exporter logs)",
 					ConstLabels: nil,
 				},
 			),
@@ -121,7 +121,7 @@ func New(c *config.All, m metrics.Metrics, cwc *cloudwatch.CloudWatch) *Collecto
 					Namespace:   c.Application.Name,
 					Subsystem:   "collector",
 					Name:        "metrics_scrapes_success_total",
-					Help:        "The total number of metrics of AWS CloudWatch API scraped with successful results.",
+					Help:        "The total number of metrics AWS CloudWatch API scraped with successful results.",
 					ConstLabels: nil,
 				},
 			),
@@ -130,7 +130,7 @@ func New(c *config.All, m metrics.Metrics, cwc *cloudwatch.CloudWatch) *Collecto
 					Namespace:   c.Application.Name,
 					Subsystem:   "collector",
 					Name:        "metrics_scrapes_errors_total",
-					Help:        "The total number of metrics of AWS CloudWatch API scraped with errors results.",
+					Help:        "The total number of metrics AWS CloudWatch API scraped with errors results.",
 					ConstLabels: nil,
 				},
 			),
@@ -139,7 +139,7 @@ func New(c *config.All, m metrics.Metrics, cwc *cloudwatch.CloudWatch) *Collecto
 					Namespace:   c.Application.Name,
 					Subsystem:   "collector",
 					Name:        "metrics_scrapes_empty_total",
-					Help:        "The total number of metrics of AWS CloudWatch API scraped with empty results.",
+					Help:        "The total number of metrics AWS CloudWatch API scraped with empty results.",
 					ConstLabels: nil,
 				},
 			),
@@ -148,7 +148,7 @@ func New(c *config.All, m metrics.Metrics, cwc *cloudwatch.CloudWatch) *Collecto
 					Namespace:   c.Application.Name,
 					Subsystem:   "collector",
 					Name:        "metrics_scrapes_messages_total",
-					Help:        "The total number of metrics of AWS CloudWatch API scraped and we got some messages results. (see exporter logs)",
+					Help:        "The total number of metrics AWS CloudWatch API scraped and we got some messages results. (see exporter logs)",
 					ConstLabels: nil,
 				},
 			),
@@ -169,7 +169,7 @@ func (c *Collector) Describe(ch chan<- *prometheus.Desc) {
 	c.ownMetrics.MetricsScrapesEmpty.Describe(ch)
 	c.ownMetrics.MetricsScrapesMessages.Describe(ch)
 
-	// Describe all metrics constructed from yaml files
+	// Describe all metrics constructed from metrics queries files
 	for _, md := range c.metrics.GetMetricsDesc() {
 		ch <- md
 	}
@@ -208,17 +208,18 @@ func (c *Collector) scrape(ch chan<- prometheus.Metric) {
 	// number of metrics to be scrape and defined in yaml files
 	c.ownMetrics.MetricsTotal.Set(float64(len(mdi.MetricDataQueries)))
 
-	// Scrape CloudWatch Metrics
+	// Scrape AWS CloudWatch Metrics
 	mdo, err := c.svc.GetMetricData(mdi)
 	if err != nil {
 		c.ownMetrics.Up.Set(0)
 		c.ownMetrics.ScrapesErrors.Inc()
-		log.Errorf("Error getting metrics %v", err)
+		log.Errorf("Error getting AWS CloudWatch Metrics %v", err)
 	} else {
 		c.ownMetrics.ScrapesSuccess.Inc()
 	}
 
 	// Some information came from the metrics scrape
+	// could be and error or a paginator message
 	if len(mdo.Messages) > 0 {
 		c.ownMetrics.ScrapesMessages.Inc()
 		var msgs []string
@@ -233,7 +234,7 @@ func (c *Collector) scrape(ch chan<- prometheus.Metric) {
 
 		if *mdr.StatusCode == "InternalError" {
 			c.ownMetrics.MetricsScrapesErrors.Inc()
-			log.Errorf("Error gotten when scrap metric id: %s, label: %s", *mdr.Id, *mdr.Label)
+			log.Errorf("Error gotten when scrap metric id: %s, label: %s. Check your metrics queries files.", *mdr.Id, *mdr.Label)
 			continue
 		}
 
@@ -245,12 +246,13 @@ func (c *Collector) scrape(ch chan<- prometheus.Metric) {
 				messages = append(messages, *m.Value)
 			}
 			mgsString := strings.Join(messages, ",")
-			log.Warnf("Message field for metric id: %s, contain: %s", *mdr.Id, mgsString)
+			log.Warnf("Message field for metric id: %s, contain: %s. Check your metrics queries files.", *mdr.Id, mgsString)
 		}
 
 		// no metric value came, continue with the next
 		if len(mdr.Values) == 0 {
 			c.ownMetrics.MetricsScrapesEmpty.Inc()
+			log.Warnf("No values gotten for metric id: %s. Check your metrics queries files.", *mdr.Id)
 			continue
 		}
 
@@ -267,11 +269,11 @@ func (c *Collector) scrape(ch chan<- prometheus.Metric) {
 
 		c.ownMetrics.MetricsScrapesSuccess.Inc()
 
-		// Notify metrics to prometheus
+		// Notify scraped metrics to prometheus
 		ch <- nm
 	}
 
-	// report own metrics
+	// Notify own metrics
 	ch <- c.ownMetrics.Up
 	ch <- c.ownMetrics.MetricsTotal
 	ch <- c.ownMetrics.ScrapesSuccess

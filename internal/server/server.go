@@ -59,9 +59,9 @@ func (s *Server) ListenOSSignals(done *chan bool) {
 		signal.Notify(osSignals, syscall.SIGINT)
 		signal.Notify(osSignals, syscall.SIGQUIT)
 
-		log.Info("Server is listening operating system signals")
+		log.Info("Server is listening Operating System signals")
 		sig := <-osSignals
-		log.Infof("Received signal %s from operation system", sig)
+		log.Warnf("Received signal %s from Operation System", sig)
 		s.doGracefullyShutdown()
 
 		// Notify main routine shutdown is done
@@ -70,7 +70,7 @@ func (s *Server) ListenOSSignals(done *chan bool) {
 }
 
 func (s *Server) doGracefullyShutdown() {
-	log.Infof("Graceful shutdown, wait at least %vs before stop\n", s.c.Server.ShutdownTimeout.Seconds())
+	log.Warnf("Graceful shutdown, wait at least %vs before stop\n", s.c.Server.ShutdownTimeout.Seconds())
 
 	ctx, cancel := context.WithTimeout(context.Background(), s.c.ShutdownTimeout)
 	defer cancel()

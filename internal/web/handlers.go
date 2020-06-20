@@ -62,7 +62,7 @@ func (h *Handlers) Home(w http.ResponseWriter, r *http.Request) {
 		{{ end }}
 	</ul>
 
-	<h3><a href="https://prometheus.io/">https://prometheus.io</a></h3>
+	<h3><a href="https://prometheus.io/">If you want to know more about Metrics and Exporters go to https://prometheus.io</a></h3>
 </body>
 </html>
 `

@@ -24,11 +24,11 @@ import (
 // versionCmd represents the version command
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "Print the application version",
-	Long:  `Print the application version`,
+	Short: "Show the application version",
+	Long:  `Show the application version and its details.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		ext, _ := cmd.Flags().GetBool("extended")
-		if ext {
+		exd, _ := cmd.Flags().GetBool("extended")
+		if exd {
 			fmt.Printf(
 				"version: %s, "+
 					"revision: %s, "+

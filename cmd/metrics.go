@@ -20,6 +20,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/http/pprof"
+	"os"
 	"time"
 
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
@@ -37,32 +39,38 @@ import (
 var (
 	metricsCmd = &cobra.Command{
 		Use:   "metrics [commands]",
-		Short: "Useful to debug your metrics",
-		Long:  `metrics commands`,
+		Short: "Useful to debug your metrics defined into the queries files.",
+		Long: `The set of commands defined here are usefully to check and test the metrics
+defined into your metrics queries files.`,
 	}
 
 	metricsGetCmd = &cobra.Command{
-		Use:   "get [options] [args]",
-		Short: "get metrics",
-		Long:  `Get metrics from AWS CloudWatch using the metrics queries defined in the [yaml|json] files`,
+		Use:   "get",
+		Short: "Execute a call to AWS CloudWatch API to get metrics defined into the metrics queries files.",
+		Long: `Using this command you can execute a call to AWS CloudWatch API to get metrics
+defined into the metrics queries files.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			getCmd(cmd, args)
 		},
 	}
 
 	metricsDisplayPromDescCmd = &cobra.Command{
-		Use:   "display [options] [args]",
-		Short: "display promDesc",
-		Long:  `Display prometheus metrics definitions`,
+		Use:   "display",
+		Short: "Display prometheus metrics description build from metrics queries files.",
+		Long: `Using this command you can display prometheus metrics description build from metrics queries files
+into prometheus format, will be the exactly information you will see as a metric name, help string and dimensions.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			displayPromDescCmd(cmd, args)
 		},
 	}
 
 	metricsCollectCmd = &cobra.Command{
-		Use:   "collect [options] [args]",
-		Short: "collect metrics",
-		Long:  `Collect metrics from AWS CloudWatch using prometheus collector`,
+		Use:   "collect",
+		Short: "Start a basic web server with the collector working and every request is sent to AWS CloudWatch API to collect metrics.",
+		Long: `Using this command you can start a basic web server with the collector working and every request is sent 
+to AWS CloudWatch API to collect metrics,  this work as the command "server start", but you don't 
+need to use it as a replacement of the last command, this will be used only to test the result 
+before moving to production state.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			collectCmd(cmd, args)
 		},
@@ -76,7 +84,7 @@ func init() {
 	metricsCmd.AddCommand(metricsCollectCmd)
 
 	// Behavior parameters
-	metricsGetCmd.PersistentFlags().StringVar(&conf.Application.MetricStatPeriod, "metricStatPeriod", "5m", "The AWS Cloudwatch metrics query stats period")
+	metricsGetCmd.PersistentFlags().StringVar(&conf.Application.MetricStatPeriod, "metricStatPeriod", "5m", "The AWS CloudWatch metrics query stats period")
 	if err := viper.BindPFlag("application.metricStatPeriod", metricsGetCmd.PersistentFlags().Lookup("metricStatPeriod")); err != nil {
 		log.Error(err)
 	}
@@ -89,8 +97,8 @@ func init() {
 	metricsGetCmd.Flags().StringP("outFormat", "", "yaml", "Output format for results, possible values: [yaml|json]")
 	metricsGetCmd.Flags().StringP("outFile", "", "", "Output file where to store the results.")
 
-	metricsCollectCmd.Flags().StringP("address", "", "127.0.0.1", "Test server address, empty means all addresses")
-	metricsCollectCmd.Flags().StringP("port", "", "8080", "Test server port")
+	metricsCollectCmd.Flags().StringP("address", "", "127.0.0.1", "Server address, empty means all addresses")
+	metricsCollectCmd.Flags().StringP("port", "", "8080", "Server port")
 }
 
 func getCmd(cmd *cobra.Command, args []string) {
@@ -98,9 +106,8 @@ func getCmd(cmd *cobra.Command, args []string) {
 	loadFromMetricsFiles(&conf)
 	validateMetricsQueries(&conf)
 
-	if conf.Server.Debug {
-		log.Debug(conf.ToJSON())
-	}
+	log.Debugf("Available configuration: %s", conf.ToJSON())
+	log.Debugf("Available Env Vars: %s", os.Environ())
 
 	startTime, endTime, period := metrics.GetTimeStamps(time.Now(), conf.Application.MetricStatPeriod, conf.Application.MetricTimeWindow)
 	log.Debugf("Start Time: %s", startTime.Format(time.RFC3339))
@@ -109,6 +116,8 @@ func getCmd(cmd *cobra.Command, args []string) {
 
 	m := metrics.New(&conf)
 	mdi := m.GetMetricDataInput(startTime, endTime, period, "")
+
+	log.Debugf("Metrics queries: %s", mdi.String())
 
 	sess := awshelper.NewSession(&conf.AWS)
 	svc := cloudwatch.New(sess)
@@ -151,9 +160,8 @@ func displayPromDescCmd(cmd *cobra.Command, args []string) {
 	loadFromMetricsFiles(&conf)
 	validateMetricsQueries(&conf)
 
-	if conf.Server.Debug {
-		log.Debug(conf.ToJSON())
-	}
+	log.Debugf("Available configuration: %s", conf.ToJSON())
+	log.Debugf("Available Env Vars: %s", os.Environ())
 
 	m := metrics.New(&conf)
 
@@ -167,9 +175,8 @@ func collectCmd(cmd *cobra.Command, args []string) {
 	loadFromMetricsFiles(&conf)
 	validateMetricsQueries(&conf)
 
-	if conf.Server.Debug {
-		log.Debug(conf.ToJSON())
-	}
+	log.Debugf("Available configuration: %s", conf.ToJSON())
+	log.Debugf("Available Env Vars: %s", os.Environ())
 
 	m := metrics.New(&conf)
 	sess := awshelper.NewSession(&conf.AWS)
@@ -178,11 +185,53 @@ func collectCmd(cmd *cobra.Command, args []string) {
 	c := collector.New(&conf, m, cwc)
 
 	prometheus.MustRegister(c)
-	http.Handle("/metrics", promhttp.Handler())
+	mux := http.NewServeMux()
+
+	// metrics path
+	mux.Handle("/metrics", promhttp.Handler())
+
+	// Debug & Profiling
+	mux.HandleFunc("/debug/pprof/", pprof.Index)
+	mux.HandleFunc("/debug/pprof/heap", pprof.Index)
+	mux.HandleFunc("/debug/pprof/mutex", pprof.Index)
+	mux.HandleFunc("/debug/pprof/goroutine", pprof.Index)
+	mux.HandleFunc("/debug/pprof/threadcreate", pprof.Index)
+	mux.HandleFunc("/debug/pprof/block", pprof.Index)
+	mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+	mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
+	mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+	mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
+
+	// default root path
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		_, err := w.Write([]byte(`<html>
+            <head><title>` + appName + ` Exporter</title></head>
+            <body>
+            <h1>` + appName + ` Exporter</h1>
+            <p><a href='/metrics'>Metrics</a></p>
+			<h2>Debug and profile</h2>
+            <p><a href='/debug/pprof/'>/debug/pprof</a></p>
+            <p><a href='/debug/pprof/heap'>/debug/pprof/heap</a></p>
+            <p><a href='/debug/pprof/mutex'>/debug/pprof/mutex</a></p>
+            <p><a href='/debug/pprof/goroutine'>/debug/pprof/goroutine</a></p>
+            <p><a href='/debug/pprof/threadcreate'>/debug/pprof/threadcreate</a></p>
+            <p><a href='/debug/pprof/block'>/debug/pprof/block</a></p>
+            <p><a href='/debug/pprof/cmdline'>/debug/pprof/cmdline</a></p>
+            <p><a href='/debug/pprof/profile'>/debug/pprof/profile</a></p>
+            <p><a href='/debug/pprof/symbol'>/debug/pprof/symbol</a></p>
+            <p><a href='/debug/pprof/trace'>/debug/pprof/trace</a></p>
+            </body>
+            </html>`))
+		if err != nil {
+			log.Error(err)
+		}
+	})
 
 	a, _ := cmd.Flags().GetString("address")
 	p, _ := cmd.Flags().GetString("port")
 	soc := fmt.Sprintf("%s:%v", a, p)
+
 	log.Infof("Starting test server on %s", soc)
-	log.Fatal(http.ListenAndServe(soc, nil))
+	log.Warn("Don't use this server as your default server used for prometheus exporter, instead use 'server start' command.")
+	log.Fatal(http.ListenAndServe(soc, mux))
 }

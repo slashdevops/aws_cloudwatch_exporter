@@ -20,6 +20,65 @@ The configuration could be set using 3 ways:
 The precedence is in the same order of the list, so, if you define values into `server.yaml` and then 
 the same configuration key is defined as a `Env Var` this last will replace the file value.
 
+### Running
+
+#### Docker
+
+```bash
+make && \
+make promu && \
+promu build --prefix .build/darwin-amd64 && \
+make docker DOCKER_REPO=docker.io/slashdevops
+
+docker run --rm \
+    -v ~/tmp/queries/m1.yaml:/metrics/m1.yaml \
+    -v ~/.aws:/credentials \
+    -v ~/.aws:/credentials \
+    -e "AWS_SDK_LOAD_CONFIG=1" \
+    -e "AWS_CONFIG_FILE=/credentials/.aws/config" \
+    -e "AWS_SHARED_CREDENTIALS_FILE=/credentials/.aws/credentials" \
+    -e "AWS_PROFILE=slashdevops" \
+    slashdevops/aws-cloudwatch-exporter-linux-amd64:develop metrics get --metricsFiles /metrics/m1.yaml \
+    --debug
+
+docker run --rm \
+    -v ~/tmp/queries/m1.yaml:/metrics/m1.yaml \
+    -v ~/.aws/credentials:/home/.aws/credentials:ro \
+    -v ~/.aws/config:/home/.aws/config:ro \
+    -e "AWS_PROFILE=slashdevops" \
+    slashdevops/aws-cloudwatch-exporter-linux-amd64:develop metrics get --metricsFiles /metrics/m1.yaml \
+    --debug
+
+docker run --rm \
+    -v ~/tmp/queries/m1.yaml:/metrics/m1.yaml \
+    -e "AWS_REGION=eu-west-1" \
+    slashdevops/aws-cloudwatch-exporter-linux-amd64:develop metrics get --metricsFiles /metrics/m1.yaml \
+    --debug
+
+docker run --rm \
+    -v ~/tmp/queries/m1.yaml:/metrics/m1.yaml \
+    -v $HOME/.aws/credentials:/home/nobody/.aws/credentials -u nobody \
+    -v $HOME/.aws/config:/home/nobody/.aws/config -u nobody \
+    slashdevops/aws-cloudwatch-exporter-linux-amd64:develop ls -la /home/nobody/
+```
+
+#### Binary
+
+```bash
+make
+
+AWS_SDK_LOAD_CONFIG="true" \
+AWS_PROFILE="slashdevops" \
+./aws_cloudwatch_exporter metrics get --metricsFiles ~/tmp/queries/m1.yaml \
+    --debug
+```
+
+```bash
+./aws_cloudwatch_exporter metrics get --metricsFiles ~/tmp/queries/m1.yaml \
+    --profile slashdevops \
+    --debug
+```
+
 ### Configuration Files
 
 * [server.yaml](docs/server.md)

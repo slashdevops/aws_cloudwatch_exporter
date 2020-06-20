@@ -18,6 +18,7 @@ package cmd
 import (
 	"net/http"
 	"net/http/pprof"
+	"os"
 	"time"
 
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
@@ -36,14 +37,15 @@ import (
 var (
 	serverCmd = &cobra.Command{
 		Use:   "server [commands]",
-		Short: "Useful to start server",
-		Long:  `A longer description that spans `,
+		Short: "Useful to start http server as a scrape point for Prometheus.io",
+		Long:  `This command start and http server as a scrape point for Prometheus.io.`,
 	}
 
 	serverStartCmd = &cobra.Command{
 		Use:   "start",
-		Short: "Start the http server to expose the metrics",
-		Long:  `This start the http server to handle connections for metrics endpoint`,
+		Short: "Start the http server to expose the metrics to Prometheus.io",
+		Long: `This command start the http server to handle connections for metrics endpoint.
+Usefully when you want to scrap metrics in production environment.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			startCmd(cmd, args)
 		},
@@ -56,13 +58,13 @@ func init() {
 
 	// Server variables
 	// Address
-	serverCmd.PersistentFlags().StringVar(&conf.Server.Address, "address", "127.0.0.1", "IP Address in the host where you want the service listen, empty means all addresses")
+	serverCmd.PersistentFlags().StringVar(&conf.Server.Address, "address", appIP, "IP Address in the host where you want the service listen, empty means all addresses")
 	if err := viper.BindPFlag("server.address", serverCmd.PersistentFlags().Lookup("address")); err != nil {
 		log.Error(err)
 	}
 
 	// Port
-	serverCmd.PersistentFlags().Uint16Var(&conf.Server.Port, "port", 9690, "Port in the host where you want the service listen")
+	serverCmd.PersistentFlags().Uint16Var(&conf.Server.Port, "port", appPort, "Port in the host where you want the service listen")
 	if err := viper.BindPFlag("server.port", serverCmd.PersistentFlags().Lookup("port")); err != nil {
 		log.Error(err)
 	}
@@ -117,9 +119,8 @@ func startCmd(cmd *cobra.Command, args []string) {
 	loadFromMetricsFiles(&conf)
 	validateMetricsQueries(&conf)
 
-	if conf.Server.Debug {
-		log.Debug(conf.ToJSON())
-	}
+	log.Debugf("Available configuration: %s", conf.ToJSON())
+	log.Debugf("Available Env Vars: %s", os.Environ())
 
 	m := metrics.New(&conf)
 	sess := awshelper.NewSession(&conf.AWS)

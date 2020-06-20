@@ -15,11 +15,14 @@ ARG ARCH="amd64"
 ARG OS="linux"
 COPY .build/${OS}-${ARCH}/aws_cloudwatch_exporter  /bin/aws_cloudwatch_exporter
 
-EXPOSE      9690
-USER        nobody
+ARG PORT="9690"
+EXPOSE  ${PORT}
 
-HEALTHCHECK CMD wget --spider -S "http://localhost:9690/health" -T 60 2>&1 || exit 1
+USER    nobody
 
-VOLUME "/etc/aws_cloudwatch_exporter"
+HEALTHCHECK CMD wget --spider -S "http://localhost:${PORT}/health" -T 60 2>&1 || exit 1
+
+VOLUME ["/metrics","/home/nobody"]
 
 ENTRYPOINT  [ "/bin/aws_cloudwatch_exporter" ]
+# CMD  [ "/bin/aws_cloudwatch_exporter" ]

@@ -14,7 +14,8 @@ on:
       - '**.md'
 
 env:
-  DOCKER_HUB_REPO: docker.io/slashdevops
+  DOCKER_HUB_REPO: "docker.io/slashdevops"
+  DOCKER_BUILD_ARCHS: "amd64 armv7 arm64"
 
 jobs:
 
@@ -113,10 +114,10 @@ jobs:
         run: ls -la .build
 
       - name: Build Docker Images
-        run: make docker DOCKER_REPO=docker.io/slashdevops
+        run: make docker DOCKER_REPO=$DOCKER_HUB_REPO DOCKER_ARCHS=$DOCKER_BUILD_ARCHS
 
       - name: Docker Tag Images Latest
-        run: make docker-tag-latest DOCKER_REPO=docker.io/slashdevops
+        run: make docker-tag-latest DOCKER_REPO=$DOCKER_HUB_REPO DOCKER_ARCHS=$DOCKER_BUILD_ARCHS
 
       - name: Show Local Docker Images
         run: docker images
@@ -125,7 +126,7 @@ jobs:
         run: echo ${{ secrets.DOCKER_HUB_PASSWORD }} | docker login -u ${{ secrets.DOCKER_HUB_USER }} --password-stdin
 
       - name: Publish Images in Docker Hub
-        run: make docker-publish DOCKER_REPO=$DOCKER_HUB_REPO
+        run: make docker-publish DOCKER_REPO=$DOCKER_HUB_REPO DOCKER_ARCHS=$DOCKER_BUILD_ARCHS
 
       - name: Publish Manifest in Docker Hub
-        run: make docker-manifest DOCKER_REPO=$DOCKER_HUB_REPO
+        run: make docker-manifest DOCKER_REPO=$DOCKER_HUB_REPO DOCKER_ARCHS=$DOCKER_BUILD_ARCHS
