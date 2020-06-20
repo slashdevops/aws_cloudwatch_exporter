@@ -37,12 +37,13 @@ const (
 	appName        = "aws_cloudwatch_exporter"
 	appDescription = `AWS CloudWatch exporter for prometheus.io
 This exporter use GetMetricData API to get the metrics from AWS CloudWatch`
-	appDescriptionShort = "AWS CloudWatch exporter for prometheus.io"
-	appGitRepository    = "https://github.com/slashdevops/aws_cloudwatch_exporter"
-	appMetricsPath      = "/metrics"
-	appHealthPath       = "/health"
-	appIP               = "127.0.0.1"
-	appPort             = 9690
+	appDescriptionShort  = "AWS CloudWatch exporter for prometheus.io"
+	appGitRepository     = "https://github.com/slashdevops/aws_cloudwatch_exporter"
+	appMetricsPath       = "/metrics"
+	appHealthPath        = "/health"
+	appIP                = "127.0.0.1"
+	appPort              = 9690
+	appMaxMetricsQueries = 500
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -238,6 +239,11 @@ func validateMetricsQueries(c *config.All) {
 		log.Infof("Total metrics queries: %v", len(c.MetricDataQueries))
 	} else {
 		log.Fatal("Metrics Queries are empty, you need to define at least one metric in metrics file")
+	}
+
+	// TODO: Allow more that 500 metrics queries and remove it
+	if len(c.MetricDataQueries) > appMaxMetricsQueries {
+		log.Fatal("You have defined %v metrics queries, the limits is %v", len(c.MetricDataQueries), appMaxMetricsQueries)
 	}
 }
 
