@@ -2,7 +2,7 @@
 
 ![Master branch workflow](https://github.com/slashdevops/aws_cloudwatch_exporter/workflows/Master%20branch%20workflow/badge.svg?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/slashdevops/aws_cloudwatch_exporter)](https://goreportcard.com/report/github.com/slashdevops/aws_cloudwatch_exporter)
-![Docker Pulls](https://img.shields.io/docker/pulls/slashdevops/aws_cloudwatch_exporter.svg?maxAge=604800)
+![Docker Pulls](https://img.shields.io/docker/pulls/slashdevops/aws-cloudwatch-exporter)
 
 Prometheus exporter for AWS CloudWatch
 
