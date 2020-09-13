@@ -19,7 +19,7 @@ import (
 	"net/http"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/slashdevops/aws_cloudwatch_exporter/config"
+	"github.com/slashdevops/aws_cloudwatch_exporter/internal/config"
 
 	"text/template"
 )

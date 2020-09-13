@@ -23,7 +23,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
 	log "github.com/sirupsen/logrus"
-	"github.com/slashdevops/aws_cloudwatch_exporter/config"
+	"github.com/slashdevops/aws_cloudwatch_exporter/internal/config"
 	"gopkg.in/yaml.v3"
 )
 

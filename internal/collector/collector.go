@@ -24,7 +24,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/common/log"
-	"github.com/slashdevops/aws_cloudwatch_exporter/config"
+	"github.com/slashdevops/aws_cloudwatch_exporter/internal/config"
 	"github.com/slashdevops/aws_cloudwatch_exporter/internal/metrics"
 )
 

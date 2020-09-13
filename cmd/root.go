@@ -27,7 +27,7 @@ import (
 	"github.com/imdario/mergo"
 	"github.com/prometheus/common/version"
 	"github.com/sirupsen/logrus"
-	"github.com/slashdevops/aws_cloudwatch_exporter/config"
+	"github.com/slashdevops/aws_cloudwatch_exporter/internal/config"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v3"
