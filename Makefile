@@ -18,4 +18,4 @@ include Makefile.common
 
 DOCKER_IMAGE_NAME   ?= aws-cloudwatch-exporter
 
-GOLANGCI_LINT_VERSION ?= v1.27.0
+GOLANGCI_LINT_VERSION ?= v1.46.2
