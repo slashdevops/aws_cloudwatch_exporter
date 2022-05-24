@@ -18,7 +18,7 @@ COPY .build/${OS}-${ARCH}/aws_cloudwatch_exporter  /bin/aws_cloudwatch_exporter
 ARG PORT="9690"
 EXPOSE  ${PORT}
 
-RUN mkdir -p /home/nobody/.aws && chown -R nobody.nogroup /home/nobody
+RUN mkdir -p /home/nobody/.aws && chown -R nobody:nobody /home/nobody
 ENV HOME="/home/nobody"
 USER nobody
 
