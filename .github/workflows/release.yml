@@ -60,7 +60,7 @@ jobs:
         run: ls -la .build
 
       - name: Upload .build artifacts
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2
         with:
           name: .build
           path: .build
@@ -89,7 +89,7 @@ jobs:
         run: docker version
 
       - name: Download .build artifacts from Build Step
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v2
         with:
           name: .build
           path: .build
@@ -136,17 +136,16 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        id: create_github_release
+        uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          body: |
-            See the file: CHANGELOG.md
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          # body: |
+          #   See the file: CHANGELOG.md
           draft: false
           prerelease: false
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   publish_tarballs:
     name: Publish Tarballs
@@ -169,7 +168,7 @@ jobs:
         run: promu info
 
       - name: Download .build artifacts from Build Step
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v2
         with:
           name: .build
           path: .build
@@ -195,7 +194,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload Artifacts to Github
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2
         with:
           name: releases
           path: .tarballs

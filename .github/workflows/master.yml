@@ -73,7 +73,7 @@ jobs:
         run: ls -la .build
 
       - name: Upload .build artifacts
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2
         with:
           name: .build
           path: .build
@@ -99,7 +99,7 @@ jobs:
         run: docker version
 
       - name: Download .build artifacts from Build Step
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v2
         with:
           name: .build
           path: .build
