@@ -1,0 +1,690 @@
+make all --print-data-base --no-builtin-variables --no-builtin-rules --question
+# GNU Make 3.81
+# Copyright (C) 2006  Free Software Foundation, Inc.
+# This is free software; see the source for copying conditions.
+# There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.
+
+# This program built for i386-apple-darwin11.3.0
+ 
+
+# Make data base, printed on Tue May 24 13:40:56 2022
+
+# Variables
+
+# automatic
+<D = $(patsubst %/,%,$(dir $<))
+# makefile (from `Makefile.common', line 95)
+PREFIX = $(shell pwd)
+# automatic
+?F = $(notdir $?)
+# makefile (from `Makefile.common', line 69)
+GO_BUILD_PLATFORM = $(GOHOSTOS)-$(GOHOSTARCH)
+# environment
+ELECTRON_NO_ATTACH_CONSOLE = 1
+# environment
+LC_CTYPE = UTF-8
+# environment
+VSCODE_LOG_NATIVE = false
+# automatic
+?D = $(patsubst %/,%,$(dir $?))
+# makefile (from `Makefile.common', line 31)
+GOOPTS = 
+# makefile (from `Makefile.common', line 98)
+DOCKERFILE_PATH = ./Dockerfile
+# automatic
+@D = $(patsubst %/,%,$(dir $@))
+# makefile (from `Makefile.common', line 97)
+DOCKER_IMAGE_TAG = $(subst /,-,$(shell git rev-parse --abbrev-ref HEAD))
+# automatic
+@F = $(notdir $@)
+# environment
+ZNT_REPO_DIR = /Users/christian/.oh-my-zsh/plugins/zsh-navigation-tools
+# makefile
+CURDIR := /Users/christian/git/github.com/slashdevops/aws_cloudwatch_exporter
+# makefile
+SHELL = /bin/sh
+# makefile (from `Makefile.common', line 28)
+ 
+GO = go
+# environment
+VSCODE_NLS_CONFIG = {"locale":"en-gb","availableLanguages":{},"_languagePackSupport":true}
+# environment
+_ = /usr/bin/make
+# makefile (from `Makefile.common', line 82)
+PROMU_URL := https://github.com/prometheus/promu/releases/download/v0.5.0/promu-0.5.0.darwin-arm64.tar.gz
+# makefile (from `Makefile.common', line 35)
+GO_VERSION = $(shell $(GO) version)
+# environment
+MAVEN_HOME = /Users/christian/.sdkman/candidates/maven/current
+# makefile (from `Makefile.common', line 1)
+MAKEFILE_LIST :=  Makefile Makefile.common
+# makefile (from `Makefile.common', line 44)
+GO111MODULE := on
+# environment
+VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
+# environment
+VSCODE_VERBOSE_LOGGING = true
+# makefile (from `Makefile.common', line 36)
+GO_VERSION_NUMBER = $(word 3, $(GO_VERSION))
+# environment
+__CFBundleIdentifier = com.microsoft.VSCode
+# environment
+INFOPATH = /opt/homebrew/share/info:
+# environment
+P9K_SSH = 0
+# environment
+VSCODE_IPC_HOOK_EXTHOST = /var/folders/yc/w7gzxwfd2wg4d8s043jvcrqr0000gn/T/vscode-ipc-517c95e0-b8ab-4f5c-9a5d-e7dfe3331332.sock
+# environment
+VSCODE_CWD = /Users/christian/git/github.com/slashdevops/aws_cloudwatch_exporter
+# environment
+GOPROXY = https://proxy.golang.org,direct
+# makefile (from `Makefile.common', line 39)
+GOVENDOR := 
+# makefile (from `Makefile.common', line 85)
+GOLANGCI_LINT_OPTS = 
+# environment
+PATH = /opt/homebrew/opt/go/libexec/bin:/Users/christian/.sdkman/candidates/maven/current/bin:/Users/christian/.sdkman/candidates/java/current/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/MacGPG2/bin:/Library/Apple/usr/bin:/Applications/Visual Studio Code.app/Contents/Resources/app/bin:/Users/christian/go/bin
+# environment
+GOROOT = /opt/homebrew/opt/go/libexec
+# makefile (from `Makefile.common', line 84)
+GOLANGCI_LINT := 
+# environment
+LSCOLORS = Gxfxcxdxbxegedabagacad
+# makefile (from `Makefile.common', line 96)
+BIN_DIR = $(shell pwd)
+# makefile (from `Makefile.common', line 86)
+GOLANGCI_LINT_VERSION = v1.18.0
+# makefile (from `Makefile.common', line 63)
+pkgs = ./...
+# environment
+SDKMAN_DIR = /Users/christian/.sdkman
+# makefile (from `Makefile.common', line 100)
+DOCKER_REPO = prom
+# environment
+SDKMAN_CANDIDATES_API = https://api.sdkman.io/2
+# environment
+GOPATH = /Users/christian/go
+# makefile (from `Makefile.common', line 62)
+PROMU := /Users/christian/go/bin/promu
+# environment
+LaunchInstanceID = B47C62BF-4E74-4C68-A28D-1B3FEBFB408D
+# environment
+SDKMAN_PLATFORM = darwinx64
+# environment
+VSCODE_LOG_STACK = false
+# makefile (from `Makefile.common', line 105)
+PUBLISH_DOCKER_ARCHS = $(addprefix common-docker-publish-,$(DOCKER_ARCHS))
+# environment
+ELECTRON_RUN_AS_NODE = 1
+# default
+.FEATURES := target-specific order-only second-expansion else-if archives jobserver check-symlink
+# makefile (from `Makefile.common', line 32)
+GOHOSTOS = $(shell $(GO) env GOHOSTOS)
+# environment
+SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.uGBIbqQVTb/Listeners
+# automatic
+%F = $(notdir $%)
+# makefile (from `Makefile.common', line 26)
+GOBIN := 
+# environment
+VSCODE_PIPE_LOGGING = true
+# makefile (from `Makefile.common', line 30)
+FIRST_GOPATH := /Users/christian/go
+# environment
+PWD = /Users/christian/git/github.com/slashdevops/aws_cloudwatch_exporter
+# environment
+HOMEBREW_CELLAR = /opt/homebrew/Cellar
+# environment
+ORIGINAL_XDG_CURRENT_DESKTOP = undefined
+# environment
+MANPATH = /opt/homebrew/share/man::
+# environment
+GOMODCACHE = /Users/christian/go/pkg/mod
+# environment
+HOME = /Users/christian
+# makefile (from `Makefile.common', line 106)
+TAG_DOCKER_ARCHS = $(addprefix common-docker-tag-latest-,$(DOCKER_ARCHS))
+# default
+MAKEFILEPATH = $(shell /usr/bin/xcode-select -print-path 2>/dev/null || echo /Developer)/Makefiles
+# environment
+VSCODE_CLI = 1
+# environment
+VSCODE_CODE_CACHE_PATH = /Users/christian/Library/Application Support/Code/CachedData/da15b6fd3ef856477bf6f4fb29ba1b7af717770d
+# environment
+LOGNAME = christian
+# environment
+APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = 1
+# makefile (from `Makefile.common', line 29)
+GOFMT = $(GO)fmt
+# environment
+ZSH = /Users/christian/.oh-my-zsh
+# environment
+VSCODE_HANDLES_UNCAUGHT_ERRORS = true
+# automatic
+^D = $(patsubst %/,%,$(dir $^))
+# makefile (from `Makefile.common', line 33)
+GOHOSTARCH = $(shell $(GO) env GOHOSTARCH)
+# makefile (from `Makefile.common', line 73)
+GOTEST_DIR := 
+# environment
+XPC_FLAGS = 0x0
+# environment
+SDKMAN_VERSION = 5.12.2
+# environment
+COLORTERM = truecolor
+# default
+MAKE = $(MAKE_COMMAND)
+# environment
+LC_TERMINAL = iTerm2
+# environment
+SHLVL = 3
+# makefile (from `Makefile.common', line 99)
+DOCKERBUILD_CONTEXT = ./
+# environment
+JAVA_HOME = /Users/christian/.sdkman/candidates/java/current
+# default
+MAKE_VERSION := 3.81
+# environment
+USER = christian
+# makefile
+.DEFAULT_GOAL := common-all
+# default
+MAKECMDGOALS := all
+# environment
+TERM_SESSION_ID = w1t0p0:7A8B8855-2F3D-4B89-8861-18B18D64830E
+# environment
+LESS = -R
+# automatic
+%D = $(patsubst %/,%,$(dir $%))
+# default
+MAKE_COMMAND := /Library/Developer/CommandLineTools/usr/bin/make
+# environment
+TERM_PROGRAM = iTerm.app
+# default
+.VARIABLES := 
+# environment
+TMPDIR = /var/folders/yc/w7gzxwfd2wg4d8s043jvcrqr0000gn/T/
+# automatic
+*F = $(notdir $*)
+# environment
+VSCODE_IPC_HOOK = /Users/christian/Library/Application Support/Code/1.67.1-main.sock
+# makefile (from `Makefile', line 15)
+DOCKER_ARCHS = amd64
+# makefile
+MAKEFLAGS = Rrqp
+# environment
+MFLAGS = -Rrqp
+# automatic
+*D = $(patsubst %/,%,$(dir $*))
+# environment
+TERM_PROGRAM_VERSION = 3.4.15
+# makefile (from `Makefile.common', line 37)
+PRE_GO_111 = $(shell echo $(GO_VERSION_NUMBER) | grep -E 'go1\.(10|[0-9])\.')
+# environment
+XPC_SERVICE_NAME = application.com.microsoft.VSCode.95983376.95983382.A41C8241-68A2-4709-B9DA-7916476BF2FF
+# environment
+LC_TERMINAL_VERSION = 3.4.15
+# environment
+HOMEBREW_PREFIX = /opt/homebrew
+# automatic
++D = $(patsubst %/,%,$(dir $+))
+# automatic
++F = $(notdir $+)
+# environment
+ITERM_SESSION_ID = w1t0p0:7A8B8855-2F3D-4B89-8861-18B18D64830E
+# environment
+HOMEBREW_REPOSITORY = /opt/homebrew
+# makefile (from `Makefile.common', line 72)
+GOTEST := go test
+# environment
+COLORFGBG = 7;0
+# makefile (from `Makefile.common', line 290)
+define PRECHECK_COMMAND_template =
+precheck:: $(1)_precheck
+
+PRECHECK_COMMAND_$(1) ?= $(1) $$(strip $$(PRECHECK_OPTIONS_$(1)))
+.PHONY: $(1)_precheck
+$(1)_precheck:
+	@if ! $$(PRECHECK_COMMAND_$(1)) 1>/dev/null 2>&1; then echo "Execution of '$$(PRECHECK_COMMAND_$(1))' command failed. Is $(1) installed?"; exit 1; fi
+endef
+# environment
+__CF_USER_TEXT_ENCODING = 0x1F5:0x0:0x2
+# environment
+COMMAND_MODE = unix2003
+# default
+MAKEFILES := 
+# environment
+ZNT_CONFIG_DIR = /Users/christian/.config/znt
+# automatic
+<F = $(notdir $<)
+# environment
+ITERM_PROFILE = Default
+# makefile (from `Makefile.common', line 81)
+PROMU_VERSION = 0.5.0
+# environment
+SDKMAN_CANDIDATES_DIR = /Users/christian/.sdkman/candidates
+# environment
+PAGER = less
+# makefile (from `Makefile', line 19)
+DOCKER_IMAGE_NAME = aws-cloudwatch-exporter
+# environment
+LC_ALL = C
+# environment
+VIRTUAL_ENV_DISABLE_PROMPT = 1
+# environment
+SECURITYSESSIONID = 186b5
+# environment
+P9K_TTY = old
+# automatic
+^F = $(notdir $^)
+# default
+SUFFIXES := 
+# default
+.INCLUDE_DIRS = /usr/local/include
+# makefile (from `Makefile.common', line 104)
+BUILD_DOCKER_ARCHS = $(addprefix common-docker-,$(DOCKER_ARCHS))
+# environment
+MAKELEVEL := 0
+# environment
+PICO_SDK_PATH = ~/pico/pico-sdk
+# environment
+LANG = C
+# environment
+TERM = xterm-256color
+# environment
+_P9K_TTY = /dev/ttys002
+# environment
+VSCODE_PID = 17938
+# variable set hash-table stats:
+# Load=138/1024=13%, Rehash=0, Collisions=19/273=7%
+
+# Pattern-specific Variable Values
+
+# No pattern-specific variable values.
+
+# Directories
+
+# . (device 16777231, inode 97793237): 26 files, 2 impossibilities.
+
+# 26 files, 2 impossibilities in 1 directories.
+
+# Implicit Rules
+
+%: common-%
+#  commands to execute (from `Makefile.common', line 118):
+	
+
+# 1 implicit rules, 0 (0.0%) terminal.
+
+# Files
+
+common-test:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+ 
+#  commands to execute (from `Makefile.common', line 171):
+	@echo ">> running all tests"
+	GO111MODULE=$(GO111MODULE) $(GOTEST) $(test-flags) $(GOOPTS) $(pkgs)
+	
+
+common-tarball: promu
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  commands to execute (from `Makefile.common', line 231):
+	@echo ">> building release tarball"
+	$(PROMU) tarball --prefix $(PREFIX) $(BIN_DIR)
+	
+
+common-format:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  commands to execute (from `Makefile.common', line 179):
+	@echo ">> formatting code"
+	GO111MODULE=$(GO111MODULE) $(GO) fmt $(pkgs)
+	
+
+all: common-all
+#  Command-line target.
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: `all'
+#  File does not exist.
+#  File has been updated.
+#  Needs to be updated (-q is set).
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/5=0%
+#  commands to execute (from `Makefile.common', line 118):
+	
+
+.PHONY: common-all common-style common-check_license common-deps update-go-deps common-test-short common-test common-format common-vet common-lint common-staticcheck common-unused common-build common-tarball common-docker common-docker-amd64 common-docker-publish common-docker-publish-amd64 common-docker-tag-latest common-docker-tag-latest-amd64 common-docker-manifest promu proto precheck
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+common-vet:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  commands to execute (from `Makefile.common', line 184):
+	@echo ">> vetting code"
+	GO111MODULE=$(GO111MODULE) $(GO) vet $(GOOPTS) $(pkgs)
+	
+
+common-all: precheck style check_license lint unused build test
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has been updated.
+#  Needs to be updated (-q is set).
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/5=0%
+
+common-docker-tag-latest-amd64:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  Implicit/static pattern stem: `amd64'
+#  File does not exist.
+#  File has not been updated.
+#  commands to execute (from `Makefile.common', line 251):
+	docker tag "$(DOCKER_REPO)/$(DOCKER_IMAGE_NAME)-linux-$*:$(DOCKER_IMAGE_TAG)" "$(DOCKER_REPO)/$(DOCKER_IMAGE_NAME)-linux-$*:latest"
+	
+
+common-docker-amd64:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  Implicit/static pattern stem: `amd64'
+#  File does not exist.
+#  File has not been updated.
+#  commands to execute (from `Makefile.common', line 237):
+	docker build -t "$(DOCKER_REPO)/$(DOCKER_IMAGE_NAME)-linux-$*:$(DOCKER_IMAGE_TAG)" \
+	-f $(DOCKERFILE_PATH) \
+	--build-arg ARCH="$*" \
+	--build-arg OS="linux" \
+	$(DOCKERBUILD_CONTEXT)
+	
+
+# Not a target:
+check_license:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
+.SUFFIXES:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+style: common-style
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: `style'
+#  File does not exist.
+#  File has been updated.
+#  Needs to be updated (-q is set).
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/5=0%
+#  commands to execute (from `Makefile.common', line 118):
+	
+
+# Not a target:
+Makefile:
+#  Implicit rule search has been done.
+#  Last modified 2022-05-24 13:38:54
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+
+proto:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  commands to execute (from `Makefile.common', line 270):
+	@echo ">> generating code from proto files"
+	@./scripts/genproto.sh
+	
+
+# Not a target:
+test:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+common-test-short:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  commands to execute (from `Makefile.common', line 166):
+	@echo ">> running short tests"
+	GO111MODULE=$(GO111MODULE) $(GOTEST) -short $(GOOPTS) $(pkgs)
+	
+
+# Not a target:
+build:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+common-staticcheck: lint
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+
+common-docker-tag-latest: common-docker-tag-latest-amd64
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+
+common-docker: common-docker-amd64
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+
+# Not a target:
+lint:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+common-build: promu
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  commands to execute (from `Makefile.common', line 226):
+	@echo ">> building binaries"
+	GO111MODULE=$(GO111MODULE) $(PROMU) build --prefix $(PREFIX) $(PROMU_BINARIES)
+	
+
+# Not a target:
+.DEFAULT:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+common-check_license:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  commands to execute (from `Makefile.common', line 135):
+	@echo ">> checking license header"
+	@licRes=$$(for file in $$(find . -type f -iname '*.go' ! -path './vendor/*') ; do \
+	awk 'NR<=3' $$file | grep -Eq "(Copyright|generated|GENERATED)" || echo $$file; \
+	done); \
+	if [ -n "$${licRes}" ]; then \
+	echo "license header checking failed:"; echo "$${licRes}"; \
+	exit 1; \
+	fi
+	
+
+common-unused:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  commands to execute (from `Makefile.common', line 212):
+	@echo ">> running check for unused/missing packages in go.mod"
+	GO111MODULE=$(GO111MODULE) $(GO) mod tidy
+	@git diff --exit-code -- go.sum go.mod
+	
+
+# Not a target:
+unused:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+common-style:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  Implicit/static pattern stem: `'
+#  File does not exist.
+#  File has been updated.
+#  Needs to be updated (-q is set).
+# automatic
+# @ := common-style
+# automatic
+# % := 
+# automatic
+# * := 
+# automatic
+# + := 
+# automatic
+# | := 
+# automatic
+# < := 
+# automatic
+# ^ := 
+# automatic
+# ? := 
+# variable set hash-table stats:
+# Load=8/32=25%, Rehash=0, Collisions=1/13=8%
+#  commands to execute (from `Makefile.common', line 125):
+	@echo ">> checking code style"
+	@fmtRes=$$($(GOFMT) -d $$(find . -path ./vendor -prune -o -name '*.go' -print)); \
+	if [ -n "$${fmtRes}" ]; then \
+	echo "gofmt checking failed!"; echo "$${fmtRes}"; echo; \
+	echo "Please ensure you are using $$($(GO) version) for formatting code."; \
+	exit 1; \
+	fi
+	
+
+# Not a target:
+Makefile.common:
+#  Implicit rule search has been done.
+#  Last modified 2022-05-24 13:38:54
+#  File has been updated.
+#  Successfully updated.
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/0=0%
+
+precheck::
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has been updated.
+#  Successfully updated.
+
+ 
+update-go-deps:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  commands to execute (from `Makefile.common', line 155):
+	@echo ">> updating Go dependencies"
+	@for m in $$($(GO) list -mod=readonly -m -f '{{ if and (not .Indirect) (not .Main)}}{{.Path}}{{end}}' all); do \
+	$(GO) get $$m; \
+	done
+	GO111MODULE=$(GO111MODULE) $(GO) mod tidy
+	
+
+/Users/christian/go/bin/promu:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  commands to execute (from `Makefile.common', line 262):
+	$(eval PROMU_TMP := $(shell mktemp -d))
+	curl -s -L $(PROMU_URL) | tar -xvzf - -C $(PROMU_TMP)
+	mkdir -p $(FIRST_GOPATH)/bin
+	cp $(PROMU_TMP)/promu-$(PROMU_VERSION).$(GO_BUILD_PLATFORM)/promu $(FIRST_GOPATH)/bin/promu
+	rm -r $(PROMU_TMP)
+	
+
+common-docker-publish-amd64:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  Implicit/static pattern stem: `amd64'
+#  File does not exist.
+#  File has not been updated.
+#  commands to execute (from `Makefile.common', line 246):
+	docker push "$(DOCKER_REPO)/$(DOCKER_IMAGE_NAME)-linux-$*:$(DOCKER_IMAGE_TAG)"
+	
+
+common-lint:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+
+common-deps:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  commands to execute (from `Makefile.common', line 146):
+	@echo ">> getting dependencies"
+	GO111MODULE=$(GO111MODULE) $(GO) mod download
+	
+
+promu: /Users/christian/go/bin/promu
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+
+common-docker-manifest:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  commands to execute (from `Makefile.common', line 255):
+	DOCKER_CLI_EXPERIMENTAL=enabled docker manifest create -a "$(DOCKER_REPO)/$(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)" $(foreach ARCH,$(DOCKER_ARCHS),$(DOCKER_REPO)/$(DOCKER_IMAGE_NAME)-linux-$(ARCH):$(DOCKER_IMAGE_TAG))
+	DOCKER_CLI_EXPERIMENTAL=enabled docker manifest push "$(DOCKER_REPO)/$(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)"
+	
+
+common-docker-publish: common-docker-publish-amd64
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+
+# files hash-table stats:
+# Load=37/1024=4%, Rehash=0, Collisions=13/120=11%
+# VPATH Search Paths
+
+# No `vpath' search paths.
+
+# No general (`VPATH' variable) search path.
+
+# # of strings in strcache: 2
+# # of strcache buffers: 1
+# strcache size: total = 4096 / max = 4096 / min = 4096 / avg = 4096
+# strcache free: total = 4071 / max = 4071 / min = 4071 / avg = 4071
+
+# Finished Make data base on Tue May 24 13:40:56 2022
+
+ 
