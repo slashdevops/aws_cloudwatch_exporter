@@ -104,7 +104,8 @@ jobs:
         run: ls -la .build
 
       - name: Set Env Var RELEASE_VERSION
-        run: echo ::set-env name=RELEASE_VERSION::${GITHUB_REF#refs/*/}
+        run: |
+          echo "RELEASE_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
 
       - name: Show RELEASE_VERSION
         run: echo $RELEASE_VERSION
