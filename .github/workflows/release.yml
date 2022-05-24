@@ -170,7 +170,7 @@ jobs:
         run: promu info
 
       - name: Download .build artifacts from Build Step
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v2
         with:
           name: .build
           path: .build
@@ -196,7 +196,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload Artifacts to Github
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2
         with:
           name: releases
           path: .tarballs
