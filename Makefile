@@ -18,8 +18,6 @@ include Makefile.common
 
 DOCKER_IMAGE_NAME   ?= aws-cloudwatch-exporter
 
-GOLANGCI_LINT_VERSION ?= v1.52.2
-
 APP_DEPENDENCIES  := $(shell go list -m -f '{{if not (or .Indirect .Main)}}{{.Path}}{{end}}' all)
 
 ##@ go-mod-tidy
