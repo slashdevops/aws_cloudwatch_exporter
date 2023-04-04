@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+	http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -140,14 +140,14 @@ func (m *metrics) GetMetricsDesc() map[string]*prometheus.Desc {
 // https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_concepts.html
 // Create the prometheus metrics scaffolding without any value
 //   - Id: m1
-//    MetricStat:
-//      Metric:
-//        Namespace: AWS/EC2
-//        MetricName: CPUUtilization            --> AWS/EC2_CPUUtilization_Average{job="aws_cloudwatch_exporter", instance="", AutoScalingGroupName="eks-prod-01-apps-01-asg"} value_from_scrap
-//        Dimensions:                               aws_ec2_cpu_utilization_average{job="aws_cloudwatch_exporter", instance="", auto_scaling_group_name="eks-prod-01-apps-01-asg"} value_from_scrap
-//          - Name: AutoScalingGroupName            aws_cloudwatch_exporter_aws_ec2_cpu_utilization_average{job="aws_cloudwatch_exporter", instance="", auto_scaling_group_name="eks-prod-01-apps-01-asg"} value_from_scrap
-//            Value: eks-prod-01-apps-01-asg
-//      Stat: Average
+//     MetricStat:
+//     Metric:
+//     Namespace: AWS/EC2
+//     MetricName: CPUUtilization            --> AWS/EC2_CPUUtilization_Average{job="aws_cloudwatch_exporter", instance="", AutoScalingGroupName="eks-prod-01-apps-01-asg"} value_from_scrap
+//     Dimensions:                               aws_ec2_cpu_utilization_average{job="aws_cloudwatch_exporter", instance="", auto_scaling_group_name="eks-prod-01-apps-01-asg"} value_from_scrap
+//   - Name: AutoScalingGroupName            aws_cloudwatch_exporter_aws_ec2_cpu_utilization_average{job="aws_cloudwatch_exporter", instance="", auto_scaling_group_name="eks-prod-01-apps-01-asg"} value_from_scrap
+//     Value: eks-prod-01-apps-01-asg
+//     Stat: Average
 func createPrometheusMetricsDesc(conf *config.All) map[string]*prometheus.Desc {
 	mdqc := conf.MetricDataQueriesConf
 	promMetricsDesc := make(map[string]*prometheus.Desc)
@@ -197,8 +197,10 @@ func createPrometheusMetricsDesc(conf *config.All) map[string]*prometheus.Desc {
 }
 
 // Return the necessary inputs for function NewGetMetricDataInput
-//              points     period        now()
-//                ↓        ↓→  ←↓         ↓
+//
+//	points     period        now()
+//	  ↓        ↓→  ←↓         ↓
+//
 // [(startTime)............................(endTime)] → time
 //
 // https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_MetricStat.html
