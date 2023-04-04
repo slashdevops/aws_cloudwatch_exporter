@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+	http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -47,8 +47,9 @@ func (c *All) ToYAML() string {
 // This is a convenient structure to allow config files nested (server.[keys])
 // server.conf file
 // server:
-//   address:
-//   port:
+//
+//	address:
+//	port:
 type ServerConf struct {
 	Server `mapstructure:"server" json:"server" yaml:"server"`
 }
@@ -69,8 +70,9 @@ type Server struct {
 // This is a convenient structure to allow config files nested (application.[keys])
 // No File conf
 // application:
-//   name:
-//   description:
+//
+//	name:
+//	description:
 type ApplicationConf struct {
 	Application `mapstructure:"application" json:"application" yaml:"application"`
 }
@@ -106,7 +108,6 @@ type MetricDataQueriesConf struct {
 	MetricDataQueries []MetricDataQuery `mapstructure:"MetricDataQueries" json:"MetricDataQueries" yaml:"MetricDataQueries"`
 }
 
-//
 type MetricDataQuery struct {
 	ID         string `mapstructure:"Id" json:"Id" yaml:"Id"`
 	MetricStat struct {
