@@ -21,3 +21,7 @@ vendor/
 
 # this project executable
 aws_cloudwatch_exporter
+
+.vscode/configurationCache.log
+.vscode/dryrun.log
+.vscode/targets.log
