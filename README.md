@@ -1,6 +1,6 @@
 # aws_cloudwatch_exporter
 
-![Master branch workflow](https://github.com/slashdevops/aws_cloudwatch_exporter/workflows/Master%20branch%20workflow/badge.svg?branch=master)
+![Main branch workflow](https://github.com/slashdevops/aws_cloudwatch_exporter/workflows/main%20branch%20workflow/badge.svg?branch=main)
 [![Go Report Card](https://goreportcard.com/badge/github.com/slashdevops/aws_cloudwatch_exporter)](https://goreportcard.com/report/github.com/slashdevops/aws_cloudwatch_exporter)
 ![Docker Pulls](https://img.shields.io/docker/pulls/slashdevops/aws-cloudwatch-exporter)
 
@@ -11,11 +11,11 @@ This exporter used the [AWS CloudWatch GetMetricsData API call](https://docs.aws
 * [cloudwatch-getmetricdata-api](https://aws.amazon.com/premiumsupport/knowledge-center/cloudwatch-getmetricdata-api/)
 * [Amazon CloudWatch pricing](https://aws.amazon.com/cloudwatch/pricing/?nc1=h_ls)
 
-**WARNING**: 
+**WARNING**:
 
 * The use of this exporter could be expensive, this need be used taking care.
 
-**NOTES**: 
+**NOTES**:
 
 * When you use [AWS CloudWatch GetMetricsData API call](https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_GetMetricData.html) with 1 request you can get 500 metrics a time, so
 read the links above before use it.
@@ -49,7 +49,7 @@ More information at [metrics.md](docs/metrics.md)
 #### Docker
 
 Using your own `~/.aws` configuration in local
- 
+
 ```bash
 docker run --rm \
     -i \
@@ -61,18 +61,18 @@ docker run --rm \
     -v ~/.aws:/home/nobody/.aws:ro \
     -e "AWS_SDK_LOAD_CONFIG=true" \
     -e "AWS_PROFILE=slashdevops" \
-    slashdevops/aws-cloudwatch-exporter-linux-amd64:develop metrics get --metricsFiles /home/nobody/m1.yaml --outFile /home/nobody/tmp/out.yaml 
+    slashdevops/aws-cloudwatch-exporter-linux-amd64:develop metrics get --metricsFiles /home/nobody/m1.yaml --outFile /home/nobody/tmp/out.yaml
 ```
 
 Check the result
 
 ```bash
-cat /tmp/out.yaml 
+cat /tmp/out.yaml
 ```
 
 #### Binary
 
-If you download the binary from releases 
+If you download the binary from releases
 
 ```bash
 AWS_SDK_LOAD_CONFIG="true" \
