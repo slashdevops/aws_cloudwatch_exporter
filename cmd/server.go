@@ -70,25 +70,25 @@ func init() {
 	}
 
 	// ReadTimeout
-	serverCmd.PersistentFlags().DurationVar(&conf.Server.ReadTimeout, "readTimeout", 2*time.Second, "ReadTimeout is the maximum duration for reading the entire request, including the body. see: https://github.com/slashdevops/aws_cloudwatch_exporter/blob/master/docs/server.md")
+	serverCmd.PersistentFlags().DurationVar(&conf.Server.ReadTimeout, "readTimeout", 2*time.Second, "ReadTimeout is the maximum duration for reading the entire request, including the body. see: https://github.com/slashdevops/aws_cloudwatch_exporter/blob/main/docs/server.md")
 	if err := viper.BindPFlag("server.readTimeout", serverCmd.PersistentFlags().Lookup("readTimeout")); err != nil {
 		log.Error(err)
 	}
 
 	// WriteTimeout
-	serverCmd.PersistentFlags().DurationVar(&conf.Server.WriteTimeout, "writeTimeout", 5*time.Second, "WriteTimeout is the maximum duration before timing out writes of the response. see: https://github.com/slashdevops/aws_cloudwatch_exporter/blob/master/docs/server.md")
+	serverCmd.PersistentFlags().DurationVar(&conf.Server.WriteTimeout, "writeTimeout", 5*time.Second, "WriteTimeout is the maximum duration before timing out writes of the response. see: https://github.com/slashdevops/aws_cloudwatch_exporter/blob/main/docs/server.md")
 	if err := viper.BindPFlag("server.writeTimeout", serverCmd.PersistentFlags().Lookup("writeTimeout")); err != nil {
 		log.Error(err)
 	}
 
 	// IdleTimeout
-	serverCmd.PersistentFlags().DurationVar(&conf.Server.IdleTimeout, "idleTimeout", 60*time.Second, "IdleTimeout is the maximum amount of time to wait for the next request when keep-alives are enabled. see: https://github.com/slashdevops/aws_cloudwatch_exporter/blob/master/docs/server.md")
+	serverCmd.PersistentFlags().DurationVar(&conf.Server.IdleTimeout, "idleTimeout", 60*time.Second, "IdleTimeout is the maximum amount of time to wait for the next request when keep-alives are enabled. see: https://github.com/slashdevops/aws_cloudwatch_exporter/blob/main/docs/server.md")
 	if err := viper.BindPFlag("server.idleTimeout", serverCmd.PersistentFlags().Lookup("idleTimeout")); err != nil {
 		log.Error(err)
 	}
 
 	// ReadHeaderTimeout
-	serverCmd.PersistentFlags().DurationVar(&conf.Server.ReadHeaderTimeout, "readHeaderTimeout", 5*time.Second, "ReadHeaderTimeout is the amount of time allowed to read request headers. see: https://github.com/slashdevops/aws_cloudwatch_exporter/blob/master/docs/server.md")
+	serverCmd.PersistentFlags().DurationVar(&conf.Server.ReadHeaderTimeout, "readHeaderTimeout", 5*time.Second, "ReadHeaderTimeout is the amount of time allowed to read request headers. see: https://github.com/slashdevops/aws_cloudwatch_exporter/blob/main/docs/server.md")
 	if err := viper.BindPFlag("server.readHeaderTimeout", serverCmd.PersistentFlags().Lookup("readHeaderTimeout")); err != nil {
 		log.Error(err)
 	}
@@ -100,7 +100,7 @@ func init() {
 	}
 
 	// KeepAlivesEnabled
-	serverCmd.PersistentFlags().BoolVar(&conf.Server.KeepAlivesEnabled, "keepAlivesEnabled", true, "KeepAlivesEnabled controls whether HTTP keep-alives are enabled. see: https://github.com/slashdevops/aws_cloudwatch_exporter/blob/master/docs/server.md")
+	serverCmd.PersistentFlags().BoolVar(&conf.Server.KeepAlivesEnabled, "keepAlivesEnabled", true, "KeepAlivesEnabled controls whether HTTP keep-alives are enabled. see: https://github.com/slashdevops/aws_cloudwatch_exporter/blob/main/docs/server.md")
 	if err := viper.BindPFlag("server.keepAlivesEnabled", serverCmd.PersistentFlags().Lookup("keepAlivesEnabled")); err != nil {
 		log.Error(err)
 	}
@@ -113,7 +113,6 @@ func init() {
 }
 
 func startCmd(cmd *cobra.Command, args []string) {
-
 	loadFromConfigFiles(conf.Application.ServerFile, &conf)
 	loadFromMetricsFiles(&conf)
 	validateMetricsQueries(&conf)
